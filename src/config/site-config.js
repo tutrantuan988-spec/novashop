@@ -1,5 +1,7 @@
 const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'NovaShop';
-const SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'novashop.vn';
+let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'novashop.vn';
+// Strip protocol if user accidentally includes it in domain env
+SHOP_DOMAIN = SHOP_DOMAIN.replace(/^https?:\/\//, '');
 const SHOP_URL = `https://${SHOP_DOMAIN}`;
 
 const SITE = {

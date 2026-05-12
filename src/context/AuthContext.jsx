@@ -7,7 +7,7 @@ const USERS_KEY = 'novashop:users';
 const IS_PRODUCTION = import.meta.env.PROD;
 
 const isAdminEmail = (email) => {
-  const admins = (import.meta.env.VITE_ADMIN_EMAILS || 'admin@novashop.vn')
+  const admins = (import.meta.env.VITE_ADMIN_EMAILS || 'admin@example.com')
     .split(',')
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);

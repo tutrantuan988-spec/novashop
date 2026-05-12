@@ -66,7 +66,7 @@ export const products = [
 
 
 export const reviews = [
-  { id: 1, name: 'Minh Anh', role: 'Designer', rating: 5, content: 'Giao diện đẹp, sản phẩm đúng mô tả và giao rất nhanh trong 24h. Mình sẽ tiếp tục mua sắm tại NovaShop.' },
+  { id: 1, name: 'Minh Anh', role: 'Designer', rating: 5, content: 'Giao diện đẹp, sản phẩm đúng mô tả và giao rất nhanh trong 24h. Mình sẽ tiếp tục mua sắm ở đây.' },
   { id: 2, name: 'Quốc Huy', role: 'Lập trình viên', rating: 5, content: 'Dễ tìm sản phẩm, thanh toán thuận tiện, đội ngũ hỗ trợ nhiệt tình và phản hồi rất nhanh.' },
   { id: 3, name: 'Thanh Trúc', role: 'Marketing', rating: 5, content: 'Ưu đãi tốt, đóng gói cẩn thận, mỗi đơn hàng đều có thiệp cảm ơn rất tinh tế. Mình rất hài lòng.' },
   { id: 4, name: 'Đức Long', role: 'Sinh viên', rating: 5, content: 'Giá hợp lý, có nhiều mã giảm giá cho sinh viên, app dùng mượt và dễ thao tác trên điện thoại.' },

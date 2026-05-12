@@ -47,22 +47,6 @@ services:
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
       # Shop branding
-      - key: VITE_SHOP_NAME
-        sync: false
-      - key: VITE_SHOP_DOMAIN
-        sync: false
-      - key: VITE_SHOP_PHONE
-        sync: false
-      - key: VITE_SHOP_EMAIL
-        sync: false
-      - key: VITE_SHOP_ADDRESS
-        sync: false
-      - key: VITE_SHOP_FACEBOOK
-        sync: false
-      - key: VITE_SHOP_INSTAGRAM
-        sync: false
-      - key: VITE_SHOP_YOUTUBE
-        sync: false
       - key: VITE_SHOP_DESCRIPTION
         sync: false
       - key: VITE_ADMIN_EMAILS

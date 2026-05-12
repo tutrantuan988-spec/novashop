@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { LogIn, UserPlus, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import SITE from '../config/site-config';
 
 function AuthModal() {
   const { isModalOpen, closeAuthModal, login, register, authMode } = useAuth();
@@ -60,7 +61,7 @@ function AuthModal() {
           <X size={20} />
         </button>
         <header className="modal-header">
-          <h2 id="auth-title">{mode === 'login' ? 'Đăng nhập NovaShop' : 'Tạo tài khoản mới'}</h2>
+          <h2 id="auth-title">{mode === 'login' ? `Đăng nhập ${SITE.name}` : 'Tạo tài khoản mới'}</h2>
           <p>{mode === 'login' ? 'Chào mừng bạn quay lại! Mua sắm dễ dàng hơn khi có tài khoản.' : 'Mở tài khoản trong 1 phút và nhận ngay ưu đãi 10% cho đơn hàng đầu tiên.'}</p>
         </header>
         <form onSubmit={submit} className="auth-form" noValidate>

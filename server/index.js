@@ -8,7 +8,17 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+function getStripe() {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) return null;
+  try {
+    const Stripe = require('stripe');
+    return Stripe(secretKey);
+  } catch (err) {
+    console.warn('[Stripe] Init failed:', err.message);
+    return null;
+  }
+}
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { sendOrderCreatedEmails, sendOrderPaidEmails } = require('./email');
@@ -23,6 +33,7 @@ const {
 const { schemas, validate } = require('./validation');
 const { buildHealth } = require('./health');
 const { swaggerSetup } = require('./swagger');
+const { requestLogger } = require('./logger');
 
 // Firebase Admin (optional — chỉ init nếu có service account hoặc default credentials)
 let adminDb = null;
@@ -67,6 +78,18 @@ app.use(helmet({
   hsts: IS_PRODUCTION ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false
 }));
 
+// Request logging
+app.use(requestLogger);
+
+// Swagger API docs
+swaggerSetup(app);
+
+// Health check — đăng ký trước rate limiter
+app.get('/api/health', async (_req, res) => {
+  const report = await buildHealth(adminDb);
+  res.status(report.status === 'healthy' ? 200 : 503).json(report);
+});
+
 // Dynamic SEO files (sử dụng domain từ CLIENT_URL)
 const siteDomain = process.env.CLIENT_URL ? new URL(process.env.CLIENT_URL).hostname : 'localhost';
 app.get('/robots.txt', (_req, res) => {
@@ -96,11 +119,13 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let event;
   try {
-    if (webhookSecret) {
+    const stripe = getStripe();
+    if (stripe && webhookSecret) {
       event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } else {
       event = JSON.parse(req.body.toString());
-      console.warn('[Webhook] No STRIPE_WEBHOOK_SECRET — signature not verified');
+      if (!stripe) console.warn('[Webhook] Stripe not configured');
+      if (!webhookSecret) console.warn('[Webhook] No STRIPE_WEBHOOK_SECRET — signature not verified');
     }
   } catch (err) {
     console.error('[Webhook] Signature error:', err.message);
@@ -170,8 +195,27 @@ const checkoutLimiter = rateLimit({
   message: { error: 'Bạn thao tác quá nhanh. Vui lòng thử lại sau.' }
 });
 
+const adminLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Bạn thao tác quá nhanh. Vui lòng thử lại sau 1 phút.' }
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' }
+});
+
+// General API rate limiting (excludes webhook registered earlier)
+app.use('/api', apiLimiter);
+
 function isAdminEmail(email) {
-  const admins = (process.env.ADMIN_EMAILS || 'admin@novashop.vn')
+  const admins = (process.env.ADMIN_EMAILS || 'admin@example.com')
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
@@ -224,7 +268,7 @@ app.get('/api/admin/config', (_req, res) => {
   });
 });
 
-app.get('/api/admin/verify', requireAdmin, (req, res) => {
+app.get('/api/admin/verify', adminLimiter, requireAdmin, (req, res) => {
   res.json({ ok: true, adminEmail: req.adminEmail });
 });
 
@@ -345,6 +389,11 @@ app.post('/api/create-checkout-session', checkoutLimiter, validate(schemas.Check
       quantity: Number(item.quantity) || 1
     }));
 
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe chưa được cấu hình trên server' });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -377,7 +426,7 @@ app.get('/api/products', requireFirestore, async (_req, res) => {
   }
 });
 
-app.post('/api/products', requireAdmin, requireFirestore, validate(schemas.ProductBody), async (req, res) => {
+app.post('/api/products', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ProductBody), async (req, res) => {
   try {
     const { product } = req.body;
     if (!product?.name || !product?.price) {
@@ -396,7 +445,7 @@ app.post('/api/products', requireAdmin, requireFirestore, validate(schemas.Produ
   }
 });
 
-app.patch('/api/products/:id', requireAdmin, requireFirestore, validate(schemas.ProductPatch), async (req, res) => {
+app.patch('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ProductPatch), async (req, res) => {
   try {
     const { patch } = req.body;
     await adminDb.collection('products').doc(String(req.params.id)).update({
@@ -410,7 +459,7 @@ app.patch('/api/products/:id', requireAdmin, requireFirestore, validate(schemas.
   }
 });
 
-app.delete('/api/products/:id', requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
   try {
     await adminDb.collection('products').doc(String(req.params.id)).delete();
     res.json({ ok: true });
@@ -423,7 +472,7 @@ app.delete('/api/products/:id', requireAdmin, requireFirestore, async (req, res)
 // =========================
 // Orders API
 // =========================
-app.get('/api/orders', requireAdmin, requireFirestore, async (_req, res) => {
+app.get('/api/orders', adminLimiter, requireAdmin, requireFirestore, async (_req, res) => {
   try {
     const snap = await adminDb.collection('orders').orderBy('createdAt', 'desc').get();
     res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -433,7 +482,7 @@ app.get('/api/orders', requireAdmin, requireFirestore, async (_req, res) => {
   }
 });
 
-app.get('/api/analytics/summary', requireAdmin, requireFirestore, async (req, res) => {
+app.get('/api/analytics/summary', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
   try {
     const days = Math.min(180, Math.max(7, Number(req.query.days) || 30));
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -577,7 +626,7 @@ app.get('/api/orders/mine', requireFirestore, async (req, res) => {
   }
 });
 
-app.patch('/api/orders/:id/status', requireAdmin, requireFirestore, validate(schemas.OrderStatusBody), async (req, res) => {
+app.patch('/api/orders/:id/status', adminLimiter, requireAdmin, requireFirestore, validate(schemas.OrderStatusBody), async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: 'Thiếu trạng thái' });
@@ -592,7 +641,7 @@ app.patch('/api/orders/:id/status', requireAdmin, requireFirestore, validate(sch
   }
 });
 
-app.patch('/api/orders/:id/shipping', requireAdmin, requireFirestore, validate(schemas.ShippingInfoBody), async (req, res) => {
+app.patch('/api/orders/:id/shipping', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ShippingInfoBody), async (req, res) => {
   try {
     const { shippingInfo } = req.body;
     await adminDb.collection('orders').doc(req.params.id).update({
@@ -634,7 +683,7 @@ function calculateCouponDiscount(coupon, subtotal) {
   return { discount, freeShipping: false };
 }
 
-app.get('/api/coupons', requireAdmin, requireFirestore, async (_req, res) => {
+app.get('/api/coupons', adminLimiter, requireAdmin, requireFirestore, async (_req, res) => {
   try {
     const snap = await adminDb.collection('coupons').orderBy('code').get();
     res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -644,7 +693,7 @@ app.get('/api/coupons', requireAdmin, requireFirestore, async (_req, res) => {
   }
 });
 
-app.post('/api/coupons', requireAdmin, requireFirestore, validate(schemas.CouponBody), async (req, res) => {
+app.post('/api/coupons', adminLimiter, requireAdmin, requireFirestore, validate(schemas.CouponBody), async (req, res) => {
   try {
     const data = normalizeCoupon(req.body.coupon || {});
     if (!data.code) return res.status(400).json({ error: 'Thiếu mã coupon' });
@@ -662,7 +711,7 @@ app.post('/api/coupons', requireAdmin, requireFirestore, validate(schemas.Coupon
   }
 });
 
-app.patch('/api/coupons/:code', requireAdmin, requireFirestore, validate(schemas.CouponPatch), async (req, res) => {
+app.patch('/api/coupons/:code', adminLimiter, requireAdmin, requireFirestore, validate(schemas.CouponPatch), async (req, res) => {
   try {
     const code = String(req.params.code).toUpperCase();
     const patch = normalizeCoupon({ code, ...req.body.patch });
@@ -679,7 +728,7 @@ app.patch('/api/coupons/:code', requireAdmin, requireFirestore, validate(schemas
   }
 });
 
-app.delete('/api/coupons/:code', requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/coupons/:code', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
   try {
     await adminDb.collection('coupons').doc(String(req.params.code).toUpperCase()).delete();
     res.json({ ok: true });
@@ -793,7 +842,7 @@ app.post('/api/products/:id/reviews', requireFirestore, validate(schemas.ReviewB
   }
 });
 
-app.delete('/api/products/:id/reviews/:reviewId', requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/products/:id/reviews/:reviewId', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
   try {
     const productRef = adminDb.collection('products').doc(String(req.params.id));
     await productRef.collection('reviews').doc(String(req.params.reviewId)).delete();
@@ -945,11 +994,6 @@ app.post('/api/payments/momo/ipn', express.json(), async (req, res) => {
     console.error('MoMo IPN error:', error);
     res.status(500).json({ message: error.message });
   }
-});
-
-app.get('/api/health', async (_req, res) => {
-  const report = await buildHealth(adminDb);
-  res.status(report.status === 'healthy' ? 200 : 503).json(report);
 });
 
 // Global error handler — catch unexpected errors and return JSON

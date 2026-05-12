@@ -4,6 +4,7 @@ import { Crown, Heart, LogIn, LogOut, Menu, ShoppingBag, ShoppingCart, User, X }
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import SITE from '../config/site-config';
 
 function Header() {
   const { totalItems, openCart } = useCart();
@@ -13,9 +14,9 @@ function Header() {
 
   return (
     <header className="header">
-      <Link className="logo" to="/" aria-label="NovaShop trang chủ">
+      <Link className="logo" to="/" aria-label={`${SITE.name} trang chủ`}>
         <span><ShoppingBag size={22} aria-hidden /></span>
-        NovaShop
+        {SITE.name}
       </Link>
 
       <nav className={isMenuOpen ? 'nav nav-open' : 'nav'} aria-label="Điều hướng chính">
