@@ -1,0 +1,116 @@
+services:
+  - type: web
+    name: novashop-api
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: node server/index.js
+    envVars:
+      # Core
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      # Shop info
+      - key: VITE_SHOP_NAME
+        sync: false
+      - key: VITE_SHOP_DOMAIN
+        sync: false
+      - key: VITE_SHOP_PHONE
+        sync: false
+      - key: VITE_SHOP_EMAIL
+        sync: false
+      - key: VITE_SHOP_ADDRESS
+        sync: false
+      - key: VITE_SHOP_FACEBOOK
+        sync: false
+      - key: VITE_SHOP_INSTAGRAM
+        sync: false
+      - key: VITE_SHOP_YOUTUBE
+        sync: false
+      # Firebase
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false
+      # Clerk
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+      # Shop branding
+      - key: VITE_SHOP_NAME
+        sync: false
+      - key: VITE_SHOP_DOMAIN
+        sync: false
+      - key: VITE_SHOP_PHONE
+        sync: false
+      - key: VITE_SHOP_EMAIL
+        sync: false
+      - key: VITE_SHOP_ADDRESS
+        sync: false
+      - key: VITE_SHOP_FACEBOOK
+        sync: false
+      - key: VITE_SHOP_INSTAGRAM
+        sync: false
+      - key: VITE_SHOP_YOUTUBE
+        sync: false
+      - key: VITE_SHOP_DESCRIPTION
+        sync: false
+      - key: VITE_ADMIN_EMAILS
+        sync: false
+      # Stripe
+      - key: VITE_STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      # URLs
+      - key: CLIENT_URL
+        sync: false
+      - key: VITE_API_URL
+        sync: false
+      - key: PUBLIC_API_URL
+        sync: false
+      # Admin
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ADMIN_NOTIFICATION_EMAIL
+        sync: false
+      - key: ADMIN_API_TOKEN
+        generateValue: true
+      # Email
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # Cloudinary
+      - key: VITE_CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: VITE_CLOUDINARY_UPLOAD_PRESET
+        sync: false
+      # VNPay
+      - key: VNP_TMN_CODE
+        sync: false
+      - key: VNP_HASH_SECRET
+        sync: false
+      - key: VNP_URL
+        sync: false
+      # MoMo
+      - key: MOMO_PARTNER_CODE
+        sync: false
+      - key: MOMO_ACCESS_KEY
+        sync: false
+      - key: MOMO_SECRET_KEY
+        sync: false
+      - key: MOMO_ENDPOINT
+        sync: false

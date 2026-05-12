@@ -1,0 +1,32 @@
+{
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "start": "node server/index.js",
+    "server": "node server/index.js",
+    "deploy:docker": "docker-compose up --build -d",
+    "deploy:render": "render deploy --config render.yaml"
+  },
+  "dependencies": {
+    "@clerk/clerk-react": "^5.61.6",
+    "@stripe/stripe-js": "^9.4.0",
+    "@vitejs/plugin-react": "latest",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.1",
+    "firebase": "^12.13.0",
+    "firebase-admin": "^13.9.0",
+    "helmet": "^8.1.0",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "^7.15.0",
+    "resend": "^6.12.3",
+    "stripe": "^22.1.1",
+    "swagger-ui-express": "^5.0.1",
+    "vite": "latest",
+    "zod": "^3.25.76"
+  }
+}

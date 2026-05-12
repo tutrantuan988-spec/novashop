@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOTE: Thay https://novashop.example.com bằng domain thật trước khi deploy. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://novashop.example.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://novashop.example.com/thanh-toan</loc><priority>0.6</priority></url>
+  <url><loc>https://novashop.example.com/tai-khoan</loc><priority>0.5</priority></url>
+  <url><loc>https://novashop.example.com/chinh-sach/doi-tra</loc><priority>0.6</priority></url>
+  <url><loc>https://novashop.example.com/chinh-sach/van-chuyen</loc><priority>0.6</priority></url>
+  <url><loc>https://novashop.example.com/chinh-sach/bao-mat</loc><priority>0.6</priority></url>
+  <url><loc>https://novashop.example.com/chinh-sach/dieu-khoan</loc><priority>0.6</priority></url>
+  <url><loc>https://novashop.example.com/chinh-sach/faq</loc><priority>0.6</priority></url>
+  <url><loc>https://novashop.example.com/chinh-sach/lien-he</loc><priority>0.6</priority></url>
+</urlset>

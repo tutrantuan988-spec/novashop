@@ -1,0 +1,4 @@
+# NOTE: Thay https://novashop.example.com bằng domain thật trước khi deploy.
+User-agent: *
+Allow: /
+Sitemap: https://novashop.example.com/sitemap.xml

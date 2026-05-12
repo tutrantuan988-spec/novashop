@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email in [
+          'admin@novashop.vn',
+          'tutrantuan988@gmail.com'
+        ];
+    }
+
+    // Products: ai cũng đọc được, chỉ admin viết trực tiếp.
+    // Backend Firebase Admin SDK bỏ qua rules này.
+    match /products/{product} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+
+      match /reviews/{review} {
+        allow read: if true;
+        allow create, update, delete: if false;
+      }
+    }
+
+    // Coupons: backend Admin SDK quản lý hoàn toàn.
+    match /coupons/{coupon} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    // Orders:
+    // - Production: backend tạo/cập nhật đơn bằng Firebase Admin SDK.
+    // - Client chỉ đọc đơn của chính mình hoặc admin đọc tất cả.
+    // - Admin được update trực tiếp khi dùng admin dashboard frontend.
+    match /orders/{order} {
+      allow create: if false;
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.customer.email == request.auth.token.email);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}
