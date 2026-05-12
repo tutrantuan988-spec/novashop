@@ -51,13 +51,7 @@ try {
 }
 
 const app = express();
-const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3001', 'http://localhost:5173'].filter(Boolean);
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS origin not allowed'));
-  }
-}));
+app.use(cors({ origin: true, credentials: true }));
 
 // Security headers
 app.use(helmet({
