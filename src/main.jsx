@@ -10,7 +10,7 @@ import App from './App';
 import './styles.css';
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-const useClerk = !!clerkKey && clerkKey.startsWith('pk_') && clerkKey.length > 80;
+const useClerk = !!clerkKey && clerkKey.startsWith('pk_');
 
 const AppShell = () => (
   <I18nProvider>
