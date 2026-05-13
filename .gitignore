@@ -4,4 +4,9 @@ dist/
 .env.local
 .env.*.local
 env-render.txt
+env-render.json
+firebase-admin.json
+serviceAccountKey.json
+*-service-account*.json
+*.pem
 .DS_Store

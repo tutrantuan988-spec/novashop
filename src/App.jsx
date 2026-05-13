@@ -31,6 +31,8 @@ const SearchPage = lazy(() => import('./pages/SearchPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const PolicyPage = lazy(() => import('./pages/PolicyPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 
@@ -62,6 +64,8 @@ export default function App() {
                       <Route path="/pet-accessories" element={<PetAccessoriesPage />} />
                       <Route path="/san-pham/:slug" element={<ProductDetailPage />} />
                       <Route path="/chinh-sach/:slug" element={<PolicyPage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
                       <Route path="/thanh-toan/momo-return" element={<MomoReturnPage />} />
                       <Route path="/sign-in/*" element={<SignInPage />} />
                       <Route path="/sign-up/*" element={<SignUpPage />} />

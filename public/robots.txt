@@ -1,4 +1,4 @@
-# NOTE: Thay https://novashop.example.com bằng domain thật trước khi deploy.
+# TRỌNG ĐỊNH STORE - https://trongdinhstore.vn
 User-agent: *
 Allow: /
-Sitemap: https://novashop.example.com/sitemap.xml
+Sitemap: https://trongdinhstore.vn/sitemap.xml

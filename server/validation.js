@@ -23,7 +23,8 @@ const OrderBody = z.object({
     items: z.array(OrderItemSchema).min(1, 'Đơn hàng phải có ít nhất 1 sản phẩm'),
     paymentMethod: z.enum(['cod', 'bank', 'momo', 'stripe', 'vnpay']).default('cod'),
     shipping: z.number().min(0).default(0),
-    coupon: z.string().max(50).optional().or(z.literal(''))
+    coupon: z.string().max(50).nullish(),
+    note: z.string().max(1000).optional()
   })
 });
 

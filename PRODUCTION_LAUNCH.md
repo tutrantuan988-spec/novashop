@@ -38,7 +38,7 @@ Kiểm tra API:
 http://localhost:3001/api/health
 ```
 
-Nếu thấy `{"ok":true}` là backend hoạt động.
+Nếu `status` là `healthy` thì production đã đủ cấu hình. Nếu local trả `degraded` vì thiếu Firebase Admin/email key thì backend vẫn chạy, nhưng cần bổ sung env thật trước khi mở bán.
 
 ## 3. Environment variables production
 
@@ -106,7 +106,7 @@ Hiện tại bạn đang dùng `pk_test_...` và `sk_test_...`, chỉ để test
 VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_SECRET_KEY=sk_live_...
 CLIENT_URL=https://your-domain.com
-VITE_API_URL=https://your-domain.com
+VITE_API_URL=
 ```
 
 ## 6. Clerk chính thức
@@ -165,7 +165,7 @@ Cần cập nhật:
 
 ```env
 CLIENT_URL=https://novashop.vn
-VITE_API_URL=https://novashop.vn
+VITE_API_URL=
 ```
 
 Trong Clerk và Stripe cũng cần thêm domain production vào allowed origins/redirect URLs nếu được yêu cầu.
@@ -222,6 +222,10 @@ Cần service account JSON:
    ```env
    GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json
    ```
+   Hoặc set trực tiếp:
+   ```env
+   FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+   ```
 
 ## 11. Firestore Rules
 
@@ -240,7 +244,7 @@ Hoặc copy nội dung paste thủ công vào Firebase Console → Firestore →
 ## 12. Checklist trước khi mở bán
 
 - [ ] Website deploy thành công
-- [ ] `/api/health` trả `{"ok":true, "stripe":true, "firebaseAdmin":true}`
+- [ ] `/api/health` trả `status=healthy`
 - [ ] Đăng ký/đăng nhập Clerk hoạt động
 - [ ] Sản phẩm đọc từ Firestore
 - [ ] Đặt hàng tạo document trong `orders`

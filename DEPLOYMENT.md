@@ -61,7 +61,7 @@ Sau đó cập nhật env:
 
 ```env
 CLIENT_URL=https://your-domain.com
-VITE_API_URL=https://your-domain.com
+VITE_API_URL=
 ```
 
 ---
@@ -81,7 +81,7 @@ File `render.yaml` đã cấu hình sẵn.
    - `STRIPE_SECRET_KEY`
    - `STRIPE_WEBHOOK_SECRET`
    - `CLIENT_URL` (URL public của Render)
-   - `VITE_API_URL` (cùng URL Render)
+   - `VITE_API_URL` (có thể để trống nếu frontend/API cùng domain Render)
    - `ADMIN_EMAILS`
    - `RESEND_API_KEY`, `EMAIL_FROM`
 6. `ADMIN_API_TOKEN` Render tự sinh — lưu lại để admin nhập trong `/admin`. Không set token này dưới prefix `VITE_`.
@@ -136,7 +136,7 @@ CORS đã whitelist `CLIENT_URL` nên đảm bảo set đúng.
 - [ ] `ADMIN_EMAILS` chứa email admin thật
 - [ ] `ADMIN_API_TOKEN` đã sinh, không public ra frontend, admin có secret để đăng nhập dashboard
 - [ ] Firestore Rules đã publish theo `firestore.rules`
-- [ ] Service account Firebase đã set qua `GOOGLE_APPLICATION_CREDENTIALS`
+- [ ] Service account Firebase đã set qua `GOOGLE_APPLICATION_CREDENTIALS` hoặc `FIREBASE_SERVICE_ACCOUNT_JSON`
 - [ ] Test thanh toán thật bằng card live (1 đơn nhỏ)
 - [ ] Test webhook bằng Stripe CLI: `stripe listen --forward-to https://your-domain.com/api/stripe-webhook`
 - [ ] SEO: `sitemap.xml`, `robots.txt`, meta tags

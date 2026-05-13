@@ -1,0 +1,110 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test --if-present
+        continue-on-error: true
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_ADMIN_EMAILS: ${{ secrets.VITE_ADMIN_EMAILS }}
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add host to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          DOMAIN: ${{ secrets.DOMAIN }}
+        run: |
+          # Create remote directories
+          ssh $SERVER_USER@$SERVER_HOST "mkdir -p /var/www/novashop/{logs,backups,certbot/conf,certbot/www}"
+          
+          # Sync built files
+          rsync -avz --delete \
+            --exclude='node_modules' \
+            --exclude='.git' \
+            ./dist/ $SERVER_USER@$SERVER_HOST:/var/www/novashop/dist/
+          
+          # Sync server files
+          rsync -avz \
+            server/ $SERVER_USER@$SERVER_HOST:/var/www/novashop/server/
+          
+          # Sync config files
+          rsync -avz \
+            nginx/ $SERVER_USER@$SERVER_HOST:/var/www/novashop/nginx/
+          
+          rsync -avz \
+            docker-compose.prod.yml \
+            Dockerfile \
+            package*.json \
+            .env.production \
+            $SERVER_USER@$SERVER_HOST:/var/www/novashop/
+          
+          # Replace domain in nginx config
+          ssh $SERVER_USER@$SERVER_HOST "sed -i 's/YOUR_DOMAIN/$DOMAIN/g' /var/www/novashop/nginx/conf.d/default.conf"
+          
+          # Deploy containers
+          ssh $SERVER_USER@$SERVER_HOST << EOF
+            cd /var/www/novashop
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f
+          EOF
+
+      - name: Health check
+        env:
+          DOMAIN: ${{ secrets.DOMAIN }}
+        run: |
+          sleep 10
+          curl -f https://$DOMAIN/api/health || exit 1
+          echo "✅ Health check passed"
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Deployed successfully to https://${{ secrets.DOMAIN }}"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed"

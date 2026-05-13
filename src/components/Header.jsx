@@ -1,6 +1,8 @@
 import { memo, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ArrowRight, Crown, Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, ShoppingCart, Sun, User, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { useI18n } from '../context/I18nContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -10,11 +12,11 @@ function Header() {
   const { totalItems, openCart } = useCart();
   const { user, isAuthenticated, isAdmin, authMode, openAuthModal, logout } = useAuth();
   const { count: wishlistCount } = useWishlist();
+  const { isDark, toggleTheme } = useTheme();
+  const { lang, toggleLang, t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const toggleTheme = () => setIsDark(d => !d);
-  const navLabels = {
+  const navLabels = t?.nav || {
     products: 'Sản phẩm',
     luxury: 'Cao cấp',
     concierge: 'Hỗ trợ',

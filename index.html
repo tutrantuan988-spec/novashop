@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ff7a1a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="%VITE_SHOP_NAME%" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="%VITE_SHOP_DESCRIPTION%" />
     <meta name="keywords" content="mua sắm online, website bán hàng, thời trang, công nghệ, phụ kiện, %VITE_SHOP_NAME%, ưu đãi" />
     <meta name="author" content="%VITE_SHOP_NAME%" />
@@ -22,8 +25,32 @@
 
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
 
     <title>%VITE_SHOP_NAME% - Mua sắm thông minh, phong cách mỗi ngày</title>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '%VITE_GA_ID%');
+    </script>
+
+    <!-- Tawk.to Live Chat -->
+    <script type="text/javascript">
+      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+      (function(){
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/%VITE_TAWKTO_ID%/default';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s0.parentNode.insertBefore(s1,s0);
+      })();
+    </script>
 
     <script type="application/ld+json">
       {

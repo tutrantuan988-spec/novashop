@@ -19,9 +19,14 @@ function getStripe() {
     return null;
   }
 }
-const { initializeApp } = require('firebase-admin/app');
+const { cert, initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { sendOrderCreatedEmails, sendOrderPaidEmails } = require('./email');
+const { connectDatabase } = require('./models');
+const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
+const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
 const {
   isVnpayConfigured,
   buildVnpayUrl,
@@ -39,10 +44,23 @@ const { requestLogger } = require('./logger');
 let adminDb = null;
 try {
   const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
-  if (projectId) {
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (serviceAccountJson) {
+    initializeApp({ credential: cert(JSON.parse(serviceAccountJson)), projectId });
+    adminDb = getFirestore();
+    console.log('[Firebase Admin] Initialized with service account JSON');
+  } else if (projectId) {
     initializeApp({ projectId });
     adminDb = getFirestore();
     console.log('[Firebase Admin] Initialized for project:', projectId);
+  }
+
+  if (adminDb) {
+    // Probe credentials async — nếu không có default credentials thì disable adminDb
+    adminDb.collection('_probe').limit(1).get().catch((err) => {
+      console.warn('[Firebase Admin] Credentials probe failed, disabling Firestore:', err.message);
+      adminDb = null;
+    });
   } else {
     console.warn('[Firebase Admin] No project ID — price validation will fall back to client values');
   }
@@ -51,14 +69,29 @@ try {
 }
 
 const app = express();
-app.use(cors({ origin: true, credentials: true }));
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.PUBLIC_API_URL,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+].filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!IS_PRODUCTION || !origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS origin không được phép'));
+  },
+  credentials: true
+}));
 
 // Security headers
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com", "https://checkout.stripe.com", "https://clerk.novashop.vn", "https://*.clerk.accounts.dev"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com", "https://checkout.stripe.com", "https://*.clerk.accounts.dev"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://*.firebaseapp.com", "https://*.googleusercontent.com"],
@@ -250,7 +283,7 @@ function requireAdmin(req, res, next) {
 
 function requireFirestore(req, res, next) {
   if (!adminDb) {
-    return res.status(500).json({ error: 'Firebase Admin chưa được cấu hình trên server' });
+    return res.status(503).json({ error: 'Firestore không khả dụng — máy chủ chưa cấu hình credentials' });
   }
   next();
 }
@@ -267,7 +300,16 @@ app.get('/api/admin/verify', adminLimiter, requireAdmin, (req, res) => {
 });
 
 async function buildCheckoutItems(items) {
-  if (!adminDb) throw new Error('Firebase Admin chưa được cấu hình trên server');
+  if (!adminDb) {
+    // Dev fallback: trust client-provided data (no stock/price validation)
+    return items.map((item) => ({
+      id: String(item.id),
+      name: item.name || `Product ${item.id}`,
+      price: Number(item.price) || 0,
+      image: item.image || '',
+      quantity: Number(item.quantity) || 1
+    }));
+  }
   const validated = [];
   for (const item of items) {
     const quantity = Number(item.quantity) || 1;
@@ -290,15 +332,40 @@ async function buildCheckoutItems(items) {
   return validated;
 }
 
+// In-memory order fallback for dev mode when Firestore unavailable
+const devOrders = [];
+let devOrderId = 1000;
+
 app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req, res) => {
   try {
-    if (!adminDb) throw new Error('Firebase Admin chưa được cấu hình trên server');
     const { order } = req.body;
     if (!order?.customer?.name || !order?.customer?.phone || !order?.customer?.address) {
       return res.status(400).json({ error: 'Thông tin giao hàng không hợp lệ' });
     }
     if (!order.items || !Array.isArray(order.items) || order.items.length === 0) {
       return res.status(400).json({ error: 'Đơn hàng chưa có sản phẩm' });
+    }
+
+    // If Firestore unavailable, use simple fallback (no stock validation)
+    if (!adminDb) {
+      const subtotal = order.items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+      const shipping = Number(order.shipping) || 0;
+      const total = subtotal + shipping;
+      devOrderId++;
+      const id = String(devOrderId);
+      const saved = {
+        id,
+        ...order,
+        subtotal,
+        shipping,
+        total,
+        status: 'pending',
+        paymentStatus: order.paymentMethod === 'stripe' ? 'unpaid' : 'pending',
+        createdAt: new Date()
+      };
+      devOrders.unshift(saved);
+      console.log('[DEV] Order created:', id, saved.customer?.email);
+      return res.json({ id, total, order: saved });
     }
 
     const validatedItems = await buildCheckoutItems(order.items);
@@ -383,6 +450,10 @@ app.post('/api/create-checkout-session', checkoutLimiter, validate(schemas.Check
       quantity: Number(item.quantity) || 1
     }));
 
+    if (lineItems.some((item) => item.price_data.unit_amount <= 0)) {
+      return res.status(400).json({ error: 'Giá sản phẩm không hợp lệ cho thanh toán Stripe' });
+    }
+
     const stripe = getStripe();
     if (!stripe) {
       return res.status(500).json({ error: 'Stripe chưa được cấu hình trên server' });
@@ -397,7 +468,8 @@ app.post('/api/create-checkout-session', checkoutLimiter, validate(schemas.Check
       metadata: {
         orderId: String(orderId || ''),
         customerEmail: String(customerEmail || '')
-      }
+      },
+      ...(customerEmail ? { customer_email: customerEmail } : {})
     });
 
     res.json({ id: session.id, url: session.url });
@@ -408,10 +480,42 @@ app.post('/api/create-checkout-session', checkoutLimiter, validate(schemas.Check
 });
 
 // =========================
+// Stripe PaymentIntent (for inline card form)
+// =========================
+app.post('/api/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, orderId, currency = 'vnd' } = req.body;
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Số tiền không hợp lệ' });
+    }
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe chưa được cấu hình trên server' });
+    }
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount),
+      currency: currency.toLowerCase(),
+      metadata: { orderId: String(orderId || '') },
+      automatic_payment_methods: { enabled: true }
+    });
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error('PaymentIntent error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
 // Products API
 // =========================
-app.get('/api/products', requireFirestore, async (_req, res) => {
+app.get('/api/products', async (_req, res) => {
   try {
+    if (!adminDb) {
+      if (IS_PRODUCTION) {
+        return res.status(503).json({ error: 'Firestore không khả dụng — máy chủ chưa cấu hình credentials' });
+      }
+      return res.json([]);
+    }
     const snap = await adminDb.collection('products').orderBy('createdAt', 'desc').get();
     res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   } catch (error) {
@@ -583,13 +687,21 @@ app.get('/api/analytics/summary', adminLimiter, requireAdmin, requireFirestore, 
   }
 });
 
-app.get('/api/orders/:id/summary', requireFirestore, async (req, res) => {
+app.get('/api/orders/:id/summary', async (req, res) => {
   try {
-    const snap = await adminDb.collection('orders').doc(String(req.params.id)).get();
-    if (!snap.exists) return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
-    const o = snap.data();
+    let o;
+    const id = String(req.params.id);
+
+    if (!adminDb) {
+      o = devOrders.find((d) => String(d.id) === id);
+      if (!o) return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+    } else {
+      const snap = await adminDb.collection('orders').doc(id).get();
+      if (!snap.exists) return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+      o = { id: snap.id, ...snap.data() };
+    }
     res.json({
-      id: snap.id,
+      id: o.id || id,
       total: o.total,
       subtotal: o.subtotal,
       discount: o.discount,
@@ -605,10 +717,16 @@ app.get('/api/orders/:id/summary', requireFirestore, async (req, res) => {
   }
 });
 
-app.get('/api/orders/mine', requireFirestore, async (req, res) => {
+app.get('/api/orders/mine', async (req, res) => {
   try {
     const email = String(req.query.email || '').toLowerCase();
     if (!email) return res.status(400).json({ error: 'Thiếu email' });
+
+    if (!adminDb) {
+      const orders = devOrders.filter((o) => String(o.customer?.email || '').toLowerCase() === email);
+      return res.json(orders);
+    }
+
     const snap = await adminDb.collection('orders').orderBy('createdAt', 'desc').get();
     const orders = snap.docs
       .map((d) => ({ id: d.id, ...d.data() }))
@@ -990,6 +1108,133 @@ app.post('/api/payments/momo/ipn', express.json(), async (req, res) => {
   }
 });
 
+// =========================
+// AI Chat (Claude) API
+// =========================
+const NOVASHOP_SYSTEM_PROMPT = `Bạn là Nova — trợ lý AI của TRỌNG ĐỊNH STORE, một shop thương mại điện tử Việt Nam.
+Bạn thân thiện, nhiệt tình, trả lời bằng tiếng Việt tự nhiên như nhân viên shop thật.
+Giữ câu trả lời ngắn gọn, dưới 150 từ. Dùng emoji vừa phải.
+
+=== THÔNG TIN SHOP ===
+TÊN SHOP: TRỌNG ĐỊNH STORE
+SLOGAN: Mua sắm thông minh, chất lượng đảm bảo
+WEBSITE: trongdinhstore.vn
+
+DANH MỤC SẢN PHẨM:
+- Thức ăn cho chó: thức ăn hạt, pate, snack, dinh dưỡng bổ sung
+- Thức ăn cho mèo: thức ăn hạt, pate, snack, cát vệ sinh
+- Phụ kiện thú cưng: đồ chơi, bát ăn, vòng cổ, dây dắt
+
+CHÍNH SÁCH VẬN CHUYỂN:
+- Freeship đơn từ 300.000đ (toàn quốc)
+- Phí ship: 30.000đ cố định cho đơn dưới 300.000đ
+- Nội thành HN: giao trong ngày nếu đặt trước 14h
+- Tỉnh lân cận: 1–2 ngày | Tỉnh xa: 3–5 ngày
+- Đối tác giao hàng: GHN, GHTK, J&T Express, Viettel Post
+
+CHÍNH SÁCH ĐỔI TRẢ:
+- 7 ngày đổi/trả kể từ ngày nhận hàng
+- Điều kiện: còn nguyên tem nhãn, chưa qua sử dụng
+- Hàng lỗi sản xuất: đổi mới 100%, shop chịu phí ship
+- Liên hệ qua Zalo hoặc hotline để tạo yêu cầu đổi trả
+
+CHÍNH SÁCH THANH TOÁN:
+- COD (trả tiền mặt khi nhận hàng) — toàn quốc
+- Chuyển khoản MBBank: TK 0369712958, chủ TK TRAN TUAN TU
+- Đồng kiểm hàng trước khi thanh toán COD
+
+CAM KẾT CHẤT LƯỢNG:
+- 100% thức ăn chính hãng, có nguồn gốc rõ ràng
+- Hàng nhái/kém chất lượng → hoàn tiền 200% giá trị
+
+HỖ TRỢ KHÁCH HÀNG:
+- Zalo: phản hồi trong 5 phút (8h–22h hàng ngày)
+- Hotline: 0369712958 (8h–20h)
+- Chat AI: 24/7
+- Email: tutrantuan988@gmail.com
+- TikTok: @nclonf
+
+ĐÓNG GÓI:
+- Thức ăn hạt bọc kín, chống ẩm, có seal niêm phong
+- Pate/snack đóng thùng carton chắc chắn, chống va đập
+- Quay video đóng gói lưu lại cho đơn hàng
+
+=== HƯỚNG DẪN TRẢ LỜI ===
+- Không biết thông tin → nói "Mình sẽ chuyển câu hỏi này đến nhân viên hỗ trợ nhé!"
+- Không trả lời về chính trị, tôn giáo, hay nội dung không liên quan shop
+- Nếu khách muốn mua hàng → hỏi họ cần thức ăn cho chó hay mèo, loại nào để tư vấn
+- Cuối mỗi câu khó → gợi ý "Bạn có thể nhắn Zalo 0369712958 để được hỗ trợ trực tiếp"`;
+
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Bạn gửi tin nhắn quá nhanh. Vui lòng thử lại sau 1 phút.' }
+});
+
+app.post('/api/chat', chatLimiter, async (req, res) => {
+  try {
+    const { messages } = req.body;
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'Thiếu nội dung tin nhắn' });
+    }
+
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({
+        error: 'AI chat chưa được cấu hình. Vui lòng liên hệ admin.'
+      });
+    }
+
+    const validMessages = messages.filter((m) => m.role && m.content).map((m) => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: String(m.content || '')
+    }));
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: NOVASHOP_SYSTEM_PROMPT },
+          ...validMessages
+        ],
+        max_tokens: 300
+      })
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => '');
+      console.error('[Groq] HTTP', response.status, errBody);
+      return res.status(502).json({
+        error: 'Lỗi khi gọi AI. Bạn thử lại sau nhé!',
+        message: IS_PRODUCTION ? undefined : `Groq HTTP ${response.status}`
+      });
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    res.json({ message: text });
+  } catch (error) {
+    console.error('[Groq] Chat error:', error.message);
+    res.status(500).json({
+      error: 'Lỗi khi gọi AI. Bạn thử lại sau nhé!',
+      message: IS_PRODUCTION ? undefined : error.message
+    });
+  }
+});
+
+// MongoDB API routes
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/admin', adminRoutes);
+
 // Global error handler — catch unexpected errors and return JSON
 app.use((err, _req, res, _next) => {
   console.error('[Server Error]', err);
@@ -1008,6 +1253,11 @@ app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'API endpoint không tồn tại' });
 });
 
-app.listen(PORT, () => {
-  console.log(`NovaShop API server running on http://localhost:${PORT}`);
-});
+async function startServer() {
+  await connectDatabase();
+  app.listen(PORT, () => {
+    console.log(`TRỌNG ĐỊNH STORE API server running on http://localhost:${PORT}`);
+  });
+}
+
+startServer();

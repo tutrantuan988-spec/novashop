@@ -43,6 +43,8 @@ services:
         sync: false
       - key: GOOGLE_APPLICATION_CREDENTIALS
         sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
       # Clerk
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
@@ -82,6 +84,11 @@ services:
         sync: false
       - key: VITE_CLOUDINARY_UPLOAD_PRESET
         sync: false
+      # Monitoring
+      - key: VITE_SENTRY_DSN
+        sync: false
+      - key: VITE_SENTRY_TRACES_SAMPLE_RATE
+        value: 0.05
       # VNPay
       - key: VNP_TMN_CODE
         sync: false

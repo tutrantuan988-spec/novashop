@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TRỌNG ĐỊNH STORE">
+  <rect width="512" height="512" rx="112" fill="#fff7ed"/>
+  <circle cx="380" cy="132" r="88" fill="#ffedd5"/>
+  <path d="M148 188h264l-28 156H176l-28-156Z" fill="#f97316"/>
+  <path d="M188 188c8-59 35-88 80-88s72 29 80 88" fill="none" stroke="#111827" stroke-width="28" stroke-linecap="round"/>
+  <path d="M176 344h208l-18 52H194l-18-52Z" fill="#ef4444"/>
+  <circle cx="212" cy="412" r="22" fill="#111827"/>
+  <circle cx="348" cy="412" r="22" fill="#111827"/>
+  <path d="M216 248h128" stroke="#fff7ed" stroke-width="28" stroke-linecap="round"/>
+</svg>
