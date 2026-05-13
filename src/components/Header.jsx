@@ -190,6 +190,7 @@ function Header() {
         <div className="header-search-wrap">
           <SearchBar />
         </div>
+
         <Link to="/tim-kiem" className="icon-button mobile-only" aria-label="Tìm kiếm">
           <Search size={18} />
         </Link>
@@ -204,14 +205,10 @@ function Header() {
           {isDark ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
-        <a className="vip-pill" href="/#concierge">
+        <a className="vip-pill desktop-only" href="/#concierge">
           <Crown size={16} aria-hidden />
           VIP
         </a>
-
-        <button type="button" className="icon-button mobile-only" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Mở menu" aria-expanded={isMenuOpen}>
-          {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
 
         {isAuthenticated && (
           <Link to="/tai-khoan/yeu-thich" className="icon-button wishlist-pill" aria-label={`Yêu thích (${wishlistCount})`}>
@@ -224,6 +221,10 @@ function Header() {
           <ShoppingCart size={20} aria-hidden />
           <span>Giỏ hàng</span>
           {totalItems > 0 && <strong>{totalItems}</strong>}
+        </button>
+
+        <button type="button" className="icon-button mobile-only" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Mở menu" aria-expanded={isMenuOpen}>
+          {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
     </header>

@@ -356,6 +356,15 @@ button {
   display: none;
 }
 
+.desktop-only {
+  display: inline-flex;
+}
+@media (max-width: 1279px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
 .hero {
   display: grid;
   grid-template-columns: 1.04fr 0.96fr;
@@ -1393,9 +1402,10 @@ button {
   background: rgba(16, 24, 40, 0.45);
 }
 
-@media (max-width: 900px) {
+/* Burger menu on viewports below desktop wide (1280) - prevents nav overlap with logo/searchbar */
+@media (max-width: 1279px) {
   .header {
-    gap: 10px;
+    gap: 12px;
   }
 
   .mobile-only {
@@ -1428,7 +1438,9 @@ button {
     justify-content: center;
     width: 100%;
   }
+}
 
+@media (max-width: 900px) {
   .cart-button span {
     display: none;
   }
@@ -2405,14 +2417,15 @@ textarea:focus-visible {
   color: var(--accent, #f97316);
 }
 
-/* Header SearchBar wrapper (P8) */
+/* Header SearchBar wrapper (P8) - chỉ show desktop wide cùng với nav inline */
 .header-search-wrap {
   display: none;
 }
-@media (min-width: 1100px) {
+@media (min-width: 1280px) {
   .header-search-wrap {
     display: block;
-    width: 240px;
+    width: 220px;
+    flex-shrink: 0;
   }
 }
 
