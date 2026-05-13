@@ -81,6 +81,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24px;
   max-width: 1240px;
   margin: 0 auto;
   min-height: 76px;
@@ -147,6 +148,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1 1 auto;
   gap: 6px;
   min-width: 0;
   color: rgba(26, 35, 64, 0.72);
