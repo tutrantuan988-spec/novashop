@@ -22,6 +22,11 @@ function getStripe() {
 const { cert, initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { sendOrderCreatedEmails, sendOrderPaidEmails } = require('./email');
+const {
+  reserveInventory,
+  releaseInventory,
+  InsufficientStockError
+} = require('./utils/inventoryTransaction');
 const { connectDatabase } = require('./models');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
@@ -165,32 +170,60 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
     console.log('[Webhook] checkout.session.completed for order:', orderId);
     if (orderId && adminDb) {
       try {
+        // Idempotency: chống xử lý webhook 2 lần
+        const processedRef = adminDb.collection('processed_webhooks').doc(event.id);
+        const processedSnap = await processedRef.get();
+        if (processedSnap.exists) {
+          console.log('[Webhook] Already processed:', event.id);
+          return res.json({ received: true });
+        }
+
         const orderRef = adminDb.collection('orders').doc(orderId);
         const orderSnap = await orderRef.get();
         const order = orderSnap.exists ? orderSnap.data() : null;
-
         const paidOrder = order ? { ...order, id: orderId } : null;
 
         await orderRef.update({
           status: 'paid',
           paymentStatus: 'paid',
           stripeSessionId: session.id,
+          paymentIntentId: session.payment_intent || null,
           paidAt: new Date()
         });
 
-        if (order?.items?.length) {
-          const batch = adminDb.batch();
-          for (const item of order.items) {
-            if (!item.id) continue;
-            const productRef = adminDb.collection('products').doc(String(item.id));
-            const productSnap = await productRef.get();
-            if (!productSnap.exists) continue;
-            const currentStock = Number(productSnap.data().stock) || 0;
-            const nextStock = Math.max(0, currentStock - (Number(item.quantity) || 1));
-            batch.update(productRef, { stock: nextStock });
+        // Reserve inventory atomically — chỉ khi order chưa được reserve
+        if (order?.items?.length && !order.inventoryReserved) {
+          try {
+            const reserveItems = order.items.map((it) => ({
+              productId: it.id || it.productId,
+              variantId: it.variantId || null,
+              quantity: Number(it.quantity) || 1,
+              name: it.name
+            }));
+            await reserveInventory(adminDb, reserveItems, {
+              orderId,
+              userId: order.customer?.userId || order.userId || null,
+              type: 'sale',
+              note: `Stripe payment ${session.id}`
+            });
+            await orderRef.update({ inventoryReserved: true });
+          } catch (invErr) {
+            // Đã thanh toán nhưng hết hàng → flag để admin xử lý refund
+            console.error('[Webhook] Inventory reserve failed:', invErr.message);
+            await orderRef.update({
+              status: 'paid_oversold',
+              inventoryError: invErr.message,
+              insufficientItems: invErr.insufficientItems || []
+            });
           }
-          await batch.commit();
         }
+
+        await processedRef.set({
+          eventId: event.id,
+          eventType: event.type,
+          orderId,
+          processedAt: new Date()
+        });
 
         if (paidOrder) {
           await sendOrderPaidEmails({
@@ -395,6 +428,8 @@ app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req
 
     const total = Math.max(0, subtotal - discount) + shipping;
 
+    const isStripeMethod = order.paymentMethod === 'stripe';
+
     const ref = await adminDb.collection('orders').add({
       ...order,
       coupon: appliedCoupon,
@@ -404,9 +439,42 @@ app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req
       shipping,
       total,
       status: 'pending',
-      paymentStatus: order.paymentMethod === 'stripe' ? 'unpaid' : 'pending',
+      paymentStatus: isStripeMethod ? 'unpaid' : 'pending',
+      inventoryReserved: false,
       createdAt: new Date()
     });
+
+    // Reserve stock NGAY cho COD / bank-transfer (vì coi như đơn sẽ ship).
+    // Với Stripe: đợi webhook checkout.session.completed → reserve khi paid
+    // (tránh giữ stock vô ích nếu user không hoàn tất thanh toán).
+    if (!isStripeMethod) {
+      try {
+        const reserveItems = validatedItems.map((it) => ({
+          productId: it.id,
+          variantId: it.variantId || null,
+          quantity: it.quantity,
+          name: it.name
+        }));
+        await reserveInventory(adminDb, reserveItems, {
+          orderId: ref.id,
+          userId: order.customer?.userId || order.userId || null,
+          type: 'sale',
+          note: `Order ${ref.id} (${order.paymentMethod || 'cod'})`
+        });
+        await ref.update({ inventoryReserved: true });
+      } catch (invErr) {
+        // Rollback order doc nếu reserve fail
+        await ref.delete();
+        if (invErr instanceof InsufficientStockError) {
+          return res.status(409).json({
+            error: invErr.message,
+            code: invErr.code,
+            insufficientItems: invErr.insufficientItems
+          });
+        }
+        throw invErr;
+      }
+    }
 
     const savedOrder = {
       ...order,
@@ -417,7 +485,7 @@ app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req
       shipping,
       total,
       status: 'pending',
-      paymentStatus: order.paymentMethod === 'stripe' ? 'unpaid' : 'pending'
+      paymentStatus: isStripeMethod ? 'unpaid' : 'pending'
     };
 
     await sendOrderCreatedEmails(savedOrder);
@@ -425,6 +493,13 @@ app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req
     res.json({ id: ref.id, subtotal, discount, shipping, total });
   } catch (error) {
     console.error('Create order error:', error);
+    if (error instanceof InsufficientStockError) {
+      return res.status(409).json({
+        error: error.message,
+        code: error.code,
+        insufficientItems: error.insufficientItems
+      });
+    }
     res.status(500).json({ error: error.message });
   }
 });
@@ -742,11 +817,49 @@ app.patch('/api/orders/:id/status', adminLimiter, requireAdmin, requireFirestore
   try {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: 'Thiếu trạng thái' });
-    await adminDb.collection('orders').doc(req.params.id).update({
-      status,
-      updatedAt: new Date()
-    });
-    res.json({ ok: true });
+    const orderId = req.params.id;
+    const orderRef = adminDb.collection('orders').doc(orderId);
+    const orderSnap = await orderRef.get();
+    if (!orderSnap.exists) {
+      return res.status(404).json({ error: 'Đơn hàng không tồn tại' });
+    }
+    const order = orderSnap.data();
+
+    // Trả stock atomically khi cancel / refund (chỉ nếu đơn đã reserve trước đó)
+    const releaseStatuses = ['cancelled', 'refunded'];
+    const wasReserved = order.inventoryReserved && !order.inventoryReleased;
+    const shouldRelease = releaseStatuses.includes(status) && wasReserved;
+
+    if (shouldRelease && Array.isArray(order.items) && order.items.length) {
+      try {
+        const releaseItems = order.items.map((it) => ({
+          productId: it.id || it.productId,
+          variantId: it.variantId || null,
+          quantity: Number(it.quantity) || 0
+        }));
+        await releaseInventory(adminDb, releaseItems, {
+          orderId,
+          userId: req.adminEmail || null,
+          type: status === 'refunded' ? 'return' : 'restock',
+          note: `Order ${orderId} → ${status}`
+        });
+        await orderRef.update({
+          status,
+          inventoryReleased: true,
+          updatedAt: new Date()
+        });
+      } catch (relErr) {
+        console.error('[Order status] Release inventory failed:', relErr.message);
+        return res.status(500).json({ error: 'Không thể trả tồn kho: ' + relErr.message });
+      }
+    } else {
+      await orderRef.update({
+        status,
+        updatedAt: new Date()
+      });
+    }
+
+    res.json({ ok: true, inventoryReleased: shouldRelease });
   } catch (error) {
     console.error('Update order status error:', error);
     res.status(500).json({ error: error.message });

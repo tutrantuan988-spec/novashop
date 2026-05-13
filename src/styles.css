@@ -2198,6 +2198,36 @@ textarea:focus-visible {
   font-weight: 700;
 }
 
+.stock-warning {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.stock-warning strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.stock-warning ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.stock-warning li {
+  margin: 4px 0;
+}
+
+.stock-warning p {
+  margin: 8px 0 0;
+  font-style: italic;
+}
+
 .summary-totals {
   display: grid;
   gap: 8px;

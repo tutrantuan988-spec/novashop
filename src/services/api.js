@@ -30,7 +30,11 @@ async function request(path, { method = 'GET', body, adminEmail, adminToken, hea
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || `Yêu cầu thất bại (${res.status})`);
+    const err = new Error(data.error || `Yêu cầu thất bại (${res.status})`);
+    err.status = res.status;
+    err.code = data.code || null;
+    err.insufficientItems = data.insufficientItems || null;
+    throw err;
   }
   return res.json();
 }

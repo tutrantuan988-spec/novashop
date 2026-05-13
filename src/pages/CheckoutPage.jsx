@@ -50,6 +50,7 @@ function CheckoutPageInner() {
   const [couponBusy, setCouponBusy] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
   const [stripeOrder, setStripeOrder] = useState(null);
+  const [stockIssues, setStockIssues] = useState([]); // [{ productId, name, requested, available }]
 
   const payment = watch('payment');
   const isPlacing = isSubmitting;
@@ -118,6 +119,7 @@ function CheckoutPageInner() {
         note: data.note
       };
 
+      setStockIssues([]); // Reset trước mỗi lần submit
       const saved = await createOrderApi(orderData);
 
       if (data.payment === 'stripe') {
@@ -129,6 +131,17 @@ function CheckoutPageInner() {
       clearCart();
     } catch (error) {
       console.error('Order error:', error);
+      // Server trả 409 + INSUFFICIENT_STOCK → highlight items thiếu
+      if (error.code === 'INSUFFICIENT_STOCK' && Array.isArray(error.insufficientItems)) {
+        setStockIssues(error.insufficientItems);
+        const list = error.insufficientItems
+          .map((it) => `${it.name}: chỉ còn ${it.available} (bạn đặt ${it.requested})`)
+          .join('; ');
+        toast.error(`Không đủ tồn kho — ${list}`);
+        // Scroll lên đầu giỏ hàng để user thấy highlight
+        document.getElementById('cart-summary')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
       toast.error(`Đặt hàng thất bại: ${error.message || 'Vui lòng thử lại sau.'}`);
     }
   };
@@ -278,19 +291,46 @@ function CheckoutPageInner() {
           </div>
         </div>
 
-        <aside className="checkout-summary card-box">
+        <aside id="cart-summary" className="checkout-summary card-box">
           <h2>Đơn hàng của bạn</h2>
+
+          {stockIssues.length > 0 && (
+            <div className="stock-warning" role="alert">
+              <strong>⚠️ Một số sản phẩm không đủ tồn kho:</strong>
+              <ul>
+                {stockIssues.map((it) => (
+                  <li key={`${it.productId}-${it.variantId || ''}`}>
+                    {it.name}: chỉ còn <strong>{it.available}</strong> (bạn đặt {it.requested})
+                  </li>
+                ))}
+              </ul>
+              <p>Vui lòng quay lại giỏ hàng để điều chỉnh số lượng.</p>
+            </div>
+          )}
+
           <ul className="summary-items">
-            {items.map((item) => (
-              <li key={item.id}>
-                <img src={item.image} alt={item.name} loading="lazy" />
-                <div>
-                  <strong>{item.name}</strong>
-                  <span>SL: {item.quantity}</span>
-                </div>
-                <span className="summary-price">{formatVND(item.price * item.quantity)}</span>
-              </li>
-            ))}
+            {items.map((item) => {
+              const issue = stockIssues.find((s) => String(s.productId) === String(item.id));
+              return (
+                <li
+                  key={item.id}
+                  className={issue ? 'summary-item-error' : ''}
+                  style={issue ? { background: 'rgba(239, 68, 68, 0.08)', borderLeft: '3px solid #ef4444', paddingLeft: 8 } : undefined}
+                >
+                  <img src={item.image} alt={item.name} loading="lazy" />
+                  <div>
+                    <strong>{item.name}</strong>
+                    <span>SL: {item.quantity}</span>
+                    {issue && (
+                      <small style={{ color: '#ef4444', fontWeight: 700, display: 'block' }}>
+                        Còn {issue.available} sản phẩm
+                      </small>
+                    )}
+                  </div>
+                  <span className="summary-price">{formatVND(item.price * item.quantity)}</span>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="coupon-row">
