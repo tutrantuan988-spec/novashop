@@ -1,8 +1,6 @@
 import { memo, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ArrowRight, Crown, Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, ShoppingCart, Sun, User, X } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import { useI18n } from '../context/I18nContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -12,10 +10,18 @@ function Header() {
   const { totalItems, openCart } = useCart();
   const { user, isAuthenticated, isAdmin, authMode, openAuthModal, logout } = useAuth();
   const { count: wishlistCount } = useWishlist();
-  const { isDark, toggleTheme } = useTheme();
-  const { lang, toggleLang, t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const toggleTheme = () => setIsDark(d => !d);
+  const navLabels = {
+    products: 'Sản phẩm',
+    luxury: 'Cao cấp',
+    concierge: 'Hỗ trợ',
+    deals: 'Khuyến mãi',
+    reviews: 'Đánh giá',
+    admin: 'Quản lý'
+  };
 
   return (
     <header className="header">
@@ -26,12 +32,12 @@ function Header() {
       </Link>
 
       <nav className={isMenuOpen ? 'nav nav-open' : 'nav'} aria-label="Điều hướng chính">
-        <a href="/#products" onClick={() => setIsMenuOpen(false)}>{t.nav.products}</a>
-        <a href="/#luxury" onClick={() => setIsMenuOpen(false)}>{t.nav.luxury}</a>
-        <a href="/#concierge" onClick={() => setIsMenuOpen(false)}>{t.nav.concierge}</a>
-        <a href="/#deals" onClick={() => setIsMenuOpen(false)}>{t.nav.deals}</a>
-        <a href="/#reviews" onClick={() => setIsMenuOpen(false)}>{t.nav.reviews}</a>
-        {isAdmin && <NavLink to="/admin" onClick={() => setIsMenuOpen(false)}>{t.nav.admin}</NavLink>}
+        <a href="/#products" onClick={() => setIsMenuOpen(false)}>{navLabels.products}</a>
+        <a href="/#luxury" onClick={() => setIsMenuOpen(false)}>{navLabels.luxury}</a>
+        <a href="/#concierge" onClick={() => setIsMenuOpen(false)}>{navLabels.concierge}</a>
+        <a href="/#deals" onClick={() => setIsMenuOpen(false)}>{navLabels.deals}</a>
+        <a href="/#reviews" onClick={() => setIsMenuOpen(false)}>{navLabels.reviews}</a>
+        {isAdmin && <NavLink to="/admin" onClick={() => setIsMenuOpen(false)}>{navLabels.admin}</NavLink>}
       </nav>
 
       <div className="header-actions">
