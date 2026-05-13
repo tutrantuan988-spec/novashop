@@ -6,8 +6,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './context/ThemeContext';
 import { I18nProvider } from './context/I18nContext';
 import { queryClient } from './lib/queryClient';
+import { initMonitoring } from './lib/monitoring';
 import App from './App';
 import './styles.css';
+
+initMonitoring();
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const useClerk = !!clerkKey && clerkKey.startsWith('pk_');

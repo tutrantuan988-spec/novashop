@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Edit3, Plus, RotateCcw, Search, Trash2, ShoppingBag, Package, BarChart3, Eye, X, Tag, ShieldCheck } from 'lucide-react';
+import { Edit3, Plus, RotateCcw, Search, Trash2, ShoppingBag, Package, BarChart3, Eye, X, Tag, ShieldCheck, Download, RefreshCw, RotateCw } from 'lucide-react';
 import {
   clearAdminSessionToken,
   getAdminConfigApi,
@@ -18,8 +18,12 @@ import { useProducts } from '../context/ProductsContext';
 import { categories } from '../data/products';
 import { formatVND } from '../utils/format';
 import { isUploadConfigured, uploadProductImage } from '../services/upload';
+import { exportOrdersCsv } from '../utils/exportCsv';
 import CouponManager from '../components/CouponManager';
 import AnalyticsCharts from '../components/AnalyticsCharts';
+import ReturnsManager from '../components/admin/ReturnsManager';
+
+const LOW_STOCK_THRESHOLD = 10;
 
 const emptyForm = {
   name: '',
@@ -387,6 +391,13 @@ function AdminPage() {
         >
           <Tag size={16} aria-hidden /> Mã giảm giá
         </button>
+        <button
+          type="button"
+          className={activeTab === 'returns' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('returns')}
+        >
+          <RotateCw size={16} aria-hidden /> Đổi/trả
+        </button>
       </div>
 
       {activeTab === 'dashboard' && (
@@ -524,7 +535,19 @@ function AdminPage() {
                     </td>
                     <td>{p.category}</td>
                     <td>{formatVND(p.price)}</td>
-                    <td>{p.stock ?? 0}</td>
+                    <td>
+                      {(p.stock ?? 0) === 0 ? (
+                        <span style={{ background: 'rgba(239,68,68,0.12)', color: '#991b1b', padding: '2px 8px', borderRadius: 4, fontSize: 12, fontWeight: 700 }}>
+                          Hết hàng
+                        </span>
+                      ) : (p.stock ?? 0) < LOW_STOCK_THRESHOLD ? (
+                        <span style={{ background: 'rgba(245,158,11,0.15)', color: '#92400e', padding: '2px 8px', borderRadius: 4, fontSize: 12, fontWeight: 700 }}>
+                          Sắp hết ({p.stock})
+                        </span>
+                      ) : (
+                        p.stock
+                      )}
+                    </td>
                     <td>
                       <div className="row-actions">
                         <button type="button" className="icon-action" onClick={() => onEdit(p)} aria-label={`Sửa ${p.name}`}>
@@ -629,6 +652,10 @@ function AdminPage() {
 
       {activeTab === 'coupons' && (
         <CouponManager adminEmail={user?.email} />
+      )}
+
+      {activeTab === 'returns' && (
+        <ReturnsManager adminEmail={user?.email} />
       )}
 
       {selectedOrder && (

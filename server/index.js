@@ -251,7 +251,7 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
   res.json({ received: true });
 });
 
-app.use(express.json());
+app.use(express.json({ limit: '12mb' })); // Higher limit for base64 image upload (P9)
 app.use(express.static(path.resolve(__dirname, '../dist')));
 
 const PORT = process.env.PORT || 3001;
@@ -1902,11 +1902,49 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
 
+// Sentry (P11) — initialize on first load
+const { initSentry, captureException } = require('./utils/sentry');
+initSentry();
+
 // Global error handler — catch unexpected errors and return JSON
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, _next) => {
   console.error('[Server Error]', err);
+  captureException(err, { url: req.url, method: req.method });
   if (res.headersSent) return;
   res.status(500).json({ error: 'Lỗi máy chủ nội bộ', message: IS_PRODUCTION ? undefined : err.message });
+});
+
+// =========================
+// Image Upload (P9)
+// =========================
+const { processAndUpload, isCloudinaryConfigured } = require('./utils/imageUpload');
+
+app.get('/api/upload/config', (_req, res) => {
+  res.json({ cloudinaryConfigured: isCloudinaryConfigured() });
+});
+
+app.post('/api/upload/image', adminLimiter, requireAdmin, async (req, res) => {
+  try {
+    const { dataUrl, folder, publicId } = req.body || {};
+    if (!dataUrl || typeof dataUrl !== 'string') {
+      return res.status(400).json({ error: 'dataUrl (base64) là bắt buộc' });
+    }
+    // Strip data URL prefix
+    const matches = dataUrl.match(/^data:image\/[^;]+;base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'dataUrl phải là base64 image' });
+    }
+    const buffer = Buffer.from(matches[1], 'base64');
+    if (buffer.length > 10 * 1024 * 1024) {
+      return res.status(413).json({ error: 'Ảnh quá lớn (>10MB)' });
+    }
+    const result = await processAndUpload(buffer, { folder, publicId });
+    if (result.error) return res.status(500).json(result);
+    res.json(result);
+  } catch (error) {
+    console.error('Image upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // =========================
