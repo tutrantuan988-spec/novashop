@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { LogIn, UserPlus, X } from 'lucide-react';
+import { SignIn } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext';
 import SITE from '../config/site-config';
 
@@ -11,7 +12,31 @@ function AuthModal() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
 
-  if (authMode === 'clerk' || !isModalOpen) return null;
+  if (!isModalOpen) return null;
+
+  if (authMode === 'clerk') {
+    return (
+      <div className="modal-overlay" role="dialog" aria-modal="true">
+        <div className="modal" style={{ maxWidth: 420 }}>
+          <button type="button" className="modal-close" onClick={closeAuthModal} aria-label="Đóng">
+            <X size={20} />
+          </button>
+          <SignIn
+            routing="hash"
+            afterSignInUrl="/"
+            signUpUrl="/"
+            appearance={{
+              elements: {
+                card: { boxShadow: 'none', border: 'none' },
+                headerTitle: { display: 'none' },
+                headerSubtitle: { display: 'none' }
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const onChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
 

@@ -29,6 +29,14 @@ function ProductDetailPage() {
     if (product) {
       document.title = `${product.name} - ${SITE.name}`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Track recently viewed
+      try {
+        const key = 'trongdinhstore:recentlyViewed';
+        const raw = window.localStorage.getItem(key);
+        const list = raw ? JSON.parse(raw) : [];
+        const next = [{ id: product.id, slug: product.slug, name: product.name, image: product.image, price: product.price }, ...list.filter((p) => p.id !== product.id)].slice(0, 8);
+        window.localStorage.setItem(key, JSON.stringify(next));
+      } catch {}
     }
   }, [product]);
 

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const WishlistContext = createContext(null);
-const STORAGE_KEY = 'novashop:wishlist';
+const STORAGE_KEY = 'trongdinhstore:wishlist';
 
 function readStorage() {
   if (typeof window === 'undefined') return [];

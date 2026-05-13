@@ -1,5 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const ADMIN_SESSION_KEY = 'novashop:adminToken';
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+const ADMIN_SESSION_KEY = 'trongdinhstore:adminToken';
 
 export function getAdminSessionToken() {
   if (typeof window === 'undefined') return '';

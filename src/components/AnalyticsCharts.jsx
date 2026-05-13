@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { TrendingUp, ShoppingBag, DollarSign, Activity, RefreshCw } from 'lucide-react';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 import { getAnalyticsApi } from '../services/api';
 import { formatVND } from '../utils/format';
 
@@ -30,63 +33,43 @@ const PAYMENT_LABELS = {
 };
 
 function RevenueChart({ data }) {
-  const width = 720;
-  const height = 220;
-  const padding = { top: 20, right: 20, bottom: 28, left: 60 };
-  const innerWidth = width - padding.left - padding.right;
-  const innerHeight = height - padding.top - padding.bottom;
-
-  const maxRevenue = Math.max(...data.map((d) => d.revenue), 1);
-  const points = data.map((d, i) => {
-    const x = padding.left + (innerWidth * i) / Math.max(1, data.length - 1);
-    const y = padding.top + innerHeight - (innerHeight * d.revenue) / maxRevenue;
-    return { x, y, ...d };
-  });
-
-  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  const areaPath = `${linePath} L ${points[points.length - 1]?.x || padding.left} ${padding.top + innerHeight} L ${padding.left} ${padding.top + innerHeight} Z`;
-
-  const ticks = 4;
-  const yTicks = Array.from({ length: ticks + 1 }, (_, i) => {
-    const value = (maxRevenue * i) / ticks;
-    const y = padding.top + innerHeight - (innerHeight * i) / ticks;
-    return { value, y };
-  });
-
-  const xTickEvery = Math.max(1, Math.ceil(data.length / 8));
-
   return (
-    <div className="chart-wrap">
-      <svg viewBox={`0 0 ${width} ${height}`} className="revenue-chart" role="img" aria-label="Biểu đồ doanh thu">
-        <defs>
-          <linearGradient id="revFill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#d8a84f" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#d8a84f" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {yTicks.map((t, i) => (
-          <g key={i}>
-            <line x1={padding.left} x2={width - padding.right} y1={t.y} y2={t.y} stroke="#e2e8f0" strokeDasharray="3 3" />
-            <text x={padding.left - 8} y={t.y + 4} textAnchor="end" fontSize="10" fill="#94a3b8">
-              {Math.round(t.value / 1000)}k
-            </text>
-          </g>
-        ))}
-        <path d={areaPath} fill="url(#revFill)" />
-        <path d={linePath} fill="none" stroke="#d8a84f" strokeWidth="2.5" />
-        {points.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r="3" fill="#d8a84f">
-            <title>{`${p.date}: ${formatVND(p.revenue)} (${p.orders} đơn)`}</title>
-          </circle>
-        ))}
-        {points.map((p, i) => (
-          i % xTickEvery === 0 ? (
-            <text key={`x-${i}`} x={p.x} y={height - 8} textAnchor="middle" fontSize="10" fill="#94a3b8">
-              {p.date.slice(5)}
-            </text>
-          ) : null
-        ))}
-      </svg>
+    <div className="chart-wrap" style={{ height: 280 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f97316" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <XAxis
+            dataKey="date"
+            tickFormatter={(v) => v?.slice(5) || v}
+            stroke="#94a3b8"
+            fontSize={12}
+          />
+          <YAxis
+            tickFormatter={(v) => `${Math.round(v / 1000)}k`}
+            stroke="#94a3b8"
+            fontSize={12}
+          />
+          <Tooltip
+            formatter={(value) => formatVND(value)}
+            labelFormatter={(label) => label}
+          />
+          <Area
+            type="monotone"
+            dataKey="revenue"
+            stroke="#f97316"
+            strokeWidth={2.5}
+            fill="url(#revFill)"
+            dot={{ r: 3, fill: '#f97316' }}
+            activeDot={{ r: 5 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }

@@ -147,7 +147,7 @@ function AdminPage() {
     return (
       <section className="section admin-denied">
         <h1>Bạn không có quyền truy cập</h1>
-        <p>Trang này chỉ dành cho tài khoản quản trị viên. Đăng ký bằng email <code>admin@novashop.vn</code> để dùng thử.</p>
+        <p>Trang này chỉ dành cho tài khoản quản trị viên. Liên hệ admin để được cấp quyền.</p>
         <Link to="/" className="primary-button">Về trang chủ</Link>
       </section>
     );
@@ -303,7 +303,7 @@ function AdminPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `novashop-orders-${Date.now()}.csv`;
+    a.download = `trongdinhstore-orders-${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Đã xuất CSV');

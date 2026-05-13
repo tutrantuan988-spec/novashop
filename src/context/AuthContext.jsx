@@ -2,8 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useUser, useClerk } from '@clerk/clerk-react';
 
 const AuthContext = createContext(null);
-const USER_KEY = 'novashop:user';
-const USERS_KEY = 'novashop:users';
+const USER_KEY = 'trongdinhstore:user';
+const USERS_KEY = 'trongdinhstore:users';
 const IS_PRODUCTION = import.meta.env.PROD;
 
 const isAdminEmail = (email) => {

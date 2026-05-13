@@ -1,48 +1,69 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BadgeCheck, CheckCircle2, CreditCard, Truck } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatVND } from '../utils/format';
 import SITE from '../config/site-config';
+import { checkoutSchema } from '../lib/checkoutSchema';
 import {
-  createCheckoutSession,
   createOrderApi,
-  validateCouponApi,
-  createVnpayPayment,
-  createMomoPayment
+  validateCouponApi
 } from '../services/api';
+import StripeProvider from '../components/StripeProvider';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 const SHIPPING_FEE = 30000;
-const FREE_SHIP_THRESHOLD = 1000000;
+const FREE_SHIP_THRESHOLD = 300000;
 
-function CheckoutPage() {
+function CheckoutPageInner() {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
   const { user } = useAuth();
   const toast = useToast();
 
-  const [form, setForm] = useState({
-    fullName: user?.name || '',
-    email: user?.email || '',
-    phone: '',
-    address: '',
-    city: '',
-    note: '',
-    payment: 'cod'
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue
+  } = useForm({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      fullName: user?.name || '',
+      email: user?.email || '',
+      phone: '',
+      address: '',
+      city: '',
+      note: '',
+      payment: 'cod'
+    }
   });
+
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMessage, setCouponMessage] = useState('');
   const [couponBusy, setCouponBusy] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
-  const [isPlacing, setIsPlacing] = useState(false);
+  const [stripeOrder, setStripeOrder] = useState(null);
+
+  const payment = watch('payment');
+  const isPlacing = isSubmitting;
 
   useEffect(() => {
     document.title = `Thanh toán - ${SITE.name}`;
     window.scrollTo({ top: 0 });
   }, []);
+
+  useEffect(() => {
+    if (payment !== 'stripe') {
+      setStripeOrder(null);
+    }
+  }, [payment]);
 
   const totals = useMemo(() => {
     let discount = 0;
@@ -54,8 +75,6 @@ function CheckoutPage() {
     const total = Math.max(0, subtotal - discount) + shipping;
     return { subtotal, discount, shipping, total };
   }, [subtotal, appliedCoupon]);
-
-  const onChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
 
   const applyCoupon = async (event) => {
     event.preventDefault();
@@ -74,18 +93,14 @@ function CheckoutPage() {
     }
   };
 
-  const placeOrder = async (event) => {
-    event.preventDefault();
-    if (!form.fullName || !form.phone || !form.address || !form.city) return;
-    setIsPlacing(true);
-
+  const handleShippingSubmit = async (data) => {
     try {
       const orderData = {
         customer: {
-          name: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          address: `${form.address}, ${form.city}`
+          name: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          address: `${data.address}, ${data.city}`
         },
         items: items.map((i) => ({
           id: i.id,
@@ -98,39 +113,16 @@ function CheckoutPage() {
         discount: totals.discount,
         shipping: totals.shipping,
         total: totals.total,
-        paymentMethod: form.payment,
+        paymentMethod: data.payment,
         coupon: appliedCoupon?.code || null,
-        note: form.note
+        note: data.note
       };
 
       const saved = await createOrderApi(orderData);
 
-      if (form.payment === 'stripe') {
-        const session = await createCheckoutSession({
-          items: items.map((i) => ({ id: i.id, quantity: i.quantity })),
-          orderId: saved.id,
-          customerEmail: form.email || user?.email || ''
-        });
-        if (session.url) {
-          window.location.href = session.url;
-          return;
-        }
-      }
-
-      if (form.payment === 'vnpay') {
-        const session = await createVnpayPayment(saved.id);
-        if (session.url) {
-          window.location.href = session.url;
-          return;
-        }
-      }
-
-      if (form.payment === 'momo') {
-        const session = await createMomoPayment(saved.id);
-        if (session.url) {
-          window.location.href = session.url;
-          return;
-        }
+      if (data.payment === 'stripe') {
+        setStripeOrder({ id: saved.id, total: saved.total ?? totals.total });
+        return;
       }
 
       setOrderPlaced({ id: saved.id, total: saved.total ?? totals.total });
@@ -138,9 +130,17 @@ function CheckoutPage() {
     } catch (error) {
       console.error('Order error:', error);
       toast.error(`Đặt hàng thất bại: ${error.message || 'Vui lòng thử lại sau.'}`);
-    } finally {
-      setIsPlacing(false);
     }
+  };
+
+  const handleStripeSuccess = () => {
+    setOrderPlaced(stripeOrder);
+    setStripeOrder(null);
+    clearCart();
+  };
+
+  const handleStripeError = (msg) => {
+    toast.error(msg);
   };
 
   if (orderPlaced) {
@@ -174,34 +174,40 @@ function CheckoutPage() {
     <section className="section checkout" aria-labelledby="checkout-title">
       <h1 id="checkout-title">Thanh toán đơn hàng</h1>
 
-      <form onSubmit={placeOrder} className="checkout-grid" noValidate>
+      <form onSubmit={handleSubmit(handleShippingSubmit)} className="checkout-grid" noValidate>
         <div className="checkout-form">
           <div className="card-box">
             <h2><Truck size={18} aria-hidden /> Thông tin giao hàng</h2>
             <div className="form-grid">
               <label>
                 <span>Họ và tên *</span>
-                <input name="fullName" required value={form.fullName} onChange={onChange} autoComplete="name" />
+                <input {...register('fullName')} autoComplete="name" aria-invalid={!!errors.fullName} />
+                {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
               </label>
               <label>
                 <span>Số điện thoại *</span>
-                <input name="phone" required value={form.phone} onChange={onChange} autoComplete="tel" placeholder="0901 234 567" />
+                <input {...register('phone')} autoComplete="tel" placeholder="0901 234 567" aria-invalid={!!errors.phone} />
+                {errors.phone && <span className="field-error">{errors.phone.message}</span>}
               </label>
               <label className="full">
-                <span>Email</span>
-                <input name="email" type="email" value={form.email} onChange={onChange} autoComplete="email" />
+                <span>Email *</span>
+                <input {...register('email')} type="email" autoComplete="email" aria-invalid={!!errors.email} />
+                {errors.email && <span className="field-error">{errors.email.message}</span>}
               </label>
               <label className="full">
                 <span>Địa chỉ *</span>
-                <input name="address" required value={form.address} onChange={onChange} autoComplete="street-address" placeholder="Số nhà, tên đường" />
+                <input {...register('address')} autoComplete="street-address" placeholder="Số nhà, tên đường" aria-invalid={!!errors.address} />
+                {errors.address && <span className="field-error">{errors.address.message}</span>}
               </label>
               <label className="full">
                 <span>Tỉnh/Thành phố *</span>
-                <input name="city" required value={form.city} onChange={onChange} autoComplete="address-level2" placeholder="TP. Hồ Chí Minh" />
+                <input {...register('city')} autoComplete="address-level2" placeholder="TP. Hồ Chí Minh" aria-invalid={!!errors.city} />
+                {errors.city && <span className="field-error">{errors.city.message}</span>}
               </label>
               <label className="full">
                 <span>Ghi chú</span>
-                <textarea name="note" rows={3} value={form.note} onChange={onChange} placeholder="Ví dụ: giao trong giờ hành chính" />
+                <textarea {...register('note')} rows={3} placeholder="Ví dụ: giao trong giờ hành chính" />
+                {errors.note && <span className="field-error">{errors.note.message}</span>}
               </label>
             </div>
           </div>
@@ -209,42 +215,66 @@ function CheckoutPage() {
           <div className="card-box">
             <h2><CreditCard size={18} aria-hidden /> Phương thức thanh toán</h2>
             <div className="payment-options">
-              <label className={form.payment === 'cod' ? 'payment active' : 'payment'}>
-                <input type="radio" name="payment" value="cod" checked={form.payment === 'cod'} onChange={onChange} />
+              <label className={payment === 'cod' ? 'payment active' : 'payment'}>
+                <input type="radio" {...register('payment')} value="cod" />
                 <div>
                   <strong>Thanh toán khi nhận hàng (COD)</strong>
                   <span>Kiểm tra hàng trước khi thanh toán</span>
                 </div>
               </label>
-              <label className={form.payment === 'bank' ? 'payment active' : 'payment'}>
-                <input type="radio" name="payment" value="bank" checked={form.payment === 'bank'} onChange={onChange} />
+              <label className={payment === 'bank' ? 'payment active' : 'payment'}>
+                <input type="radio" {...register('payment')} value="bank" />
                 <div>
-                  <strong>Chuyển khoản ngân hàng</strong>
-                  <span>Hoàn tất thanh toán bằng QR sau khi đặt hàng</span>
+                  <strong>Chuyển khoản MBBank</strong>
+                  <span>Quét QR hoặc chuyển khoản sau khi đặt hàng</span>
                 </div>
               </label>
-              <label className={form.payment === 'momo' ? 'payment active' : 'payment'}>
-                <input type="radio" name="payment" value="momo" checked={form.payment === 'momo'} onChange={onChange} />
+              <label className={payment === 'stripe' ? 'payment active' : 'payment'}>
+                <input type="radio" {...register('payment')} value="stripe" />
                 <div>
-                  <strong>Ví điện tử MoMo</strong>
-                  <span>Quét QR hoặc dùng app MoMo</span>
-                </div>
-              </label>
-              <label className={form.payment === 'vnpay' ? 'payment active' : 'payment'}>
-                <input type="radio" name="payment" value="vnpay" checked={form.payment === 'vnpay'} onChange={onChange} />
-                <div>
-                  <strong>VNPay (ATM / QR / Visa nội địa)</strong>
-                  <span>Thanh toán qua cổng VNPay</span>
-                </div>
-              </label>
-              <label className={form.payment === 'stripe' ? 'payment active' : 'payment'}>
-                <input type="radio" name="payment" value="stripe" checked={form.payment === 'stripe'} onChange={onChange} />
-                <div>
-                  <strong>Thẻ quốc tế (Visa / MasterCard / Stripe)</strong>
-                  <span>Thanh toán bảo mật qua Stripe</span>
+                  <strong>Thẻ Visa / Mastercard</strong>
+                  <span>Thanh toán an toàn qua Stripe</span>
                 </div>
               </label>
             </div>
+
+            {payment === 'bank' && (
+              <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
+                <img
+                  src={`https://img.vietqr.io/image/MBBANK-0369712958-compact2.jpg?amount=${totals.total}&addInfo=${encodeURIComponent('Thanh toan don hang')}&accountName=${encodeURIComponent('TRAN TUAN TU')}`}
+                  alt="QR VietQR chuyển khoản MBBank"
+                  style={{ maxWidth: 240, width: '100%', borderRadius: 12, marginBottom: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                  onError={(e) => { e.target.src = '/qr-payment.png'; }}
+                />
+                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Quét mã để chuyển khoản MBBank</p>
+                <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 2 }}>Chủ TK: TRAN TUAN TU</p>
+                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Số TK: 0369712958</p>
+                <p style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700, marginTop: 6 }}>Số tiền: {formatVND(totals.total)}</p>
+              </div>
+            )}
+
+            {payment === 'stripe' && stripeOrder && (
+              <StripePaymentForm
+                amount={totals.total}
+                orderId={stripeOrder.id}
+                onSuccess={handleStripeSuccess}
+                onError={handleStripeError}
+              />
+            )}
+
+            {payment === 'stripe' && !stripeOrder && (
+              <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
+                <CreditCard size={36} style={{ marginBottom: 8, color: '#6772e5' }} />
+                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Thanh toán bằng thẻ quốc tế</p>
+                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Visa, Mastercard, JCB, Amex — Bảo mật bởi Stripe</p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 12 }}>
+                  {['Visa', 'Mastercard', 'JCB', 'Amex'].map((card) => (
+                    <span key={card} style={{ padding: '4px 10px', background: 'var(--bg)', borderRadius: 6, fontSize: 12, fontWeight: 700, color: 'var(--muted)', border: '1px solid var(--border)' }}>{card}</span>
+                  ))}
+                </div>
+                <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Tiếp tục thanh toán" để nhập thông tin thẻ</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -285,13 +315,25 @@ function CheckoutPage() {
             <div className="grand"><dt>Tổng cộng</dt><dd>{formatVND(totals.total)}</dd></div>
           </dl>
 
-          <button type="submit" className="primary-button submit-btn" disabled={isPlacing}>
-            {isPlacing ? 'Đang xử lý...' : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
+          <button
+            type="submit"
+            className="primary-button submit-btn"
+            disabled={isPlacing || (payment === 'stripe' && stripeOrder)}
+          >
+            {isPlacing ? 'Đang xử lý...' : payment === 'stripe' && !stripeOrder ? <><CreditCard size={18} aria-hidden /> Tiếp tục thanh toán</> : payment === 'stripe' && stripeOrder ? 'Nhập thông tin thẻ bên trái' : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
           </button>
           <p className="checkout-note">Bằng việc đặt hàng, bạn đồng ý với điều khoản và chính sách của {SITE.name}.</p>
         </aside>
       </form>
     </section>
+  );
+}
+
+function CheckoutPage() {
+  return (
+    <StripeProvider>
+      <CheckoutPageInner />
+    </StripeProvider>
   );
 }
 

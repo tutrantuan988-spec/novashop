@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { products as seedProducts } from '../data/products';
 import { isFirebaseReady } from '../lib/firebase';
 import { useAuth } from './AuthContext';
@@ -10,7 +11,7 @@ import {
 } from '../services/api';
 
 const ProductsContext = createContext(null);
-const STORAGE_KEY = 'novashop:products';
+const STORAGE_KEY = 'trongdinhstore:products';
 
 const readStorage = () => {
   if (typeof window === 'undefined') return seedProducts;
@@ -71,7 +72,7 @@ function LocalProductsProvider({ children }) {
   const resetProducts = useCallback(() => setItems(seedProducts), []);
 
   const value = useMemo(
-    () => ({ items, addProduct, updateProduct, removeProduct, resetProducts }),
+    () => ({ items, addProduct, updateProduct, removeProduct, resetProducts, loading: false }),
     [items, addProduct, updateProduct, removeProduct, resetProducts]
   );
 
@@ -81,23 +82,16 @@ function LocalProductsProvider({ children }) {
 function ApiProductsProvider({ children }) {
   const { user } = useAuth();
   const adminEmail = user?.email;
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await listProductsApi();
-        if (!cancelled) setItems(data.length ? data : seedProducts);
-      } catch {
-        if (!cancelled) setItems(seedProducts);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  const queryClient = useQueryClient();
+  const productQuery = useQuery({
+    queryKey: ['products'],
+    queryFn: listProductsApi
+  });
+  const items = useMemo(() => {
+    const data = Array.isArray(productQuery.data) ? productQuery.data : [];
+    return data.length ? data : seedProducts;
+  }, [productQuery.data]);
+  const loading = productQuery.isLoading;
 
   const addProduct = useCallback(async (data) => {
     const nextId = Math.max(0, ...items.map((p) => Number(p.id) || 0)) + 1;
@@ -112,20 +106,24 @@ function ApiProductsProvider({ children }) {
       sizes: data.sizes || []
     };
     const saved = await createProductApi(product, adminEmail);
-    setItems((current) => [saved, ...current]);
-  }, [items, adminEmail]);
+    queryClient.setQueryData(['products'], (current = []) => [saved, ...(Array.isArray(current) ? current : [])]);
+  }, [items, adminEmail, queryClient]);
 
   const updateProduct = useCallback(async (id, patch) => {
     await updateProductApi(id, patch, adminEmail);
-    setItems((current) => current.map((p) => (String(p.id) === String(id) ? { ...p, ...patch } : p)));
-  }, [adminEmail]);
+    queryClient.setQueryData(['products'], (current = []) =>
+      (Array.isArray(current) ? current : []).map((p) => (String(p.id) === String(id) ? { ...p, ...patch } : p))
+    );
+  }, [adminEmail, queryClient]);
 
   const removeProduct = useCallback(async (id) => {
     await deleteProductApi(id, adminEmail);
-    setItems((current) => current.filter((p) => String(p.id) !== String(id)));
-  }, [adminEmail]);
+    queryClient.setQueryData(['products'], (current = []) =>
+      (Array.isArray(current) ? current : []).filter((p) => String(p.id) !== String(id))
+    );
+  }, [adminEmail, queryClient]);
 
-  const resetProducts = useCallback(() => setItems(seedProducts), []);
+  const resetProducts = useCallback(() => queryClient.setQueryData(['products'], seedProducts), [queryClient]);
 
   const value = useMemo(
     () => ({ items, addProduct, updateProduct, removeProduct, resetProducts, loading }),

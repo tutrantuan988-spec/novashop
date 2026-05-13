@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const CartContext = createContext(null);
-const STORAGE_KEY = 'novashop:cart';
+const STORAGE_KEY = 'trongdinhstore:cart';
 
 const readStorage = () => {
   if (typeof window === 'undefined') return [];

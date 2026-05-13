@@ -1,5 +1,5 @@
-const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'NovaShop';
-let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'novashop.vn';
+const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'TRỌNG ĐỊNH STORE';
+let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'trongdinhstore.vn';
 // Strip protocol if user accidentally includes it in domain env
 SHOP_DOMAIN = SHOP_DOMAIN.replace(/^https?:\/\//, '');
 const SHOP_URL = `https://${SHOP_DOMAIN}`;
@@ -8,13 +8,13 @@ const SITE = {
   name: SHOP_NAME,
   domain: SHOP_DOMAIN,
   url: SHOP_URL,
-  phone: import.meta.env.VITE_SHOP_PHONE || '1900 1234',
-  email: import.meta.env.VITE_SHOP_EMAIL || `support@${SHOP_DOMAIN}`,
-  address: import.meta.env.VITE_SHOP_ADDRESS || '123 Nguyễn Huệ, Q.1, TP.HCM',
+  phone: import.meta.env.VITE_SHOP_PHONE || '0369712958',
+  email: import.meta.env.VITE_SHOP_EMAIL || 'tutrantuan988@gmail.com',
+  address: import.meta.env.VITE_SHOP_ADDRESS || 'Hà Nội, Việt Nam',
   facebook: import.meta.env.VITE_SHOP_FACEBOOK || '#',
   instagram: import.meta.env.VITE_SHOP_INSTAGRAM || '#',
   youtube: import.meta.env.VITE_SHOP_YOUTUBE || '#',
-  description: import.meta.env.VITE_SHOP_DESCRIPTION || `${SHOP_NAME} - Mua sắm online thông minh với hàng nghìn sản phẩm chính hãng, giao nhanh 24h và chính sách đổi trả linh hoạt.`
+  description: import.meta.env.VITE_SHOP_DESCRIPTION || `${SHOP_NAME} — Thức ăn chính hãng cho thú cưng, giao nhanh toàn quốc.`
 };
 
 export default SITE;
