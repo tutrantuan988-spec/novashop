@@ -1995,6 +1995,78 @@ app.get('/api/shipping/track/:orderCode', publicReadLimiter, async (req, res) =>
 });
 
 // =========================
+// Cart Sync (P6 prerequisite)
+// =========================
+// Sync entire user cart - replaces existing items để abandoned tracking hoạt động
+app.post('/api/cart/sync', publicReadLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.json({ ok: true, skipped: true });
+    const { userId, email, items } = req.body || {};
+    if (!userId || !email) {
+      return res.status(400).json({ error: 'userId và email là bắt buộc' });
+    }
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ error: 'items phải là array' });
+    }
+
+    // Xóa các cart_items cũ của user
+    const existingSnap = await adminDb
+      .collection('cart_items')
+      .where('userId', '==', String(userId))
+      .where('checkedOut', '==', false)
+      .get();
+
+    const batch = adminDb.batch();
+    existingSnap.docs.forEach((d) => batch.delete(d.ref));
+
+    // Thêm items mới
+    const now = new Date();
+    items.forEach((it) => {
+      const ref = adminDb.collection('cart_items').doc();
+      batch.set(ref, {
+        userId: String(userId),
+        email: String(email),
+        productId: String(it.id || it.productId),
+        variantId: it.variantId || null,
+        name: it.name || '',
+        price: Number(it.price) || 0,
+        image: it.image || '',
+        quantity: Number(it.quantity) || 1,
+        checkedOut: false,
+        reminderSent: 0,
+        addedAt: now
+      });
+    });
+    await batch.commit();
+    res.json({ ok: true, count: items.length });
+  } catch (error) {
+    console.error('Cart sync error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mark cart as checked out (gọi sau khi tạo order thành công)
+app.post('/api/cart/checkout', publicReadLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.json({ ok: true, skipped: true });
+    const { userId } = req.body || {};
+    if (!userId) return res.status(400).json({ error: 'userId bắt buộc' });
+    const snap = await adminDb
+      .collection('cart_items')
+      .where('userId', '==', String(userId))
+      .where('checkedOut', '==', false)
+      .get();
+    const batch = adminDb.batch();
+    snap.docs.forEach((d) => batch.update(d.ref, { checkedOut: true, checkedOutAt: new Date() }));
+    await batch.commit();
+    res.json({ ok: true, count: snap.size });
+  } catch (error) {
+    console.error('Cart checkout error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
 // Notifications (P12)
 // =========================
 const { createNotification } = require('./utils/notificationService');

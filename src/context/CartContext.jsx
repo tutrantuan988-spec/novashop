@@ -1,7 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from './AuthContext';
+import { syncCartApi, markCartCheckedOutApi } from '../services/api';
 
 const CartContext = createContext(null);
 const STORAGE_KEY = 'trongdinhstore:cart';
+const SYNC_DEBOUNCE_MS = 2000;
 
 const readStorage = () => {
   if (typeof window === 'undefined') return [];
@@ -17,6 +20,8 @@ const readStorage = () => {
 export function CartProvider({ children }) {
   const [items, setItems] = useState(() => readStorage());
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  const syncTimerRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -25,6 +30,21 @@ export function CartProvider({ children }) {
       console.warn('Cannot persist cart', error);
     }
   }, [items]);
+
+  // Auto-sync lên Firestore khi user đã login (debounced 2s, P6 abandoned cart)
+  useEffect(() => {
+    if (!isAuthenticated || !user?.email) return;
+    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    syncTimerRef.current = setTimeout(() => {
+      const userId = user.id || user.email;
+      syncCartApi(userId, user.email, items).catch(() => {
+        // Silent — abandoned cart tracking là feature optional
+      });
+    }, SYNC_DEBOUNCE_MS);
+    return () => {
+      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    };
+  }, [items, isAuthenticated, user?.email, user?.id]);
 
   /**
    * Build composite key cho cart line — distinguish cùng product nhưng khác variant
@@ -101,7 +121,14 @@ export function CartProvider({ children }) {
     setItems((current) => current.filter((item) => lineKey(item.id, item.variantId) !== key));
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    // Đánh dấu cart đã checkout trên Firestore (P6) — tránh job gửi reminder
+    if (isAuthenticated && user?.email) {
+      const userId = user.id || user.email;
+      markCartCheckedOutApi(userId).catch(() => {});
+    }
+  }, [isAuthenticated, user?.email, user?.id]);
 
   const value = useMemo(() => {
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);

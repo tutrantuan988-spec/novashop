@@ -165,6 +165,15 @@ export function markAllNotificationsReadApi(userId) {
   return request('/api/notifications/mark-all-read', { method: 'POST', body: { userId } });
 }
 
+// ===== Cart Sync (P6) =====
+export function syncCartApi(userId, email, items) {
+  return request('/api/cart/sync', { method: 'POST', body: { userId, email, items } });
+}
+
+export function markCartCheckedOutApi(userId) {
+  return request('/api/cart/checkout', { method: 'POST', body: { userId } });
+}
+
 // ===== GHN Shipping (P14) =====
 export function calculateShippingFeeApi(payload) {
   return request('/api/shipping/calculate', { method: 'POST', body: payload });

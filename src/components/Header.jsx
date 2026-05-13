@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import NotificationBell from './ui/NotificationBell';
+import SearchBar from './search/SearchBar';
 import SITE from '../config/site-config';
 
 function Header() {
@@ -186,7 +187,10 @@ function Header() {
           </button>
         )}
 
-        <Link to="/tim-kiem" className="icon-button" aria-label="Tìm kiếm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="header-search-wrap">
+          <SearchBar />
+        </div>
+        <Link to="/tim-kiem" className="icon-button mobile-only" aria-label="Tìm kiếm">
           <Search size={18} />
         </Link>
 
