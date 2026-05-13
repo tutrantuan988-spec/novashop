@@ -43,6 +43,63 @@ export function createOrderApi(order) {
   return request('/api/orders', { method: 'POST', body: { order } });
 }
 
+// ===== Guest Checkout (P4) =====
+export function createGuestOrderApi(order) {
+  return request('/api/checkout/guest', { method: 'POST', body: { order } });
+}
+
+export function trackOrderApi(token) {
+  return request(`/api/track-order?token=${encodeURIComponent(token)}`);
+}
+
+const GUEST_TOKEN_KEY = 'novashop:guestTokens';
+
+export function saveGuestToken(orderId, token) {
+  if (typeof window === 'undefined') return;
+  try {
+    const all = JSON.parse(window.localStorage.getItem(GUEST_TOKEN_KEY) || '{}');
+    all[orderId] = token;
+    window.localStorage.setItem(GUEST_TOKEN_KEY, JSON.stringify(all));
+  } catch {}
+}
+
+export function listGuestTokens() {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(GUEST_TOKEN_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+// ===== Product Variants (P2) =====
+export function listVariantsApi(productId) {
+  return request(`/api/products/${encodeURIComponent(productId)}/variants`);
+}
+
+export function createVariantApi(productId, variant, adminEmail) {
+  return request(`/api/products/${encodeURIComponent(productId)}/variants`, {
+    method: 'POST',
+    body: { variant },
+    adminEmail
+  });
+}
+
+export function updateVariantApi(productId, variantId, variant, adminEmail) {
+  return request(`/api/products/${encodeURIComponent(productId)}/variants/${encodeURIComponent(variantId)}`, {
+    method: 'PUT',
+    body: { variant },
+    adminEmail
+  });
+}
+
+export function deleteVariantApi(productId, variantId, adminEmail) {
+  return request(`/api/products/${encodeURIComponent(productId)}/variants/${encodeURIComponent(variantId)}`, {
+    method: 'DELETE',
+    adminEmail
+  });
+}
+
 export function createCheckoutSession({ items, orderId, customerEmail }) {
   return request('/api/create-checkout-session', {
     method: 'POST',

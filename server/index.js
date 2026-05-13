@@ -27,6 +27,15 @@ const {
   releaseInventory,
   InsufficientStockError
 } = require('./utils/inventoryTransaction');
+const { generateGuestToken, verifyGuestToken } = require('./utils/guestToken');
+const {
+  authLimiter,
+  checkoutHardLimiter,
+  publicReadLimiter,
+  reviewLimiter,
+  sanitizeText,
+  idempotencyMiddleware
+} = require('./middleware/security');
 const { connectDatabase } = require('./models');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
@@ -369,7 +378,7 @@ async function buildCheckoutItems(items) {
 const devOrders = [];
 let devOrderId = 1000;
 
-app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req, res) => {
+app.post('/api/orders', checkoutLimiter, checkoutHardLimiter, idempotencyMiddleware({ adminDb }), validate(schemas.OrderBody), async (req, res) => {
   try {
     const { order } = req.body;
     if (!order?.customer?.name || !order?.customer?.phone || !order?.customer?.address) {
@@ -501,6 +510,127 @@ app.post('/api/orders', checkoutLimiter, validate(schemas.OrderBody), async (req
       });
     }
     res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// Guest Checkout (P4)
+// =========================
+app.post('/api/checkout/guest', checkoutLimiter, checkoutHardLimiter, idempotencyMiddleware({ adminDb }), async (req, res) => {
+  try {
+    const { order } = req.body || {};
+    if (!order?.customer?.email || !order?.customer?.phone || !order?.customer?.name) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp email, sđt, tên người nhận' });
+    }
+    if (!Array.isArray(order.items) || order.items.length === 0) {
+      return res.status(400).json({ error: 'Đơn hàng chưa có sản phẩm' });
+    }
+
+    if (!adminDb) {
+      // Dev fallback
+      const id = `GUEST-${Date.now()}`;
+      const total = order.items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+      const token = generateGuestToken({ orderId: id, email: order.customer.email });
+      return res.json({ id, total, guestToken: token, trackUrl: `/track-order?token=${token}` });
+    }
+
+    const validatedItems = await buildCheckoutItems(order.items);
+    const subtotal = validatedItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    const shipping = Number(order.shipping) || 0;
+    const total = subtotal + shipping;
+    const isStripeMethod = order.paymentMethod === 'stripe';
+
+    const ref = await adminDb.collection('orders').add({
+      ...order,
+      isGuest: true,
+      items: validatedItems,
+      subtotal,
+      shipping,
+      total,
+      status: 'pending',
+      paymentStatus: isStripeMethod ? 'unpaid' : 'pending',
+      inventoryReserved: false,
+      createdAt: new Date()
+    });
+
+    if (!isStripeMethod) {
+      try {
+        await reserveInventory(adminDb, validatedItems.map((it) => ({
+          productId: it.id,
+          variantId: it.variantId || null,
+          quantity: it.quantity,
+          name: it.name
+        })), {
+          orderId: ref.id,
+          userId: null,
+          type: 'sale',
+          note: `Guest order ${ref.id}`
+        });
+        await ref.update({ inventoryReserved: true });
+      } catch (invErr) {
+        await ref.delete();
+        if (invErr instanceof InsufficientStockError) {
+          return res.status(409).json({
+            error: invErr.message,
+            code: invErr.code,
+            insufficientItems: invErr.insufficientItems
+          });
+        }
+        throw invErr;
+      }
+    }
+
+    const guestToken = generateGuestToken({
+      orderId: ref.id,
+      email: order.customer.email
+    });
+
+    await sendOrderCreatedEmails({
+      ...order,
+      id: ref.id,
+      items: validatedItems,
+      subtotal,
+      shipping,
+      total,
+      status: 'pending',
+      trackUrl: `${CLIENT_URL}/track-order?token=${guestToken}`
+    });
+
+    res.json({
+      id: ref.id,
+      total,
+      guestToken,
+      trackUrl: `/track-order?token=${guestToken}`
+    });
+  } catch (error) {
+    console.error('Guest checkout error:', error);
+    if (error instanceof InsufficientStockError) {
+      return res.status(409).json({
+        error: error.message,
+        code: error.code,
+        insufficientItems: error.insufficientItems
+      });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/track-order', async (req, res) => {
+  try {
+    const token = String(req.query.token || '');
+    if (!token) return res.status(400).json({ error: 'Thiếu token' });
+    const payload = verifyGuestToken(token);
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const snap = await adminDb.collection('orders').doc(payload.orderId).get();
+    if (!snap.exists) return res.status(404).json({ error: 'Đơn hàng không tồn tại' });
+    const order = snap.data();
+    if (payload.email && order.customer?.email !== payload.email) {
+      return res.status(403).json({ error: 'Token không khớp với đơn hàng' });
+    }
+    res.json({ id: snap.id, ...order });
+  } catch (error) {
+    console.error('Track order error:', error.message);
+    res.status(401).json({ error: error.message || 'Token không hợp lệ' });
   }
 });
 
@@ -638,6 +768,90 @@ app.delete('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, as
     res.json({ ok: true });
   } catch (error) {
     console.error('Delete product error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// Product Variants API (P2)
+// =========================
+app.get('/api/products/:productId/variants', async (req, res) => {
+  try {
+    if (!adminDb) return res.json([]);
+    const snap = await adminDb
+      .collection('products')
+      .doc(String(req.params.productId))
+      .collection('variants')
+      .get();
+    res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  } catch (error) {
+    console.error('List variants error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/products/:productId/variants', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+  try {
+    const { variant } = req.body || {};
+    if (!variant?.sku || typeof variant.price !== 'number') {
+      return res.status(400).json({ error: 'sku và price là bắt buộc' });
+    }
+    const productRef = adminDb.collection('products').doc(String(req.params.productId));
+    const productSnap = await productRef.get();
+    if (!productSnap.exists) return res.status(404).json({ error: 'Sản phẩm không tồn tại' });
+
+    const data = {
+      sku: String(variant.sku),
+      attributes: variant.attributes || {},
+      price: Number(variant.price) || 0,
+      originalPrice: Number(variant.originalPrice) || 0,
+      stock: Number(variant.stock) || 0,
+      images: Array.isArray(variant.images) ? variant.images : [],
+      status: variant.status === 'inactive' ? 'inactive' : 'active',
+      createdAt: new Date()
+    };
+    const ref = await productRef.collection('variants').add(data);
+    res.json({ id: ref.id, ...data });
+  } catch (error) {
+    console.error('Create variant error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/products/:productId/variants/:variantId', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+  try {
+    const { variant } = req.body || {};
+    if (!variant) return res.status(400).json({ error: 'variant payload missing' });
+    const update = {
+      ...(variant.sku !== undefined && { sku: String(variant.sku) }),
+      ...(variant.attributes !== undefined && { attributes: variant.attributes || {} }),
+      ...(variant.price !== undefined && { price: Number(variant.price) || 0 }),
+      ...(variant.originalPrice !== undefined && { originalPrice: Number(variant.originalPrice) || 0 }),
+      ...(variant.stock !== undefined && { stock: Number(variant.stock) || 0 }),
+      ...(variant.images !== undefined && { images: Array.isArray(variant.images) ? variant.images : [] }),
+      ...(variant.status !== undefined && { status: variant.status === 'inactive' ? 'inactive' : 'active' }),
+      updatedAt: new Date()
+    };
+    await adminDb
+      .collection('products').doc(String(req.params.productId))
+      .collection('variants').doc(String(req.params.variantId))
+      .update(update);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Update variant error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/products/:productId/variants/:variantId', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+  try {
+    await adminDb
+      .collection('products').doc(String(req.params.productId))
+      .collection('variants').doc(String(req.params.variantId))
+      .delete();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Delete variant error:', error);
     res.status(500).json({ error: error.message });
   }
 });

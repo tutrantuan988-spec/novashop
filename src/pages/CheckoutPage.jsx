@@ -105,6 +105,7 @@ function CheckoutPageInner() {
         },
         items: items.map((i) => ({
           id: i.id,
+          variantId: i.variantId || null,
           name: i.name,
           price: i.price,
           quantity: i.quantity,

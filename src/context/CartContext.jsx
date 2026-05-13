@@ -26,39 +26,79 @@ export function CartProvider({ children }) {
     }
   }, [items]);
 
-  const addToCart = useCallback((product, quantity = 1) => {
+  /**
+   * Build composite key cho cart line — distinguish cùng product nhưng khác variant
+   * @param {string} productId
+   * @param {string|null} variantId
+   */
+  const lineKey = (productId, variantId) => `${productId}::${variantId || ''}`;
+
+  /**
+   * Add item vào giỏ. Hỗ trợ variant.
+   * @param {object} product - { id, slug, name, price, image }
+   * @param {number} quantity
+   * @param {object|null} variant - { id, sku, attributes, price, images, stock }
+   */
+  const addToCart = useCallback((product, quantity = 1, variant = null) => {
+    const variantId = variant?.id || null;
+    const key = lineKey(product.id, variantId);
+    const finalPrice = variant?.price ?? product.price;
+    const finalImage = (variant?.images && variant.images[0]) || product.image;
+
     setItems((current) => {
-      const existing = current.find((item) => item.id === product.id);
+      const existing = current.find((item) => lineKey(item.id, item.variantId) === key);
       if (existing) {
         return current.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+          lineKey(item.id, item.variantId) === key
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
         );
       }
       return [
         ...current,
         {
           id: product.id,
+          variantId,
           slug: product.slug,
           name: product.name,
-          price: product.price,
-          image: product.image,
-          quantity
+          price: finalPrice,
+          image: finalImage,
+          quantity,
+          // Snapshot tại thời điểm add — dùng cho hiển thị nếu product/variant thay đổi sau này
+          snapshot: {
+            productName: product.name,
+            variantName: variant
+              ? Object.entries(variant.attributes || {})
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(', ')
+              : null,
+            sku: variant?.sku || null,
+            priceAtAdd: finalPrice,
+            imageAtAdd: finalImage,
+            addedAt: new Date().toISOString()
+          }
         }
       ];
     });
     setIsOpen(true);
   }, []);
 
-  const updateQuantity = useCallback((id, change) => {
+  const updateQuantity = useCallback((id, change, variantId = null) => {
+    const key = lineKey(id, variantId);
     setItems((current) =>
       current
-        .map((item) => (item.id === id ? { ...item, quantity: item.quantity + change } : item))
+        .map((item) =>
+          lineKey(item.id, item.variantId) === key
+            ? { ...item, quantity: item.quantity + change }
+            : item
+        )
         .filter((item) => item.quantity > 0)
     );
   }, []);
 
-  const removeItem = useCallback((id) => {
-    setItems((current) => current.filter((item) => item.id !== id));
+  const removeItem = useCallback((id, variantId = null) => {
+    const key = lineKey(id, variantId);
+    setItems((current) => current.filter((item) => lineKey(item.id, item.variantId) !== key));
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);
