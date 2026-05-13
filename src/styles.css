@@ -105,13 +105,15 @@ button {
 
 .logo {
   flex: 0 0 auto;
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: 42px auto;
   column-gap: 10px;
   row-gap: 0;
   align-items: center;
-  min-width: 158px;
+  min-width: 0;
   color: #1A2340;
+  white-space: nowrap;
 }
 
 .logo span {
@@ -128,10 +130,11 @@ button {
 
 .logo strong {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.28rem;
+  font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .logo small {
