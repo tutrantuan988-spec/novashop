@@ -34,6 +34,8 @@ const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const GuestOrderTrackingPage = lazy(() => import('./pages/GuestOrderTrackingPage'));
+const AddressesPage = lazy(() => import('./pages/account/AddressesPage'));
+const ReturnRequestPage = lazy(() => import('./pages/ReturnRequestPage'));
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 
@@ -68,6 +70,16 @@ export default function App() {
                       <Route path="/about" element={<AboutPage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/track-order" element={<GuestOrderTrackingPage />} />
+                      <Route path="/tai-khoan/dia-chi" element={(
+                        <ProtectedRoute>
+                          <AddressesPage />
+                        </ProtectedRoute>
+                      )} />
+                      <Route path="/tai-khoan/doi-tra/:orderId" element={(
+                        <ProtectedRoute>
+                          <ReturnRequestPage />
+                        </ProtectedRoute>
+                      )} />
                       <Route path="/thanh-toan/momo-return" element={<MomoReturnPage />} />
                       <Route path="/sign-in/*" element={<SignInPage />} />
                       <Route path="/sign-up/*" element={<SignUpPage />} />

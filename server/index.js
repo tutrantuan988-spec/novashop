@@ -36,6 +36,7 @@ const {
   sanitizeText,
   idempotencyMiddleware
 } = require('./middleware/security');
+const algoliaSync = require('./utils/algoliaSync');
 const { connectDatabase } = require('./models');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
@@ -736,11 +737,9 @@ app.post('/api/products', adminLimiter, requireAdmin, requireFirestore, validate
       return res.status(400).json({ error: 'Thiếu thông tin sản phẩm' });
     }
     const id = String(product.id || Date.now());
-    await adminDb.collection('products').doc(id).set({
-      ...product,
-      id,
-      createdAt: new Date()
-    });
+    const doc = { ...product, id, createdAt: new Date() };
+    await adminDb.collection('products').doc(id).set(doc);
+    algoliaSync.indexProduct(id, doc).catch(() => {});
     res.json({ id, ...product });
   } catch (error) {
     console.error('Create product error:', error);
@@ -751,9 +750,14 @@ app.post('/api/products', adminLimiter, requireAdmin, requireFirestore, validate
 app.patch('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ProductPatch), async (req, res) => {
   try {
     const { patch } = req.body;
-    await adminDb.collection('products').doc(String(req.params.id)).update({
+    const productId = String(req.params.id);
+    await adminDb.collection('products').doc(productId).update({
       ...patch,
       updatedAt: new Date()
+    });
+    // Sync Algolia với data mới
+    adminDb.collection('products').doc(productId).get().then((snap) => {
+      if (snap.exists) algoliaSync.indexProduct(productId, snap.data()).catch(() => {});
     });
     res.json({ ok: true });
   } catch (error) {
@@ -764,10 +768,47 @@ app.patch('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, val
 
 app.delete('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
   try {
-    await adminDb.collection('products').doc(String(req.params.id)).delete();
+    const productId = String(req.params.id);
+    await adminDb.collection('products').doc(productId).delete();
+    algoliaSync.removeProduct(productId).catch(() => {});
     res.json({ ok: true });
   } catch (error) {
     console.error('Delete product error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Algolia bulk reindex (admin)
+app.post('/api/admin/algolia/reindex', adminLimiter, requireAdmin, requireFirestore, async (_req, res) => {
+  try {
+    const snap = await adminDb.collection('products').get();
+    const products = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const result = await algoliaSync.bulkSync(products);
+    res.json({ total: products.length, ...result });
+  } catch (error) {
+    console.error('Algolia reindex error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Public search fallback (Firestore) - dùng nếu chưa config Algolia
+app.get('/api/search', publicReadLimiter, async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim().toLowerCase();
+    const limit = Math.min(50, Number(req.query.limit) || 20);
+    if (!adminDb) return res.json({ hits: [], total: 0 });
+    if (!q) return res.json({ hits: [], total: 0 });
+
+    const snap = await adminDb.collection('products').limit(200).get();
+    const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const filtered = all.filter((p) => {
+      const haystack = `${p.name || ''} ${p.brand || ''} ${p.description || ''} ${p.category || ''}`.toLowerCase();
+      return haystack.includes(q);
+    }).slice(0, limit);
+
+    res.json({ hits: filtered, total: filtered.length });
+  } catch (error) {
+    console.error('Search error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -1297,6 +1338,279 @@ app.delete('/api/products/:id/reviews/:reviewId', adminLimiter, requireAdmin, re
     res.json({ ok: true, reviewCount, avgRating });
   } catch (error) {
     console.error('Delete review error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// Address Management (P13)
+// =========================
+app.get('/api/addresses', async (req, res) => {
+  try {
+    if (!adminDb) return res.json([]);
+    const userId = String(req.query.userId || '');
+    if (!userId) return res.status(400).json({ error: 'Thiếu userId' });
+    const snap = await adminDb
+      .collection('addresses')
+      .where('userId', '==', userId)
+      .orderBy('isDefault', 'desc')
+      .limit(20)
+      .get();
+    res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  } catch (error) {
+    console.error('List addresses error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/addresses', checkoutLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const { address } = req.body || {};
+    if (!address?.userId || !address?.recipientName || !address?.phone) {
+      return res.status(400).json({ error: 'Thiếu userId, recipientName hoặc phone' });
+    }
+    const data = {
+      userId: String(address.userId),
+      label: address.label || 'Khác',
+      recipientName: address.recipientName,
+      phone: address.phone,
+      province: address.province || '',
+      district: address.district || '',
+      ward: address.ward || '',
+      street: address.street || '',
+      isDefault: !!address.isDefault,
+      createdAt: new Date()
+    };
+    // Nếu set default → unset all others
+    if (data.isDefault) {
+      const existing = await adminDb.collection('addresses').where('userId', '==', data.userId).get();
+      const batch = adminDb.batch();
+      existing.docs.forEach((d) => batch.update(d.ref, { isDefault: false }));
+      await batch.commit();
+    }
+    const ref = await adminDb.collection('addresses').add(data);
+    res.json({ id: ref.id, ...data });
+  } catch (error) {
+    console.error('Create address error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/addresses/:id', async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const { address } = req.body || {};
+    if (!address?.userId) return res.status(400).json({ error: 'Thiếu userId' });
+    const ref = adminDb.collection('addresses').doc(String(req.params.id));
+    const snap = await ref.get();
+    if (!snap.exists || snap.data().userId !== address.userId) {
+      return res.status(403).json({ error: 'Bạn không có quyền sửa địa chỉ này' });
+    }
+    await ref.update({
+      ...address,
+      updatedAt: new Date()
+    });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Update address error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/addresses/:id', async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const userId = String(req.query.userId || '');
+    if (!userId) return res.status(400).json({ error: 'Thiếu userId' });
+    const ref = adminDb.collection('addresses').doc(String(req.params.id));
+    const snap = await ref.get();
+    if (!snap.exists || snap.data().userId !== userId) {
+      return res.status(403).json({ error: 'Bạn không có quyền xóa địa chỉ này' });
+    }
+    await ref.delete();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Delete address error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/addresses/:id/default', async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const { userId } = req.body || {};
+    if (!userId) return res.status(400).json({ error: 'Thiếu userId' });
+    // Unset all default
+    const existing = await adminDb.collection('addresses').where('userId', '==', String(userId)).get();
+    const batch = adminDb.batch();
+    existing.docs.forEach((d) => batch.update(d.ref, { isDefault: d.id === req.params.id }));
+    await batch.commit();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Set default address error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// Returns & Refunds (P7)
+// =========================
+const { issueStripeRefund } = require('./utils/refundService');
+
+// User tạo return request
+app.post('/api/returns', checkoutLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const { returnRequest } = req.body || {};
+    if (!returnRequest?.orderId || !returnRequest?.userId) {
+      return res.status(400).json({ error: 'Thiếu orderId hoặc userId' });
+    }
+    if (!Array.isArray(returnRequest.items) || returnRequest.items.length === 0) {
+      return res.status(400).json({ error: 'Phải có ít nhất 1 sản phẩm trả' });
+    }
+    if (!['return', 'exchange'].includes(returnRequest.type)) {
+      return res.status(400).json({ error: 'type phải là return hoặc exchange' });
+    }
+
+    const orderSnap = await adminDb.collection('orders').doc(String(returnRequest.orderId)).get();
+    if (!orderSnap.exists) return res.status(404).json({ error: 'Đơn hàng không tồn tại' });
+    const order = orderSnap.data();
+
+    // Validate: đơn phải đã giao + trong 7 ngày
+    if (order.status !== 'delivered' && order.status !== 'completed') {
+      return res.status(400).json({ error: 'Chỉ đổi/trả được khi đơn đã giao thành công' });
+    }
+    const deliveredTs = order.deliveredAt?.toMillis?.() || order.deliveredAt?.getTime?.()
+      || order.paidAt?.toMillis?.() || order.paidAt?.getTime?.() || Date.now();
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() - deliveredTs > sevenDaysMs) {
+      return res.status(400).json({ error: 'Đã quá thời hạn đổi/trả 7 ngày' });
+    }
+
+    // Tính refund amount (best-effort dựa trên items)
+    let refundAmount = 0;
+    for (const it of returnRequest.items) {
+      const orderItem = (order.items || []).find((oi) => String(oi.id) === String(it.productId) && (oi.variantId || null) === (it.variantId || null));
+      if (orderItem) {
+        refundAmount += (Number(orderItem.price) || 0) * (Number(it.quantity) || 0);
+      }
+    }
+
+    const data = {
+      orderId: String(returnRequest.orderId),
+      userId: String(returnRequest.userId),
+      items: returnRequest.items.map((it) => ({
+        productId: String(it.productId),
+        variantId: it.variantId || null,
+        quantity: Number(it.quantity) || 1,
+        reason: sanitizeText(it.reason),
+        images: Array.isArray(it.images) ? it.images.slice(0, 5) : []
+      })),
+      type: returnRequest.type,
+      status: 'pending',
+      refundAmount: refundAmount > 0 ? refundAmount : null,
+      refundMethod: returnRequest.refundMethod === 'store_credit' ? 'store_credit' : 'original',
+      adminNote: '',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const ref = await adminDb.collection('return_requests').add(data);
+    res.json({ id: ref.id, ...data });
+  } catch (error) {
+    console.error('Create return request error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// List returns (admin: all, user: own)
+app.get('/api/returns', async (req, res) => {
+  try {
+    if (!adminDb) return res.json([]);
+    const adminEmail = req.header('x-admin-email');
+    const userId = req.query.userId;
+    let query = adminDb.collection('return_requests').orderBy('createdAt', 'desc');
+    if (userId && !isAdminEmail(adminEmail)) {
+      query = query.where('userId', '==', String(userId));
+    }
+    const snap = await query.limit(100).get();
+    res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  } catch (error) {
+    console.error('List returns error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin approve → auto refund + release inventory
+app.put('/api/returns/:id/approve', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+  try {
+    const { adminNote = '', refundAmount: customAmount } = req.body || {};
+    const retRef = adminDb.collection('return_requests').doc(String(req.params.id));
+    const retSnap = await retRef.get();
+    if (!retSnap.exists) return res.status(404).json({ error: 'Yêu cầu đổi/trả không tồn tại' });
+    const ret = retSnap.data();
+
+    if (ret.status !== 'pending') {
+      return res.status(400).json({ error: 'Yêu cầu đã được xử lý trước đó' });
+    }
+
+    const orderSnap = await adminDb.collection('orders').doc(ret.orderId).get();
+    if (!orderSnap.exists) return res.status(404).json({ error: 'Đơn hàng gốc không tồn tại' });
+    const order = orderSnap.data();
+
+    // Restock items
+    const releaseItems = ret.items.map((it) => ({
+      productId: it.productId,
+      variantId: it.variantId || null,
+      quantity: it.quantity
+    }));
+    await releaseInventory(adminDb, releaseItems, {
+      orderId: ret.orderId,
+      userId: req.adminEmail,
+      type: 'return',
+      note: `Return ${req.params.id} approved`
+    });
+
+    // Try Stripe refund nếu paymentIntent có sẵn
+    let refundResult = { ok: false, skipped: true };
+    const amount = Number(customAmount) > 0 ? Number(customAmount) : (ret.refundAmount || 0);
+    const stripeClient = getStripe();
+    if (order.paymentIntentId && stripeClient && amount > 0 && ret.refundMethod === 'original') {
+      refundResult = await issueStripeRefund(stripeClient, {
+        paymentIntentId: order.paymentIntentId,
+        amount,
+        reason: 'requested_by_customer',
+        metadata: { returnId: req.params.id, orderId: ret.orderId }
+      });
+    }
+
+    await retRef.update({
+      status: 'approved',
+      adminNote: sanitizeText(adminNote),
+      refundAmount: amount || ret.refundAmount,
+      refundResult,
+      updatedAt: new Date()
+    });
+
+    res.json({ ok: true, refundResult });
+  } catch (error) {
+    console.error('Approve return error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin reject
+app.put('/api/returns/:id/reject', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+  try {
+    const { adminNote = '' } = req.body || {};
+    await adminDb.collection('return_requests').doc(String(req.params.id)).update({
+      status: 'rejected',
+      adminNote: sanitizeText(adminNote),
+      updatedAt: new Date()
+    });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Reject return error:', error);
     res.status(500).json({ error: error.message });
   }
 });

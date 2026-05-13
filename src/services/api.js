@@ -100,6 +100,58 @@ export function deleteVariantApi(productId, variantId, adminEmail) {
   });
 }
 
+// ===== Returns & Refunds (P7) =====
+export function createReturnApi(returnRequest) {
+  return request('/api/returns', { method: 'POST', body: { returnRequest } });
+}
+
+export function listReturnsApi({ userId, adminEmail } = {}) {
+  const qs = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+  return request(`/api/returns${qs}`, { adminEmail });
+}
+
+export function approveReturnApi(id, { adminNote, refundAmount } = {}, adminEmail) {
+  return request(`/api/returns/${encodeURIComponent(id)}/approve`, {
+    method: 'PUT',
+    body: { adminNote, refundAmount },
+    adminEmail
+  });
+}
+
+export function rejectReturnApi(id, adminNote, adminEmail) {
+  return request(`/api/returns/${encodeURIComponent(id)}/reject`, {
+    method: 'PUT',
+    body: { adminNote },
+    adminEmail
+  });
+}
+
+// ===== Addresses (P13) =====
+export function listAddressesApi(userId) {
+  return request(`/api/addresses?userId=${encodeURIComponent(userId)}`);
+}
+
+export function createAddressApi(address) {
+  return request('/api/addresses', { method: 'POST', body: { address } });
+}
+
+export function updateAddressApi(id, address) {
+  return request(`/api/addresses/${encodeURIComponent(id)}`, { method: 'PUT', body: { address } });
+}
+
+export function deleteAddressApi(id, userId) {
+  return request(`/api/addresses/${encodeURIComponent(id)}?userId=${encodeURIComponent(userId)}`, {
+    method: 'DELETE'
+  });
+}
+
+export function setDefaultAddressApi(id, userId) {
+  return request(`/api/addresses/${encodeURIComponent(id)}/default`, {
+    method: 'PUT',
+    body: { userId }
+  });
+}
+
 export function createCheckoutSession({ items, orderId, customerEmail }) {
   return request('/api/create-checkout-session', {
     method: 'POST',

@@ -2405,6 +2405,137 @@ textarea:focus-visible {
   color: var(--accent, #f97316);
 }
 
+/* SearchBar (P8) */
+.searchbar {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+}
+
+.searchbar-form {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.searchbar-form input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.searchbar-icon {
+  color: var(--muted, #6b7280);
+  flex-shrink: 0;
+}
+
+.searchbar-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+}
+
+.searchbar-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+  max-height: 420px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.searchbar-status {
+  padding: 14px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+.searchbar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: var(--text);
+  border-bottom: 1px solid var(--border, #f3f4f6);
+}
+
+.searchbar-item:last-child {
+  border-bottom: none;
+}
+
+.searchbar-item:hover {
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.searchbar-item img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.searchbar-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchbar-item-body strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchbar-item-body small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.searchbar-item-price {
+  font-weight: 800;
+  color: var(--accent, #f97316);
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.searchbar-more {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--accent, #f97316);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.searchbar-item mark {
+  background: rgba(249, 115, 22, 0.2);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
 .summary-totals {
   display: grid;
   gap: 8px;

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ShoppingCart, Star, Heart, PackageCheck, X, Loader } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -6,37 +6,80 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { formatVND } from '../utils/format';
 import { ALL_CATEGORY_PRODUCTS } from '../data/categoryProducts';
+import { searchProducts, isAlgoliaEnabled } from '../lib/searchClient';
 import SITE from '../config/site-config';
 
 function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
-  const { addItem } = useCart();
-  const { toggleItem, isWishlisted } = useWishlist();
+  const brandFilter = searchParams.get('brand') || '';
+  const minPrice = Number(searchParams.get('minPrice')) || 0;
+  const maxPrice = Number(searchParams.get('maxPrice')) || 0;
+  const sortMode = searchParams.get('sort') || 'relevance';
+
+  const { addToCart } = useCart();
+  const { toggle } = useWishlist();
   const toast = useToast();
 
   const [input, setInput] = useState(query);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [source, setSource] = useState('firestore');
+
+  // Build facets từ kết quả
+  const availableBrands = useMemo(() => {
+    const set = new Set();
+    results.forEach((p) => p.brand && set.add(p.brand));
+    return Array.from(set).sort();
+  }, [results]);
 
   useEffect(() => {
     document.title = query ? `Kết quả tìm kiếm "${query}" - ${SITE.name}` : `Tìm kiếm - ${SITE.name}`;
     if (!query) { setResults([]); return; }
+    let cancelled = false;
     setLoading(true);
-    const timer = setTimeout(() => {
-      const q = query.toLowerCase();
-      const filtered = ALL_CATEGORY_PRODUCTS.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q)
-      );
-      setResults(filtered);
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [query]);
+    (async () => {
+      try {
+        const result = await searchProducts(query, {
+          hitsPerPage: 50,
+          filters: {
+            brand: brandFilter || undefined,
+            minPrice: minPrice || undefined,
+            maxPrice: maxPrice || undefined
+          }
+        });
+        if (cancelled) return;
+        let hits = result.hits;
+        if (hits.length === 0) {
+          // Fallback localdata khi backend không có kết quả
+          const q = query.toLowerCase();
+          hits = ALL_CATEGORY_PRODUCTS.filter(
+            (p) =>
+              p.name.toLowerCase().includes(q) ||
+              (p.description || '').toLowerCase().includes(q) ||
+              (p.brand || '').toLowerCase().includes(q) ||
+              (p.category || '').toLowerCase().includes(q)
+          );
+        }
+        // Sort
+        if (sortMode === 'price-asc') hits = [...hits].sort((a, b) => (a.price || 0) - (b.price || 0));
+        else if (sortMode === 'price-desc') hits = [...hits].sort((a, b) => (b.price || 0) - (a.price || 0));
+        else if (sortMode === 'newest') hits = [...hits].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        else if (sortMode === 'best-selling') hits = [...hits].sort((a, b) => (b.sold || 0) - (a.sold || 0));
+        setResults(hits);
+        setSource(result.source);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [query, brandFilter, minPrice, maxPrice, sortMode]);
+
+  const updateParam = (key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value); else next.delete(key);
+    setSearchParams(next);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -45,7 +88,7 @@ function SearchPage() {
   };
 
   const handleAdd = (product) => {
-    addItem(product);
+    addToCart(product, 1);
     toast.success(`Đã thêm ${product.name}`);
   };
 
