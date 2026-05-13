@@ -152,6 +152,32 @@ export function setDefaultAddressApi(id, userId) {
   });
 }
 
+// ===== Notifications (P12) =====
+export function listNotificationsApi(userId) {
+  return request(`/api/notifications?userId=${encodeURIComponent(userId)}`);
+}
+
+export function markNotificationReadApi(id) {
+  return request(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'PUT' });
+}
+
+export function markAllNotificationsReadApi(userId) {
+  return request('/api/notifications/mark-all-read', { method: 'POST', body: { userId } });
+}
+
+// ===== GHN Shipping (P14) =====
+export function calculateShippingFeeApi(payload) {
+  return request('/api/shipping/calculate', { method: 'POST', body: payload });
+}
+
+export function createShipmentApi(order, adminEmail) {
+  return request('/api/shipping/create', { method: 'POST', body: { order }, adminEmail });
+}
+
+export function trackShipmentApi(orderCode) {
+  return request(`/api/shipping/track/${encodeURIComponent(orderCode)}`);
+}
+
 export function createCheckoutSession({ items, orderId, customerEmail }) {
   return request('/api/create-checkout-session', {
     method: 'POST',

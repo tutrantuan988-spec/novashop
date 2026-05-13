@@ -6,6 +6,7 @@ import { useI18n } from '../context/I18nContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import NotificationBell from './ui/NotificationBell';
 import SITE from '../config/site-config';
 
 function Header() {
@@ -192,6 +193,8 @@ function Header() {
         <button type="button" className="icon-button lang-toggle" onClick={toggleLang} aria-label="Chuyển ngôn ngữ">
           {lang === 'vi' ? 'EN' : 'VI'}
         </button>
+
+        <NotificationBell />
 
         <button type="button" className="icon-button theme-toggle" onClick={toggleTheme} aria-label={isDark ? 'Chuyển sáng' : 'Chuyển tối'}>
           {isDark ? <Sun size={18} /> : <Moon size={18} />}

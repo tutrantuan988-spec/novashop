@@ -1114,6 +1114,32 @@ app.patch('/api/orders/:id/status', adminLimiter, requireAdmin, requireFirestore
       });
     }
 
+    // Notification (P12)
+    try {
+      const { createNotification: notify } = require('./utils/notificationService');
+      const userId = order.customer?.userId || order.userId || order.customer?.email;
+      if (userId) {
+        const titleMap = {
+          confirmed: 'Đơn hàng đã được xác nhận',
+          packing: 'Đơn hàng đang được đóng gói',
+          shipped: 'Đơn hàng đã giao cho vận chuyển',
+          delivering: 'Đơn hàng đang được giao tới bạn',
+          delivered: 'Đơn hàng đã giao thành công',
+          cancelled: 'Đơn hàng đã bị hủy',
+          refunded: 'Đơn hàng đã được hoàn tiền'
+        };
+        await notify(adminDb, userId, 'order_status', {
+          title: titleMap[status] || `Trạng thái đơn ${orderId}: ${status}`,
+          body: `Đơn hàng <strong>#${orderId}</strong> hiện đang ở trạng thái: <strong>${status}</strong>.`,
+          targetUrl: `/tai-khoan/don-hang/${orderId}`,
+          email: order.customer?.email,
+          ctaLabel: 'Xem đơn hàng'
+        });
+      }
+    } catch (e) {
+      console.warn('[Notification] order status notify failed:', e.message);
+    }
+
     res.json({ ok: true, inventoryReleased: shouldRelease });
   } catch (error) {
     console.error('Update order status error:', error);
@@ -1883,6 +1909,109 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Lỗi máy chủ nội bộ', message: IS_PRODUCTION ? undefined : err.message });
 });
 
+// =========================
+// GHN Shipping (P14)
+// =========================
+const ghn = require('./utils/ghnService');
+
+app.post('/api/shipping/calculate', publicReadLimiter, async (req, res) => {
+  try {
+    const result = await ghn.calculateShippingFee(req.body || {});
+    res.json(result);
+  } catch (error) {
+    console.error('GHN calc error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/shipping/create', adminLimiter, requireAdmin, async (req, res) => {
+  try {
+    const result = await ghn.createShipment(req.body?.order || {});
+    if (result.ok && req.body?.order?.id && adminDb) {
+      // Lưu tracking info vào order
+      await adminDb.collection('orders').doc(String(req.body.order.id)).update({
+        shippingInfo: {
+          carrier: 'GHN',
+          trackingCode: result.data?.order_code || '',
+          carrierOrderCode: result.data?.order_code || '',
+          estimatedDelivery: result.data?.expected_delivery_time || null,
+          updatedAt: new Date()
+        }
+      });
+    }
+    res.json(result);
+  } catch (error) {
+    console.error('GHN create error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/shipping/track/:orderCode', publicReadLimiter, async (req, res) => {
+  try {
+    const result = await ghn.getTrackingStatus(req.params.orderCode);
+    res.json(result);
+  } catch (error) {
+    console.error('GHN track error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// Notifications (P12)
+// =========================
+const { createNotification } = require('./utils/notificationService');
+
+app.get('/api/notifications', async (req, res) => {
+  try {
+    if (!adminDb) return res.json([]);
+    const userId = String(req.query.userId || '');
+    if (!userId) return res.status(400).json({ error: 'Thiếu userId' });
+    const snap = await adminDb
+      .collection('notifications')
+      .where('userId', '==', userId)
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get();
+    res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  } catch (error) {
+    console.error('List notifications error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/notifications/:id/read', async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    await adminDb.collection('notifications').doc(String(req.params.id)).update({
+      isRead: true,
+      readAt: new Date()
+    });
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/notifications/mark-all-read', async (req, res) => {
+  try {
+    if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
+    const userId = String(req.body?.userId || '');
+    if (!userId) return res.status(400).json({ error: 'Thiếu userId' });
+    const snap = await adminDb
+      .collection('notifications')
+      .where('userId', '==', userId)
+      .where('isRead', '==', false)
+      .limit(200)
+      .get();
+    const batch = adminDb.batch();
+    snap.docs.forEach((d) => batch.update(d.ref, { isRead: true, readAt: new Date() }));
+    await batch.commit();
+    res.json({ ok: true, count: snap.size });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // SPA fallback — mọi route không phải API trả về index.html
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) return next();
@@ -1899,6 +2028,14 @@ async function startServer() {
   app.listen(PORT, () => {
     console.log(`TRỌNG ĐỊNH STORE API server running on http://localhost:${PORT}`);
   });
+
+  // Start abandoned cart job (P6)
+  try {
+    const { startAbandonedCartJob } = require('./jobs/abandonedCartJob');
+    startAbandonedCartJob(adminDb);
+  } catch (err) {
+    console.warn('[Jobs] Could not start abandoned cart job:', err.message);
+  }
 }
 
 startServer();
