@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\.fd373b57748aee8342f230208ffe80defb8cd15b-audit.json",
+    "files": [
+        {
+            "date": 1778760982763,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-14.log",
+            "hash": "6219e2ed2068f58f98320b49049668290d15226ee0de3824e39cf80d58967379"
+        },
+        {
+            "date": 1779010868224,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-17.log",
+            "hash": "c1ec34467369b40c39a8c2f8dd87565c8b3fcd00dde9143fe16ff04ce2cabee5"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -1,8 +1,8 @@
 [build]
-cmd = "cd server && npm install"
+cmd = "npm install"
 
 [deploy]
-startCommand = "cd server && npm start"
+startCommand = "node server/index.js"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
@@ -12,4 +12,4 @@ restartPolicyMaxRetries = 10
 numReplicas = 1
 
 [environments.production.deploy]
-startCommand = "cd server && npm start"
+startCommand = "node server/index.js"

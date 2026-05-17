@@ -1,0 +1,37 @@
+#!/bin/sh
+# ============================================
+# Pre-commit Hook — TRỌNG ĐỊNH STORE
+# Pattern from everything-claude-code
+# Runs: env check, basic lint validation
+# ============================================
+
+echo "🔍 [pre-commit] Kiểm tra trước khi commit..."
+
+# 1. Kiểm tra file .env không bị commit nhầm
+STAGED_ENV=$(git diff --cached --name-only | grep -E '^\.env$|\.env\.local$|firebase-admin\.json' || true)
+if [ -n "$STAGED_ENV" ]; then
+  echo "❌ [pre-commit] CẢNH BÁO: File chứa secrets đang được staged!"
+  echo "   $STAGED_ENV"
+  echo "   Hãy bỏ stage các file này trước khi commit."
+  echo "   git reset HEAD $STAGED_ENV"
+  exit 1
+fi
+
+# 2. Kiểm tra console.log trong code mới
+STAGED_JS=$(git diff --cached --name-only | grep -E '\.(js|jsx|ts|tsx)$' || true)
+if [ -n "$STAGED_JS" ]; then
+  CONSOLE_LOGS=$(git diff --cached "$STAGED_JS" | grep -E '^\+\s*console\.(log|debug)')
+  if [ -n "$CONSOLE_LOGS" ]; then
+    echo "⚠️  [pre-commit] Phát hiện console.log trong code mới:"
+    echo "$CONSOLE_LOGS"
+    echo "   Không block commit, nhưng hãy xoá nếu không cần thiết."
+  fi
+fi
+
+# 3. Kiểm tra nếu không có file .env.local
+if [ ! -f ".env.local" ]; then
+  echo "⚠️  [pre-commit] Thiếu file .env.local — copy từ .env.local.example"
+fi
+
+echo "✅ [pre-commit] OK — Tiếp tục commit."
+exit 0

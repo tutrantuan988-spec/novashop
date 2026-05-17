@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TrendingUp, ShoppingBag, DollarSign, Activity, RefreshCw } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -105,7 +105,7 @@ export default function AnalyticsCharts({ adminEmail }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     if (!adminEmail) return;
     setLoading(true);
     setError(null);
@@ -113,12 +113,11 @@ export default function AnalyticsCharts({ adminEmail }) {
       .then(setData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  };
+  }, [adminEmail, days]);
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adminEmail, days]);
+  }, [refresh]);
 
   const kpiCards = useMemo(() => {
     if (!data?.kpis) return [];

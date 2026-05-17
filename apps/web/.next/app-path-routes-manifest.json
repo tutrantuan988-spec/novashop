@@ -1,0 +1,14 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/health/route": "/api/health",
+  "/page": "/",
+  "/dashboard/analytics/page": "/dashboard/analytics",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/orders/page": "/dashboard/orders",
+  "/dashboard/products/page": "/dashboard/products",
+  "/dashboard/customers/page": "/dashboard/customers",
+  "/dashboard/billing/page": "/dashboard/billing",
+  "/dashboard/architecture/page": "/dashboard/architecture",
+  "/dashboard/webhooks/page": "/dashboard/webhooks",
+  "/dashboard/settings/page": "/dashboard/settings"
+}

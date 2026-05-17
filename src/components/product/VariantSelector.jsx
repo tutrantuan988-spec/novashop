@@ -81,7 +81,7 @@ function VariantSelector({ productId, basePrice = 0, baseStock = 0, baseImages =
       next.set('variant', matchedVariant.id);
       setSearchParams(next, { replace: true });
     }
-  }, [matchedVariant]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [matchedVariant, onChange, searchParams, setSearchParams]);
 
   const isCombinationAvailable = useCallback((attrKey, value) => {
     // Một value của attribute là khả dụng nếu tồn tại variant matching mọi attr đã chọn (trừ attrKey) + value mới + stock > 0

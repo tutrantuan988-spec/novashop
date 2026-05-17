@@ -1,160 +1,323 @@
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
-const { initializeApp, cert } = require('firebase-admin/app');
+const { cert, getApps, initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+const algoliaSync = require('./utils/algoliaSync');
 
-const COLORS = ['#1f2937', '#111827', '#0f172a', '#374151', '#1e3a5f', '#2d5a27', '#5b3a29', '#7c2d12'];
-const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
-
-const sampleProducts = [
-  { slug: 'ao-thun-premium', name: 'Áo Thun Premium Cotton', category: 'Thời trang', price: 450000, oldPrice: 600000, badge: 'Mới', description: 'Áo thun cao cấp 100% cotton, form regular fit, thoáng mát và bền màu.', stock: 50, colors: ['#1f2937', '#7c2d12'], sizes: ['S', 'M', 'L', 'XL'], image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'tai-nghe-wireless', name: 'Tai Nghe Wireless Pro', category: 'Công nghệ', price: 1200000, oldPrice: 1500000, badge: 'Bán chạy', description: 'Tai nghe không dây chống ồn chủ động, pin 30 giờ, âm thanh Hi-Res.', stock: 30, colors: ['#111827', '#f3f4f6'], sizes: [], image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'balo-du-lich', name: 'Balo Du Lịch Chống Nước', category: 'Du lịch', price: 850000, oldPrice: 1100000, badge: 'Mới', description: 'Balo 35L chống nước, nhiều ngăn, quai đeo êm ái, phù hợp đi phượt.', stock: 25, colors: ['#1e3a5f', '#2d5a27'], sizes: [], image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'giay-the-thao', name: 'Giày Thể Thao Ultra Light', category: 'Thể thao', price: 1350000, oldPrice: 1800000, badge: 'Hot', description: 'Giày chạy bộ siêu nhẹ, đế Boost, thoáng khí, hỗ trợ cổ chân.', stock: 40, colors: ['#f3f4f6', '#111827', '#7c2d12'], sizes: ['39', '40', '41', '42', '43'], image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'dong-ho-smart', name: 'Đồng Hồ Smart Watch V2', category: 'Công nghệ', price: 2500000, oldPrice: 3200000, badge: 'Mới', description: 'Smartwatch theo dõi sức khỏe, GPS, chống nước 5ATM, pin 7 ngày.', stock: 20, colors: ['#111827', '#1e3a5f'], sizes: [], image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'tui-xach-da', name: 'Túi Xách Da Cao Cấp', category: 'Phụ kiện', price: 1800000, oldPrice: 2400000, badge: 'Limited', description: 'Túi xách da bò thật, thiết kế tối giản, đựng laptop 14 inch.', stock: 15, colors: ['#5b3a29', '#1f2937'], sizes: [], image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'may-xay-sinh-to', name: 'Máy Xay Sinh Tố Công Suất Cao', category: 'Gia dụng', price: 950000, oldPrice: 1200000, badge: 'Bán chạy', description: 'Máy xay 1000W, 6 lưỡi dao, cối thủy tinh 1.5L, 3 chế độ xay.', stock: 35, colors: ['#f3f4f6', '#1f2937'], sizes: [], image: 'https://images.unsplash.com/photo-1570222094114-28a9d88a7b7e?auto=format&fit=crop&w=900&q=80' },
-  { slug: 'ao-khoac-gio', name: 'Áo Khoác Gió Chống Nước', category: 'Thời trang', price: 750000, oldPrice: 950000, badge: 'Mới', description: 'Áo khoác gió siêu nhẹ, chống nước, gấp gọn, phù hợp đi mưa.', stock: 45, colors: ['#1e3a5f', '#2d5a27', '#1f2937'], sizes: ['M', 'L', 'XL', 'XXL'], image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=900&q=80' }
+const products = [
+  {
+    id: 'royal-canin-puppy-medium',
+    slug: 'royal-canin-puppy-medium',
+    name: 'Royal Canin Puppy Medium - Thuc an cho cho con co vua',
+    category: 'Thuc an cho cho',
+    price: 185000,
+    originalPrice: 210000,
+    stock: 45,
+    badge: 'Ban chay',
+    image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc101?auto=format&fit=crop&w=900&q=80',
+    description: 'Thuc an hat cao cap danh cho cho con tu 2-12 thang tuoi. Cong thuc dinh duong can bang giup phat trien he mien dich va xuong khop.',
+    rating: 4.8,
+    reviewCount: 124,
+    brand: 'Royal Canin',
+    weight: '1kg',
+    featured: true,
+    active: true
+  },
+  {
+    id: 'pedigree-vi-ga-rau',
+    slug: 'pedigree-vi-ga-rau',
+    name: 'Pedigree Vi Ga & Rau - Thuc an cho cho truong thanh',
+    category: 'Thuc an cho cho',
+    price: 95000,
+    originalPrice: 110000,
+    stock: 78,
+    badge: 'Sale',
+    image: 'https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=900&q=80',
+    description: 'Thuc an hat Pedigree giau protein tu ga va rau cu, ho tro tieu hoa tot va long bong muot.',
+    rating: 4.5,
+    reviewCount: 89,
+    brand: 'Pedigree',
+    weight: '1.5kg',
+    featured: true,
+    active: true
+  },
+  {
+    id: 'whiskas-adult-vi-ca-thu',
+    slug: 'whiskas-adult-vi-ca-thu',
+    name: 'Whiskas Adult Vi Ca Thu - Thuc an cho meo truong thanh',
+    category: 'Thuc an cho meo',
+    price: 72000,
+    originalPrice: 85000,
+    stock: 62,
+    badge: 'Ban chay',
+    image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=900&q=80',
+    description: 'Thuc an hat Whiskas vi ca thu, bo sung taurine va vitamin E giup meo khoe mat va long mem muot.',
+    rating: 4.6,
+    reviewCount: 156,
+    brand: 'Whiskas',
+    weight: '1.1kg',
+    featured: true,
+    active: true
+  },
+  {
+    id: 'me-o-adult-ca-ngu',
+    slug: 'me-o-adult-ca-ngu',
+    name: 'Me-O Adult Ca Ngu - Thuc an cho meo vi ca ngu',
+    category: 'Thuc an cho meo',
+    price: 58000,
+    originalPrice: 68000,
+    stock: 55,
+    image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=80',
+    description: 'Thuc an hat Me-O nhap khau Thai Lan, giau omega-3 giup giam rung long va tang cuong mien dich.',
+    rating: 4.3,
+    reviewCount: 72,
+    brand: 'Me-O',
+    weight: '1.3kg',
+    featured: false,
+    active: true
+  },
+  {
+    id: 'orijen-original-cho',
+    slug: 'orijen-original-cho',
+    name: 'Orijen Original - Thuc an hat cho cho vi ga & ca hoi',
+    category: 'Thuc an cho cho',
+    price: 450000,
+    originalPrice: 520000,
+    stock: 18,
+    badge: 'Moi',
+    image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
+    description: 'Thuc an sieu cao cap voi nhieu protein dong vat, phu hop cho cho ken an va can dinh duong cao.',
+    rating: 4.9,
+    reviewCount: 42,
+    brand: 'Orijen',
+    weight: '2kg',
+    featured: true,
+    active: true
+  },
+  {
+    id: 'vong-co-da-cao-cap',
+    slug: 'vong-co-da-cao-cap',
+    name: 'Vong co da cao cap cho cho & meo - Size M',
+    category: 'Phu kien thu cung',
+    price: 120000,
+    originalPrice: 150000,
+    stock: 30,
+    badge: 'Sale',
+    image: 'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?auto=format&fit=crop&w=900&q=80',
+    description: 'Vong co da that cao cap, khoa kim loai chac chan, co dem mem bao ve co thu cung.',
+    rating: 4.3,
+    reviewCount: 41,
+    brand: 'PetCare',
+    weight: '150g',
+    featured: false,
+    active: true
+  },
+  {
+    id: 'bat-an-inox-2-ngan',
+    slug: 'bat-an-inox-2-ngan',
+    name: 'Bat an inox chong truot 2 ngan cho cho meo',
+    category: 'Phu kien thu cung',
+    price: 85000,
+    originalPrice: 95000,
+    stock: 50,
+    image: 'https://images.unsplash.com/photo-1585846416120-3a7354ed7d39?auto=format&fit=crop&w=900&q=80',
+    description: 'Bat inox 304 cao cap 2 ngan, de cao su chong truot, de ve sinh va an toan cho thu cung.',
+    rating: 4.5,
+    reviewCount: 33,
+    brand: 'PetCare',
+    weight: '400g',
+    featured: false,
+    active: true
+  },
+  {
+    id: 'nha-cay-meo-3-tang',
+    slug: 'nha-cay-meo-3-tang',
+    name: 'Nha cay meo 3 tang co cao mong & dem ngu',
+    category: 'Do choi',
+    price: 850000,
+    originalPrice: 980000,
+    stock: 8,
+    badge: 'Ban chay',
+    image: 'https://images.unsplash.com/photo-1545249390-6bdfa2aeb079?auto=format&fit=crop&w=900&q=80',
+    description: 'Nha cay meo 3 tang voi cot cao mong, dem ngu mem va khung go chac chan.',
+    rating: 4.8,
+    reviewCount: 47,
+    brand: 'CatTree',
+    weight: '8kg',
+    featured: true,
+    active: true
+  },
+  {
+    id: 'xit-khu-mui-bio',
+    slug: 'xit-khu-mui-bio',
+    name: 'Xit khu mui & diet khuan Bio - Danh cho cho meo',
+    category: 'Ve sinh & Grooming',
+    price: 75000,
+    originalPrice: 88000,
+    stock: 65,
+    image: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=80',
+    description: 'Xit khu mui sinh hoc an toan cho thu cung, khong mui hoi chuong va long.',
+    rating: 4.4,
+    reviewCount: 86,
+    brand: 'BioPet',
+    weight: '500ml',
+    featured: false,
+    active: true
+  },
+  {
+    id: 'snack-meo-nekko-creamy',
+    slug: 'snack-meo-nekko-creamy',
+    name: 'Snack meo vi ca ngu Nekko Creamy - Hop 4 goi',
+    category: 'Snack & Banh thuong',
+    price: 45000,
+    originalPrice: 52000,
+    stock: 100,
+    badge: 'Ban chay',
+    image: 'https://images.unsplash.com/photo-1519052537078-e6302a4968ef?auto=format&fit=crop&w=900&q=80',
+    description: 'Snack kem meo Nekko nhap khau Thai Lan, vi ca ngu, phu hop meo moi lua tuoi.',
+    rating: 4.5,
+    reviewCount: 138,
+    brand: 'Nekko',
+    weight: '4x15g',
+    featured: true,
+    active: true
+  }
 ];
 
-const sampleCoupons = [
-  { code: 'NOVASHOP', type: 'percent', value: 10, minSubtotal: 0, maxDiscount: 100000, usageLimit: 100, active: true },
-  { code: 'FREESHIP', type: 'shipping', value: 0, minSubtotal: 500000, usageLimit: 50, active: true },
-  { code: 'SALE50K', type: 'fixed', value: 50000, minSubtotal: 300000, usageLimit: 200, active: true },
-  { code: 'VIP20', type: 'percent', value: 20, minSubtotal: 1000000, maxDiscount: 300000, usageLimit: 20, active: true },
-  { code: 'WELCOME', type: 'fixed', value: 100000, minSubtotal: 0, usageLimit: 1, active: true }
+const coupons = [
+  { code: 'WELCOME10', type: 'percent', value: 10, minSubtotal: 0, maxDiscount: 50000, usageLimit: 200, active: true },
+  { code: 'FREESHIP', type: 'shipping', value: 0, minSubtotal: 300000, maxDiscount: 0, usageLimit: 200, active: true },
+  { code: 'PET50K', type: 'fixed', value: 50000, minSubtotal: 500000, maxDiscount: 0, usageLimit: 100, active: true }
 ];
 
-function getRandomItems(products, count) {
-  const shuffled = [...products].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count).map((p) => ({
-    id: String(p.id),
-    name: p.name,
-    price: p.price,
-    image: p.image,
-    quantity: Math.floor(Math.random() * 3) + 1
-  }));
+const reviews = [
+  {
+    productId: 'royal-canin-puppy-medium',
+    userName: 'Nguyen Van Hung',
+    userEmail: 'hung@example.com',
+    rating: 5,
+    title: 'Cho rat thich',
+    content: 'San pham chinh hang, dong goi can than, cho nha minh an rat hop.',
+    isVerified: true,
+    isActive: true
+  },
+  {
+    productId: 'whiskas-adult-vi-ca-thu',
+    userName: 'Le Minh Anh',
+    userEmail: 'minhanh@example.com',
+    rating: 5,
+    title: 'Meo an het nhanh',
+    content: 'Mui ca thom nhe, hat vua mieng va giao hang nhanh.',
+    isVerified: true,
+    isActive: true
+  }
+];
+
+function initFirebase() {
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  const serviceAccountFile = process.env.FIREBASE_SERVICE_ACCOUNT_FILE || process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+  if (!projectId) {
+    throw new Error('Thieu FIREBASE_PROJECT_ID hoac VITE_FIREBASE_PROJECT_ID trong .env.local');
+  }
+
+  if (getApps().length) return;
+
+  if (serviceAccountFile && serviceAccountFile !== 'your_key_here') {
+    const serviceAccountPath = path.isAbsolute(serviceAccountFile)
+      ? serviceAccountFile
+      : path.resolve(__dirname, '..', serviceAccountFile);
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    initializeApp({ credential: cert(serviceAccount), projectId: projectId || serviceAccount.project_id });
+    return;
+  }
+
+  if (serviceAccountJson && serviceAccountJson !== 'your_key_here') {
+    initializeApp({ credential: cert(JSON.parse(serviceAccountJson)), projectId });
+    return;
+  }
+
+  initializeApp({ projectId });
 }
 
-function createSampleOrder(products, index) {
-  const items = getRandomItems(products, Math.floor(Math.random() * 3) + 1);
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping = subtotal > 500000 ? 0 : 30000;
-  const total = subtotal + shipping;
-  const statuses = ['pending', 'paid', 'processing', 'shipped', 'delivered'];
-  const methods = ['cod', 'stripe', 'momo', 'vnpay'];
-  const status = statuses[Math.floor(Math.random() * statuses.length)];
-  const createdAt = new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000);
+function now() {
+  return new Date();
+}
 
-  return {
-    customer: {
-      name: `Khách hàng ${index + 1}`,
-      phone: `0909${String(Math.floor(Math.random() * 1000000)).padStart(6, '0')}`,
-      email: `customer${index + 1}@example.com`,
-      address: `${Math.floor(Math.random() * 200) + 1} Lê Lợi, Q.${Math.floor(Math.random() * 12) + 1}, TP.HCM`
-    },
-    items,
-    paymentMethod: methods[Math.floor(Math.random() * methods.length)],
-    shipping,
-    subtotal,
-    discount: 0,
-    total,
-    status,
-    paymentStatus: status === 'pending' ? 'pending' : 'paid',
-    createdAt
-  };
+async function upsertProducts(db) {
+  const batch = db.batch();
+  const createdAt = now();
+
+  products.forEach((product) => {
+    const ref = db.collection('products').doc(product.id);
+    const originalPrice = Number(product.originalPrice ?? product.oldPrice ?? 0) || 0;
+    batch.set(ref, {
+      ...product,
+      originalPrice,
+      oldPrice: originalPrice,
+      gallery: product.gallery || [product.image],
+      status: product.stock > 0 ? 'active' : 'out_of_stock',
+      createdAt,
+      updatedAt: createdAt
+    }, { merge: true });
+  });
+
+  await batch.commit();
+  const syncResult = await algoliaSync.bulkSync(products);
+  console.log(`[Seed] Products upserted: ${products.length}`);
+  if (syncResult?.ok) console.log(`[Seed] Algolia synced: ${syncResult.count}`);
+  if (syncResult?.skipped) console.log('[Seed] Algolia skipped: not configured');
+}
+
+async function upsertCoupons(db) {
+  const batch = db.batch();
+  const createdAt = now();
+
+  coupons.forEach((coupon) => {
+    batch.set(db.collection('coupons').doc(coupon.code), {
+      ...coupon,
+      usageCount: 0,
+      expiresAt: null,
+      createdAt,
+      updatedAt: createdAt
+    }, { merge: true });
+  });
+
+  await batch.commit();
+  console.log(`[Seed] Coupons upserted: ${coupons.length}`);
+}
+
+async function seedReviews(db) {
+  for (const review of reviews) {
+    const duplicate = await db.collection('reviews')
+      .where('productId', '==', review.productId)
+      .where('userEmail', '==', review.userEmail)
+      .limit(1)
+      .get();
+
+    if (!duplicate.empty) continue;
+    await db.collection('reviews').add({
+      ...review,
+      createdAt: now(),
+      updatedAt: now()
+    });
+  }
+  console.log(`[Seed] Reviews checked: ${reviews.length}`);
 }
 
 async function seed() {
-  // Init Firebase Admin
-  const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
-  if (!projectId) {
-    console.error('[Seed] VITE_FIREBASE_PROJECT_ID hoặc FIREBASE_PROJECT_ID chưa được cấu hình');
-    process.exit(1);
-  }
-
-  try {
-    initializeApp({ projectId });
-  } catch (err) {
-    if (err.message?.includes('already exists')) {
-      console.log('[Seed] Firebase app already initialized, using existing');
-    } else {
-      throw err;
-    }
-  }
-
+  initFirebase();
   const db = getFirestore();
-  console.log('[Seed] Connected to Firestore project:', projectId);
+  console.log('[Seed] Firestore project:', process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID);
 
-  // Seed Products
-  const productsRef = db.collection('products');
-  const existingProducts = await productsRef.limit(1).get();
-  if (!existingProducts.empty) {
-    console.log('[Seed] Products already exist, skipping product seed');
-  } else {
-    console.log('[Seed] Seeding', sampleProducts.length, 'products...');
-    const batch = db.batch();
-    for (const p of sampleProducts) {
-      const id = String(Date.now() + Math.floor(Math.random() * 10000));
-      const ref = productsRef.doc(id);
-      batch.set(ref, {
-        ...p,
-        id,
-        rating: 0,
-        reviewCount: 0,
-        featured: Math.random() > 0.5,
-        active: true,
-        createdAt: new Date()
-      });
-    }
-    await batch.commit();
-    console.log('[Seed] Products seeded successfully');
-  }
+  await upsertProducts(db);
+  await upsertCoupons(db);
+  await seedReviews(db);
 
-  // Seed Coupons
-  const couponsRef = db.collection('coupons');
-  const existingCoupons = await couponsRef.limit(1).get();
-  if (!existingCoupons.empty) {
-    console.log('[Seed] Coupons already exist, skipping coupon seed');
-  } else {
-    console.log('[Seed] Seeding', sampleCoupons.length, 'coupons...');
-    for (const c of sampleCoupons) {
-      await couponsRef.doc(c.code).set({
-        ...c,
-        usageCount: 0,
-        expiresAt: null,
-        createdAt: new Date()
-      });
-    }
-    console.log('[Seed] Coupons seeded successfully');
-  }
-
-  // Seed Sample Orders
-  const ordersRef = db.collection('orders');
-  const existingOrders = await ordersRef.limit(1).get();
-  if (!existingOrders.empty) {
-    console.log('[Seed] Orders already exist, skipping order seed');
-  } else {
-    // Get seeded products for order items
-    const productsSnap = await productsRef.get();
-    const products = productsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-    if (products.length === 0) {
-      console.log('[Seed] No products found, skipping order seed');
-    } else {
-      const orderCount = 15;
-      console.log('[Seed] Seeding', orderCount, 'sample orders...');
-      for (let i = 0; i < orderCount; i++) {
-        const order = createSampleOrder(products, i);
-        await ordersRef.add(order);
-      }
-      console.log('[Seed] Orders seeded successfully');
-    }
-  }
-
-  console.log('[Seed] Done!');
-  process.exit(0);
+  console.log('[Seed] Done');
 }
 
 seed().catch((err) => {

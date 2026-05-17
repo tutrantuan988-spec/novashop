@@ -8,19 +8,19 @@
     <meta name="apple-mobile-web-app-title" content="%VITE_SHOP_NAME%" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="%VITE_SHOP_DESCRIPTION%" />
-    <meta name="keywords" content="mua sắm online, website bán hàng, thời trang, công nghệ, phụ kiện, %VITE_SHOP_NAME%, ưu đãi" />
+    <meta name="keywords" content="thức ăn thú cưng, thức ăn chó, thức ăn mèo, Royal Canin, Pedigree, Whiskas, Me-O, phụ kiện thú cưng, %VITE_SHOP_NAME%, giao nhanh" />
     <meta name="author" content="%VITE_SHOP_NAME%" />
     <meta name="robots" content="index, follow" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="%VITE_SHOP_NAME% - Mua sắm thông minh, phong cách mỗi ngày" />
+    <meta property="og:title" content="%VITE_SHOP_NAME% - Thức ăn chính hãng cho thú cưng" />
     <meta property="og:description" content="%VITE_SHOP_DESCRIPTION%" />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1200&q=80" />
-    <meta property="og:url" content="https://%VITE_SHOP_DOMAIN%" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=80" />
+    <meta property="og:url" content="https://trong-dinh-store.netlify.app" />
     <meta property="og:locale" content="vi_VN" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="%VITE_SHOP_NAME% - Mua sắm thông minh" />
+    <meta name="twitter:title" content="%VITE_SHOP_NAME% - Thức ăn chính hãng cho thú cưng" />
     <meta name="twitter:description" content="%VITE_SHOP_DESCRIPTION%" />
 
     <link rel="preconnect" href="https://images.unsplash.com" />
@@ -28,27 +28,133 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icon.svg" />
 
-    <title>%VITE_SHOP_NAME% - Mua sắm thông minh, phong cách mỗi ngày</title>
+    <title>%VITE_SHOP_NAME% - Thức ăn chính hãng cho thú cưng</title>
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <!-- Google Tag Manager (chỉ load khi có GTM_ID) -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '%VITE_GA_ID%');
+      (function() {
+        var gtmId = '%VITE_GTM_ID%';
+        if (!gtmId || gtmId === 'GTM-XXXXXXX' || gtmId === 'G-XXXXXXXXXX') return;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtm.js?id=' + gtmId;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+      })();
     </script>
 
-    <!-- Tawk.to Live Chat -->
-    <script type="text/javascript">
-      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-      (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/%VITE_TAWKTO_ID%/default';
-        s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
-        s0.parentNode.insertBefore(s1,s0);
+    <!-- Google Analytics 4 (fallback nếu không có GTM, chỉ load khi có GA_ID) -->
+    <script>
+      (function() {
+        var gaId = '%VITE_GA_ID%';
+        if (!gaId || gaId === 'G-XXXXXXXXXX') return;
+        // Nếu đã có GTM thì không cần load GA riêng
+        if ('%VITE_GTM_ID%' && '%VITE_GTM_ID%' !== 'GTM-XXXXXXX' && '%VITE_GTM_ID%' !== 'G-XXXXXXXXXX') return;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+        document.head.appendChild(s);
+      })();
+    </script>
+
+    <!-- Facebook Pixel (chỉ load khi có PIXEL_ID) -->
+    <script>
+      (function() {
+        var pixelId = '%VITE_FACEBOOK_PIXEL_ID%';
+        if (!pixelId || pixelId === '000000000000000') return;
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', pixelId);
+        fbq('track', 'PageView');
+      })();
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=PageView&noscript=1" alt="" /></noscript>
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+      <iframe src="https://www.googletagmanager.com/ns.html?id=%VITE_GTM_ID%" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+
+    <!-- Tawk.to Live Chat (chỉ load khi có TAWKTO_ID) -->
+    <script>
+      (function() {
+        var tawkId = '%VITE_TAWKTO_ID%';
+        if (!tawkId || tawkId === 'xxxxxxxxxxxxxxxxxxxxxxx') return;
+        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+        var s1 = document.createElement('script'), s0 = document.getElementsByTagName('script')[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/' + tawkId + '/default';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+      })();
+    </script>
+
+    <!-- Zalo Official Account Chat Widget (chỉ hiển thị khi có ZALO_OA_ID) -->
+    <!-- Lấy iframe code từ: https://oa.zalo.me/ → Cài đặt → Widget Chat -->
+    <div id="zalo-chat-widget" style="display:none"></div>
+    <script>
+      (function() {
+        var zaloId = '%VITE_ZALO_OA_ID%';
+        if (!zaloId || zaloId === '0000000000000000000') return;
+        
+        // Tạo iframe Zalo OA chat
+        var iframe = document.createElement('iframe');
+        iframe.src = 'https://oa.zalo.me/' + zaloId + '/chat?type=widget&theme=green&size=large&position=bottom-right';
+        iframe.style.cssText = 'position:fixed;bottom:100px;right:20px;width:350px;height:500px;border:none;z-index:9999;display:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden';
+        iframe.id = 'zalo-oa-iframe';
+        iframe.title = 'Chat với Zalo OA';
+        iframe.allow = 'clipboard-read; clipboard-write';
+        
+        // Tạo nút toggle chat
+        var btn = document.createElement('div');
+        btn.style.cssText = 'position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:#0068ff;cursor:pointer;z-index:9998;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,104,255,0.35);transition:transform 0.2s';
+        btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.88.54 3.64 1.48 5.13L2 22l5.13-1.48C8.36 21.46 10.12 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>';
+        btn.id = 'zalo-oa-btn';
+        btn.title = 'Chat với chúng tôi qua Zalo';
+        
+        // Hover effect
+        btn.onmouseenter = function() { this.style.transform = 'scale(1.1)'; };
+        btn.onmouseleave = function() { this.style.transform = 'scale(1)'; };
+        
+        // Toggle chat on click
+        var isOpen = false;
+        btn.onclick = function() {
+          isOpen = !isOpen;
+          iframe.style.display = isOpen ? 'block' : 'none';
+          btn.style.transform = isOpen ? 'rotate(45deg)' : 'scale(1)';
+        };
+        
+        document.body.appendChild(btn);
+        document.body.appendChild(iframe);
+      })();
+    </script>
+
+    <!-- PageAgent AI Copilot (chỉ load khi có LLM config) -->
+    <script>
+      (function() {
+        // Chỉ load PageAgent khi có LLM config từ env
+        var hasLLM = ('%VITE_OPENAI_API_KEY%' && '%VITE_OPENAI_API_KEY%' !== 'sk-xxx') ||
+                     ('%VITE_GEMINI_API_KEY%' && '%VITE_GEMINI_API_KEY%' !== 'AIza...') ||
+                     ('%VITE_LLM_BASE_URL%' && '%VITE_LLM_BASE_URL%' !== '');
+        // Nếu tắt AI hoặc không có LLM config → không load PageAgent
+        if ('%VITE_DISABLE_AI_COPILOT%' === 'true' || !hasLLM) return;
+        
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = 'https://cdn.jsdelivr.net/npm/page-agent@1.8.2/dist/iife/page-agent.demo.js?autoInit=false';
+        s.crossOrigin = 'anonymous';
+        document.head.appendChild(s);
       })();
     </script>
 
@@ -61,7 +167,10 @@
         "logo": "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=400&q=80",
         "sameAs": [
           "%VITE_SHOP_FACEBOOK%",
-          "%VITE_SHOP_INSTAGRAM%"
+          "%VITE_SHOP_INSTAGRAM%",
+          "%VITE_SHOP_ZALO%",
+          "%VITE_SHOP_TIKTOK%",
+          "%VITE_SHOP_YOUTUBE%"
         ],
         "contactPoint": {
           "@type": "ContactPoint",
@@ -70,6 +179,24 @@
           "areaServed": "VN",
           "availableLanguage": "Vietnamese"
         }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "%VITE_SHOP_NAME%",
+        "description": "Thức ăn chính hãng cho thú cưng — Royal Canin, Pedigree, Whiskas, Me-O. Giao nhanh toàn quốc, freeship từ 300K.",
+        "url": "https://trong-dinh-store.netlify.app",
+        "telephone": "0369712958",
+        "email": "tutrantuan988@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "VN"
+        },
+        "priceRange": "₫₫",
+        "openingHours": "Mo-Su 08:00-21:00"
       }
     </script>
   </head>

@@ -4,12 +4,13 @@ import { SignIn } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext';
 import SITE from '../config/site-config';
 
-const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const hasClerk = !!clerkKey && clerkKey.startsWith('pk_');
 
 function SignInPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, openAuthModal, authMode } = useAuth();
+  const { isAuthenticated, openAuthModal } = useAuth();
   const redirectTo = location.state?.from?.pathname || '/';
 
   useEffect(() => {
@@ -66,16 +67,10 @@ function SignInPage() {
           ) : (
             <div className="auth-fallback">
               <h2>Đăng nhập</h2>
-              <p>Hệ thống đang dùng đăng nhập nội bộ. Vui lòng dùng nút bên dưới.</p>
-              {authMode === 'local' ? (
-                <button type="button" className="primary-button" onClick={openAuthModal}>
-                  Mở form đăng nhập
-                </button>
-              ) : (
-                <p className="auth-warning">
-                  Chưa cấu hình <code>VITE_CLERK_PUBLISHABLE_KEY</code>. Liên hệ quản trị viên.
-                </p>
-              )}
+              <p>Nhập email và mật khẩu để đăng nhập vào tài khoản của bạn.</p>
+              <button type="button" className="primary-button" style={{ width: '100%', marginTop: 16 }} onClick={openAuthModal}>
+                Đăng nhập / Đăng ký
+              </button>
             </div>
           )}
         </div>

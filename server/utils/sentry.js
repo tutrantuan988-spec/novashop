@@ -10,7 +10,7 @@ let Sentry = null;
 function initSentry() {
   if (initialized) return Sentry;
   initialized = true;
-  if (!process.env.SENTRY_DSN) {
+  if (!process.env.SENTRY_DSN || process.env.SENTRY_DSN === 'your_key_here') {
     console.log('[Sentry] SENTRY_DSN không cấu hình — disabled');
     return null;
   }

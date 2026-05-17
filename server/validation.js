@@ -40,7 +40,9 @@ const ProductBody = z.object({
     name: z.string().min(1, 'Tên sản phẩm không được để trống').max(200),
     price: z.number().min(0, 'Giá không được âm'),
     originalPrice: z.number().min(0).optional(),
+    oldPrice: z.number().min(0).optional(),
     category: z.string().max(60).optional(),
+    badge: z.string().max(40).optional(),
     image: z.string().max(1000).optional(),
     gallery: z.array(z.string().max(1000)).max(10).optional(),
     description: z.string().max(5000).optional(),
@@ -117,6 +119,74 @@ const AnalyticsQuery = z.object({
   days: z.string().regex(/^\d+$/, 'days phải là số').optional()
 });
 
+// Additional validation schemas for security
+const ContactBody = z.object({
+  name: z.string().min(1, 'Tên không được để trống').max(100),
+  email: z.string().email('Email không hợp lệ'),
+  phone: z.string().max(20).optional(),
+  subject: z.string().min(1, 'Tiêu đề không được để trống').max(200),
+  message: z.string().min(1, 'Nội dung không được để trống').max(2000),
+  recaptchaToken: z.string().optional()
+});
+
+const ChatBody = z.object({
+  message: z.string().min(1, 'Tin nhắn không được để trống').max(2000).optional(),
+  messages: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string().max(2000)
+  })).max(50).optional()
+});
+
+const ReturnRequestBody = z.object({
+  orderId: z.string().min(1, 'Thiếu mã đơn hàng'),
+  reason: z.string().min(1, 'Vui lòng chọn lý do').max(500),
+  description: z.string().max(1000).optional(),
+  items: z.array(z.object({
+    productId: z.string(),
+    quantity: z.number().int().min(1).max(999)
+  })).min(1, 'Phải chọn ít nhất 1 sản phẩm')
+});
+
+const ReturnApproveBody = z.object({
+  adminNote: z.string().max(500).optional(),
+  refundAmount: z.number().min(0).optional()
+});
+
+const ReturnRejectBody = z.object({
+  adminNote: z.string().min(1, 'Vui lòng nhập lý do từ chối').max(500)
+});
+
+const AddressBody = z.object({
+  userId: z.string().min(1),
+  name: z.string().min(1, 'Tên không được để trống').max(100),
+  phone: z.string().min(1, 'Số điện thoại không được để trống').max(20),
+  address: z.string().min(1, 'Địa chỉ không được để trống').max(500),
+  isDefault: z.boolean().optional(),
+  note: z.string().max(200).optional()
+});
+
+const PaymentIntentBody = z.object({
+  amount: z.number().min(1000, 'Số tiền tối thiểu là 1,000 VND'),
+  orderId: z.string().optional(),
+  currency: z.string().default('vnd')
+});
+
+const VariantBody = z.object({
+  variant: z.object({
+    name: z.string().min(1).max(100),
+    sku: z.string().max(50).optional(),
+    price: z.number().min(0),
+    stock: z.number().int().min(0).default(0),
+    attributes: z.record(z.string()).optional()
+  })
+});
+
+const ImageUploadBody = z.object({
+  dataUrl: z.string().min(1, 'Thiếu dữ liệu ảnh'),
+  folder: z.string().max(100).optional(),
+  publicId: z.string().max(200).optional()
+});
+
 const schemas = {
   OrderBody,
   CheckoutSessionBody,
@@ -131,7 +201,17 @@ const schemas = {
   VnpayCreateBody,
   MomoCreateBody,
   AnalyticsQuery,
-  IdParam
+  IdParam,
+  // New schemas
+  ContactBody,
+  ChatBody,
+  ReturnRequestBody,
+  ReturnApproveBody,
+  ReturnRejectBody,
+  AddressBody,
+  PaymentIntentBody,
+  VariantBody,
+  ImageUploadBody
 };
 
 function validate(schema) {

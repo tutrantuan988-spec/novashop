@@ -5,7 +5,6 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { formatVND } from '../utils/format';
-import { ALL_CATEGORY_PRODUCTS } from '../data/categoryProducts';
 import { searchProducts, isAlgoliaEnabled } from '../lib/searchClient';
 import SITE from '../config/site-config';
 
@@ -50,17 +49,6 @@ function SearchPage() {
         });
         if (cancelled) return;
         let hits = result.hits;
-        if (hits.length === 0) {
-          // Fallback localdata khi backend không có kết quả
-          const q = query.toLowerCase();
-          hits = ALL_CATEGORY_PRODUCTS.filter(
-            (p) =>
-              p.name.toLowerCase().includes(q) ||
-              (p.description || '').toLowerCase().includes(q) ||
-              (p.brand || '').toLowerCase().includes(q) ||
-              (p.category || '').toLowerCase().includes(q)
-          );
-        }
         // Sort
         if (sortMode === 'price-asc') hits = [...hits].sort((a, b) => (a.price || 0) - (b.price || 0));
         else if (sortMode === 'price-desc') hits = [...hits].sort((a, b) => (b.price || 0) - (a.price || 0));

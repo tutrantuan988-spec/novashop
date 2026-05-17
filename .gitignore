@@ -9,4 +9,33 @@ firebase-admin.json
 serviceAccountKey.json
 *-service-account*.json
 *.pem
+server-start*.log
 .DS_Store
+
+# Local Netlify folder
+.netlify
+
+# Playwright E2E tests
+e2e/report/
+e2e/results.json
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Product import cache
+*.xlsx
+*.csv
+product-import-template.*
+
+# MCP server logs
+.mcp.log
+.mcp/
+
+# Sequential Thinking debug sessions
+.debug-sessions/
+
+# Git commit log
+.git-commit-log
+
+# Project setup
+project-setup.log

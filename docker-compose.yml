@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: novashop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: novashop
+      POSTGRES_PASSWORD: novashop_password
+      POSTGRES_DB: novashop
+    ports:
+      - "5432:5432"
+    volumes:
+      - novashop_postgres_data:/var/lib/postgresql/data
+
   novashop:
     build: .
     ports:
@@ -8,3 +21,6 @@ services:
     env_file:
       - .env.local
     restart: unless-stopped
+
+volumes:
+  novashop_postgres_data:

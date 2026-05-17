@@ -4,8 +4,6 @@ import { useUser, useClerk } from '@clerk/clerk-react';
 const AuthContext = createContext(null);
 const USER_KEY = 'trongdinhstore:user';
 const USERS_KEY = 'trongdinhstore:users';
-const IS_PRODUCTION = import.meta.env.PROD;
-
 const isAdminEmail = (email) => {
   const admins = (import.meta.env.VITE_ADMIN_EMAILS || 'admin@example.com')
     .split(',')
@@ -32,6 +30,20 @@ const writeJson = (key, value) => {
   }
 };
 
+// Web Crypto API: hash password using SHA-256
+const hashPassword = async (password) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+};
+
+const verifyPassword = async (password, hash) => {
+  const hashed = await hashPassword(password);
+  return hashed === hash;
+};
+
 function LocalAuthProvider({ children }) {
   const [user, setUser] = useState(() => readJson(USER_KEY, null));
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,16 +58,24 @@ function LocalAuthProvider({ children }) {
     if (users.find((u) => u.email === email)) {
       throw new Error('Email đã được đăng ký');
     }
-    const newUser = { name, email, password, role: isAdminEmail(email) ? 'admin' : 'user' };
+    const hashedPassword = await hashPassword(password);
+    const newUser = { name, email, password: hashedPassword, role: isAdminEmail(email) ? 'admin' : 'user' };
     writeJson(USERS_KEY, [...users, newUser]);
     setUser({ name, email, role: newUser.role });
   }, []);
 
   const login = useCallback(async ({ email, password }) => {
     const users = readJson(USERS_KEY, []);
-    const found = users.find((u) => u.email === email && u.password === password);
+    const found = users.find((u) => u.email === email);
     if (!found) throw new Error('Email hoặc mật khẩu không đúng');
+    const valid = await verifyPassword(password, found.password);
+    if (!valid) throw new Error('Email hoặc mật khẩu không đúng');
     setUser({ name: found.name, email: found.email, role: found.role });
+  }, []);
+
+  const loginSocial = useCallback(({ id, name, email, avatar, provider }) => {
+    const socialUser = { id, name, email: email || `${id}@${provider}.social`, avatar, role: isAdminEmail(email) ? 'admin' : 'user', provider };
+    setUser(socialUser);
   }, []);
 
   const logout = useCallback(() => setUser(null), []);
@@ -65,22 +85,24 @@ function LocalAuthProvider({ children }) {
       user,
       isAuthenticated: !!user,
       isAdmin: user?.role === 'admin',
+      authLoading: false,
       isModalOpen,
       openAuthModal: () => setIsModalOpen(true),
       closeAuthModal: () => setIsModalOpen(false),
       register,
       login,
+      loginSocial,
       logout,
       authMode: 'local'
     }),
-    [user, isModalOpen, register, login, logout]
+    [user, isModalOpen, register, login, loginSocial, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 function ClerkAuthProvider({ children }) {
-  const { user: clerkUser } = useUser();
+  const { user: clerkUser, isLoaded } = useUser();
   const { signOut, openSignIn } = useClerk();
 
   const user = useMemo(() => {
@@ -102,6 +124,7 @@ function ClerkAuthProvider({ children }) {
       user,
       isAuthenticated: !!clerkUser,
       isAdmin: user?.role === 'admin',
+      authLoading: !isLoaded,
       isModalOpen: false,
       openAuthModal,
       closeAuthModal: () => {},
@@ -110,27 +133,7 @@ function ClerkAuthProvider({ children }) {
       logout: signOut,
       authMode: 'clerk'
     }),
-    [user, clerkUser, openAuthModal, signOut]
-  );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-function UnconfiguredAuthProvider({ children }) {
-  const value = useMemo(
-    () => ({
-      user: null,
-      isAuthenticated: false,
-      isAdmin: false,
-      isModalOpen: false,
-      openAuthModal: () => {},
-      closeAuthModal: () => {},
-      register: null,
-      login: null,
-      logout: () => {},
-      authMode: 'unconfigured'
-    }),
-    []
+    [user, clerkUser, isLoaded, openAuthModal, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -138,11 +141,8 @@ function UnconfiguredAuthProvider({ children }) {
 
 export function AuthProvider({ children }) {
   const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  if (clerkKey) {
+  if (clerkKey && clerkKey.startsWith('pk_')) {
     return <ClerkAuthProvider>{children}</ClerkAuthProvider>;
-  }
-  if (IS_PRODUCTION) {
-    return <UnconfiguredAuthProvider>{children}</UnconfiguredAuthProvider>;
   }
   return <LocalAuthProvider>{children}</LocalAuthProvider>;
 }

@@ -4,12 +4,13 @@ import { SignUp } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext';
 import SITE from '../config/site-config';
 
-const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const hasClerk = !!clerkKey && clerkKey.startsWith('pk_');
 
 function SignUpPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, openAuthModal } = useAuth();
   const redirectTo = location.state?.from?.pathname || '/';
 
   useEffect(() => {
@@ -64,9 +65,10 @@ function SignUpPage() {
           ) : (
             <div className="auth-fallback">
               <h2>Đăng ký</h2>
-              <p>
-                Đăng ký chỉ khả dụng khi đã cấu hình <code>VITE_CLERK_PUBLISHABLE_KEY</code>.
-              </p>
+              <p>Tạo tài khoản để mua sắm thuận tiện hơn.</p>
+              <button type="button" className="primary-button" style={{ width: '100%', marginTop: 16 }} onClick={openAuthModal}>
+                Đăng ký / Đăng nhập
+              </button>
             </div>
           )}
         </div>

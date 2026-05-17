@@ -42,7 +42,7 @@ function buildVnpayUrl({ orderId, amount, ipAddr, returnUrl, orderInfo, locale =
   if (!isVnpayConfigured()) throw new Error('VNPay chưa được cấu hình');
   const tmnCode = process.env.VNP_TMN_CODE;
   const secretKey = process.env.VNP_HASH_SECRET;
-  const vnpUrl = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+  const vnpUrl = process.env.VNP_URL || 'https://pay.vnpay.vn/vpcpay.html';
 
   const params = sortObject({
     vnp_Version: '2.1.0',

@@ -13,8 +13,6 @@ import {
   createOrderApi,
   validateCouponApi
 } from '../services/api';
-import StripeProvider from '../components/StripeProvider';
-import StripePaymentForm from '../components/StripePaymentForm';
 
 const SHIPPING_FEE = 30000;
 const FREE_SHIP_THRESHOLD = 300000;
@@ -49,7 +47,7 @@ function CheckoutPageInner() {
   const [couponMessage, setCouponMessage] = useState('');
   const [couponBusy, setCouponBusy] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
-  const [stripeOrder, setStripeOrder] = useState(null);
+  const [vnpayLoading, setVnpayLoading] = useState(false);
   const [stockIssues, setStockIssues] = useState([]); // [{ productId, name, requested, available }]
 
   const payment = watch('payment');
@@ -60,11 +58,6 @@ function CheckoutPageInner() {
     window.scrollTo({ top: 0 });
   }, []);
 
-  useEffect(() => {
-    if (payment !== 'stripe') {
-      setStripeOrder(null);
-    }
-  }, [payment]);
 
   const totals = useMemo(() => {
     let discount = 0;
@@ -123,15 +116,29 @@ function CheckoutPageInner() {
       setStockIssues([]); // Reset trước mỗi lần submit
       const saved = await createOrderApi(orderData);
 
-      if (data.payment === 'stripe') {
-        setStripeOrder({ id: saved.id, total: saved.total ?? totals.total });
-        return;
+      if (data.payment === 'vnpay') {
+        setVnpayLoading(true);
+        try {
+          const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+          const vnpRes = await fetch(`${apiBase}/api/payments/vnpay/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: saved.id })
+          });
+          const vnpData = await vnpRes.json();
+          if (!vnpRes.ok) throw new Error(vnpData.error || 'Không thể tạo thanh toán VNPay');
+          window.location.href = vnpData.url;
+          return;
+        } catch (err) {
+          setVnpayLoading(false);
+          toast.error(`VNPay: ${err.message}`);
+          return;
+        }
       }
 
       setOrderPlaced({ id: saved.id, total: saved.total ?? totals.total });
       clearCart();
     } catch (error) {
-      console.error('Order error:', error);
       // Server trả 409 + INSUFFICIENT_STOCK → highlight items thiếu
       if (error.code === 'INSUFFICIENT_STOCK' && Array.isArray(error.insufficientItems)) {
         setStockIssues(error.insufficientItems);
@@ -147,15 +154,6 @@ function CheckoutPageInner() {
     }
   };
 
-  const handleStripeSuccess = () => {
-    setOrderPlaced(stripeOrder);
-    setStripeOrder(null);
-    clearCart();
-  };
-
-  const handleStripeError = (msg) => {
-    toast.error(msg);
-  };
 
   if (orderPlaced) {
     return (
@@ -243,11 +241,11 @@ function CheckoutPageInner() {
                   <span>Quét QR hoặc chuyển khoản sau khi đặt hàng</span>
                 </div>
               </label>
-              <label className={payment === 'stripe' ? 'payment active' : 'payment'}>
-                <input type="radio" {...register('payment')} value="stripe" />
+              <label className={payment === 'vnpay' ? 'payment active' : 'payment'}>
+                <input type="radio" {...register('payment')} value="vnpay" />
                 <div>
-                  <strong>Thẻ Visa / Mastercard</strong>
-                  <span>Thanh toán an toàn qua Stripe</span>
+                  <strong>VNPay (ATM / Visa / QR)</strong>
+                  <span>Thanh toán qua VNPay — hỗ trợ thẻ ATM, Visa, MasterCard, QR Pay</span>
                 </div>
               </label>
             </div>
@@ -267,26 +265,17 @@ function CheckoutPageInner() {
               </div>
             )}
 
-            {payment === 'stripe' && stripeOrder && (
-              <StripePaymentForm
-                amount={totals.total}
-                orderId={stripeOrder.id}
-                onSuccess={handleStripeSuccess}
-                onError={handleStripeError}
-              />
-            )}
-
-            {payment === 'stripe' && !stripeOrder && (
+            {payment === 'vnpay' && (
               <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
-                <CreditCard size={36} style={{ marginBottom: 8, color: '#6772e5' }} />
-                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Thanh toán bằng thẻ quốc tế</p>
-                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Visa, Mastercard, JCB, Amex — Bảo mật bởi Stripe</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 12 }}>
-                  {['Visa', 'Mastercard', 'JCB', 'Amex'].map((card) => (
-                    <span key={card} style={{ padding: '4px 10px', background: 'var(--bg)', borderRadius: 6, fontSize: 12, fontWeight: 700, color: 'var(--muted)', border: '1px solid var(--border)' }}>{card}</span>
+                <CreditCard size={36} style={{ marginBottom: 8, color: '#0071ba' }} />
+                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Thanh toán qua VNPay</p>
+                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Hỗ trợ ATM nội địa, Visa, Mastercard, JCB, QR Pay</p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                  {['ATM nội địa', 'Visa', 'Mastercard', 'JCB', 'QR Pay'].map((m) => (
+                    <span key={m} style={{ padding: '4px 10px', background: 'var(--bg)', borderRadius: 6, fontSize: 12, fontWeight: 700, color: 'var(--muted)', border: '1px solid var(--border)' }}>{m}</span>
                   ))}
                 </div>
-                <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Tiếp tục thanh toán" để nhập thông tin thẻ</p>
+                <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Thanh toán VNPay" → chuyển sang cổng VNPay để thanh toán</p>
               </div>
             )}
           </div>
@@ -359,9 +348,9 @@ function CheckoutPageInner() {
           <button
             type="submit"
             className="primary-button submit-btn"
-            disabled={isPlacing || (payment === 'stripe' && stripeOrder)}
+            disabled={isPlacing || vnpayLoading}
           >
-            {isPlacing ? 'Đang xử lý...' : payment === 'stripe' && !stripeOrder ? <><CreditCard size={18} aria-hidden /> Tiếp tục thanh toán</> : payment === 'stripe' && stripeOrder ? 'Nhập thông tin thẻ bên trái' : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
+            {isPlacing || vnpayLoading ? 'Đang xử lý...' : payment === 'vnpay' ? <><CreditCard size={18} aria-hidden /> Thanh toán VNPay</> : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
           </button>
           <p className="checkout-note">Bằng việc đặt hàng, bạn đồng ý với điều khoản và chính sách của {SITE.name}.</p>
         </aside>
@@ -371,11 +360,7 @@ function CheckoutPageInner() {
 }
 
 function CheckoutPage() {
-  return (
-    <StripeProvider>
-      <CheckoutPageInner />
-    </StripeProvider>
-  );
+  return <CheckoutPageInner />;
 }
 
 export default memo(CheckoutPage);

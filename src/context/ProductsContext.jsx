@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { products as seedProducts } from '../data/products';
-import { isFirebaseReady } from '../lib/firebase';
+import { isBackendConfigured } from '../services/api';
 import { useAuth } from './AuthContext';
 import {
   listProductsApi,
@@ -94,11 +94,9 @@ function ApiProductsProvider({ children }) {
   const loading = productQuery.isLoading;
 
   const addProduct = useCallback(async (data) => {
-    const nextId = Math.max(0, ...items.map((p) => Number(p.id) || 0)) + 1;
     const product = {
       ...data,
-      id: String(nextId),
-      slug: slugify(data.name) + '-' + nextId,
+      slug: data.slug || `${slugify(data.name)}-${Date.now()}`,
       gallery: data.gallery && data.gallery.length ? data.gallery : [data.image],
       rating: data.rating || 4.5,
       reviewCount: data.reviewCount || 0,
@@ -107,7 +105,8 @@ function ApiProductsProvider({ children }) {
     };
     const saved = await createProductApi(product, adminEmail);
     queryClient.setQueryData(['products'], (current = []) => [saved, ...(Array.isArray(current) ? current : [])]);
-  }, [items, adminEmail, queryClient]);
+    return saved;
+  }, [adminEmail, queryClient]);
 
   const updateProduct = useCallback(async (id, patch) => {
     await updateProductApi(id, patch, adminEmail);
@@ -123,7 +122,7 @@ function ApiProductsProvider({ children }) {
     );
   }, [adminEmail, queryClient]);
 
-  const resetProducts = useCallback(() => queryClient.setQueryData(['products'], seedProducts), [queryClient]);
+  const resetProducts = useCallback(() => queryClient.invalidateQueries({ queryKey: ['products'] }), [queryClient]);
 
   const value = useMemo(
     () => ({ items, addProduct, updateProduct, removeProduct, resetProducts, loading }),
@@ -134,7 +133,7 @@ function ApiProductsProvider({ children }) {
 }
 
 export function ProductsProvider({ children }) {
-  if (isFirebaseReady()) {
+  if (isBackendConfigured()) {
     return <ApiProductsProvider>{children}</ApiProductsProvider>;
   }
   return <LocalProductsProvider>{children}</LocalProductsProvider>;

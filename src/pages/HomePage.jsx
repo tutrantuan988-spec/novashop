@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, ArrowRight, ShieldCheck, Truck, LockKeyhole, Search, Sparkles, X, Gem, Headphones, PackageCheck, BadgeCheck, Star, Filter, SlidersHorizontal, Clock, Crown, Gift, MessageCircle, Wallet, RotateCcw, ChevronRight } from 'lucide-react';
+import { Zap, ArrowRight, ShieldCheck, Truck, LockKeyhole, Search, Sparkles, X, Gem, Headphones, PackageCheck, BadgeCheck, Star, SlidersHorizontal, MessageCircle, Wallet, RotateCcw, ChevronRight } from 'lucide-react';
 import AnimatedHeroCard from '../components/AnimatedHeroCard';
 import PolicyModal from '../components/PolicyModal';
 import { useProducts } from '../context/ProductsContext';
@@ -217,8 +217,6 @@ function HomePage() {
     return list;
   }, [items, activeCategory, query, sort, minRating, priceMax, priceCeiling]);
 
-  const topProducts = useMemo(() => items.slice(0, 4), [items]);
-
   const activeFilterCount = (activeCategory !== 'Tất cả' ? 1 : 0)
     + (query ? 1 : 0)
     + (minRating > 0 ? 1 : 0)
@@ -258,22 +256,17 @@ function HomePage() {
       <PolicyModal policy={activePolicy} onClose={() => setActivePolicy(null)} />
       <section className="hero premium-hero" id="home">
         <div className="hero-content">
-          <div className="eyebrow"><Zap size={18} aria-hidden /> {SITE.name} Việt Nam • Sale mỗi ngày</div>
-          <h1>Thức ăn chính hãng cho thú cưng, giao nhanh tận nhà.</h1>
-          <p>{SITE.name} chuyên cung cấp thức ăn chính hãng cho thú cưng, thanh toán COD hoặc chuyển khoản MBBank và giao hàng toàn quốc.</p>
+          <div className="eyebrow"><Zap size={18} aria-hidden /> Thức ăn chính hãng • Giao toàn quốc</div>
+          <h1>Thức ăn chính hãng cho thú cưng.</h1>
+          <p>Chuyên Royal Canin, Pedigree, Whiskas, Me-O và nhiều thương hiệu uy tín. COD toàn quốc, freeship từ 300K.</p>
           <div className="hero-actions">
             <a className="primary-button" href="#products">Mua sắm ngay <ArrowRight size={18} aria-hidden /></a>
-            <a className="secondary-button" href="#deals">Xem ưu đãi hôm nay</a>
-          </div>
-          <div className="hero-stats">
-            <div><strong>Chính hãng</strong><span>Thức ăn nhập khẩu</span></div>
-            <div><strong>24h</strong><span>Giao nhanh nội thành</span></div>
-            <div><strong>7 ngày</strong><span>Đổi trả dễ dàng</span></div>
+            <a className="secondary-button" href="#luxury">Xem danh mục</a>
           </div>
           <div className="hero-trust">
-            <span><ShieldCheck size={16} aria-hidden /> Hàng chính hãng</span>
+            <span><ShieldCheck size={16} aria-hidden /> 100% chính hãng</span>
             <span><Truck size={16} aria-hidden /> Freeship từ 300K</span>
-            <span><LockKeyhole size={16} aria-hidden /> Thanh toán an toàn</span>
+            <span><LockKeyhole size={16} aria-hidden /> Đổi trả 7 ngày</span>
           </div>
         </div>
         <AnimatedHeroCard />
@@ -473,36 +466,12 @@ function HomePage() {
         <FlashSale />
       </MotionWrapper>
 
-      {topProducts.length > 0 && (
-        <section className="section editorial-section" aria-labelledby="editorial-heading">
-          <div className="editorial-card">
-            <div>
-              <span className="section-kicker"><Star size={16} aria-hidden /> Editor's pick</span>
-              <h2 id="editorial-heading">Top sản phẩm được đội ngũ {SITE.name} đề xuất</h2>
-              <p>Danh sách được chọn theo xu hướng, điểm đánh giá, chất lượng hoàn thiện và độ phù hợp.</p>
-            </div>
-            <div className="mini-products">
-              {topProducts.map((product, index) => (
-                <a href={`/san-pham/${product.slug}`} className="mini-product" key={product.id}>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <img src={product.image} alt={product.name} loading="lazy" />
-                  <div>
-                    <strong>{product.name}</strong>
-                    <small>{product.category} · {product.rating}★</small>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {reviews.length > 0 && (
         <section className="section reviews" id="reviews" aria-labelledby="reviews-heading">
           <div className="section-heading">
             <div>
               <span className="section-kicker">Khách hàng nói gì</span>
-              <h2 id="reviews-heading">Trải nghiệm được tin chọn</h2>
+              <h2 id="reviews-heading">Trải nghiệm thực tế</h2>
             </div>
           </div>
           <div className="review-grid">
@@ -517,36 +486,6 @@ function HomePage() {
           </div>
         </section>
       )}
-
-      <section className="deal-section" id="deals" aria-labelledby="deal-heading">
-        <div>
-          <span className="section-kicker"><Zap size={16} aria-hidden /> Ưu đãi giới hạn</span>
-          <h2 id="deal-heading">Ưu đãi cho thành viên mới</h2>
-          <p>Đăng ký tài khoản để nhận thông báo ưu đãi và mã giảm giá mới nhất từ {SITE.name}.</p>
-          <div className="countdown" aria-label="Đếm ngược ưu đãi">
-            <span><Clock size={15} aria-hidden /> 12 giờ</span>
-            <span>28 phút</span>
-            <span>45 giây</span>
-          </div>
-        </div>
-        <a className="primary-button" href="#products">Săn deal ngay <ArrowRight size={18} aria-hidden /></a>
-      </section>
-
-      <section className="section concierge-section" id="concierge" aria-labelledby="concierge-heading">
-        <div className="concierge-panel">
-          <div>
-            <span className="section-kicker"><Crown size={16} aria-hidden /> {SITE.name} Concierge</span>
-            <h2 id="concierge-heading">Dịch vụ mua sắm cá nhân cho khách hàng VIP</h2>
-            <p>Đội ngũ concierge hỗ trợ chọn quà, phối sản phẩm, đặt lịch giao theo khung giờ, gói quà theo dịp và chăm sóc sau mua.</p>
-            <a className="primary-button" href="#products">Bắt đầu trải nghiệm VIP</a>
-          </div>
-          <div className="concierge-list">
-            <article><Gift aria-hidden /><strong>Gift advisor</strong><span>Gợi ý quà theo ngân sách và phong cách người nhận.</span></article>
-            <article><ShieldCheck aria-hidden /><strong>Premium assurance</strong><span>Kiểm tra ngoại quan, phụ kiện và bảo hành trước khi giao.</span></article>
-            <article><Headphones aria-hidden /><strong>Priority support</strong><span>Hỗ trợ ưu tiên qua chat, điện thoại và email.</span></article>
-          </div>
-        </div>
-      </section>
 
       <Newsletter />
 

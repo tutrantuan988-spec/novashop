@@ -17,7 +17,9 @@ function Footer() {
           <p>Trọng Định Store – Mua sắm online thông minh với hàng nghìn sản phẩm chính hãng, giao nhanh 24h.</p>
           <div className="footer-social" aria-label="Mạng xã hội">
             <a href={SITE.facebook} aria-label="Facebook" target="_blank" rel="noopener noreferrer"><span aria-hidden>f</span></a>
+            <a href={SITE.zalo} aria-label="Zalo" target="_blank" rel="noopener noreferrer" className="social-zalo"><span aria-hidden>zl</span></a>
             <a href={SITE.instagram} aria-label="Instagram" target="_blank" rel="noopener noreferrer"><span aria-hidden>ig</span></a>
+            <a href={SITE.tiktok} aria-label="TikTok" target="_blank" rel="noopener noreferrer"><span aria-hidden>tt</span></a>
             <a href={SITE.youtube} aria-label="Youtube" target="_blank" rel="noopener noreferrer"><span aria-hidden>yt</span></a>
           </div>
         </div>
@@ -54,6 +56,11 @@ function Footer() {
       <div className="footer-bottom">
         <span>© 2026 Trọng Định Store. Mọi quyền được bảo lưu.</span>
         <span>{t.footer.design} {SITE.name}</span>
+        <span>
+          <a href="https://www.testmuai.com/?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" className="footer-partner">
+            testmuai.com
+          </a>
+        </span>
       </div>
     </footer>
   );

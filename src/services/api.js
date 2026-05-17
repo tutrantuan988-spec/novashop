@@ -1,5 +1,8 @@
 const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+export const isBackendConfigured = () =>
+  !!import.meta.env.VITE_API_URL || !import.meta.env.PROD;
 const ADMIN_SESSION_KEY = 'trongdinhstore:adminToken';
+const LOCAL_ORDERS_KEY = 'trongdinhstore:localOrders';
 
 export function getAdminSessionToken() {
   if (typeof window === 'undefined') return '';
@@ -16,31 +19,92 @@ export function clearAdminSessionToken() {
   window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
 }
 
-async function request(path, { method = 'GET', body, adminEmail, adminToken, headers = {} } = {}) {
-  const finalHeaders = { 'Content-Type': 'application/json', ...headers };
-  if (adminEmail) {
-    finalHeaders['x-admin-email'] = adminEmail;
-    const token = adminToken ?? getAdminSessionToken();
-    if (token) finalHeaders.Authorization = `Bearer ${token}`;
-  }
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    const err = new Error(data.error || `Yêu cầu thất bại (${res.status})`);
-    err.status = res.status;
-    err.code = data.code || null;
-    err.insufficientItems = data.insufficientItems || null;
-    throw err;
-  }
-  return res.json();
+export function isFallback(result) {
+  return result && typeof result === 'object' && result.fallback === true;
 }
 
-export function createOrderApi(order) {
-  return request('/api/orders', { method: 'POST', body: { order } });
+async function request(path, { method = 'GET', body, adminEmail, adminToken, headers = {} } = {}) {
+  try {
+    const finalHeaders = { 'Content-Type': 'application/json', ...headers };
+    if (adminEmail) {
+      finalHeaders['x-admin-email'] = adminEmail;
+      const token = adminToken ?? getAdminSessionToken();
+      if (token) finalHeaders.Authorization = `Bearer ${token}`;
+    }
+    const res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: finalHeaders,
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (res.status === 404 && !import.meta.env.VITE_API_URL) {
+      throw new Error('Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.');
+    }
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      const err = new Error(data.error || `Yêu cầu thất bại (${res.status})`);
+      err.status = res.status;
+      err.code = data.code || null;
+      err.insufficientItems = data.insufficientItems || null;
+      throw err;
+    }
+    return res.json();
+  } catch (err) {
+    if (err.name === 'TypeError') { // network error
+      throw new Error('Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối mạng.');
+    }
+    throw err;
+  }
+}
+
+const api = {
+  get(path, options = {}) {
+    return request(path.startsWith('/') ? path : `/${path}`, { ...options, method: 'GET' });
+  },
+  post(path, body, options = {}) {
+    return request(path.startsWith('/') ? path : `/${path}`, { ...options, method: 'POST', body });
+  },
+  put(path, body, options = {}) {
+    return request(path.startsWith('/') ? path : `/${path}`, { ...options, method: 'PUT', body });
+  },
+  patch(path, body, options = {}) {
+    return request(path.startsWith('/') ? path : `/${path}`, { ...options, method: 'PATCH', body });
+  },
+  delete(path, options = {}) {
+    return request(path.startsWith('/') ? path : `/${path}`, { ...options, method: 'DELETE' });
+  },
+};
+
+export default api;
+
+function createLocalOrder(order) {
+  const id = `TD${Date.now().toString(36).toUpperCase()}`;
+  const saved = {
+    id,
+    ...order,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    source: 'local'
+  };
+  if (typeof window !== 'undefined') {
+    try {
+      const all = JSON.parse(window.localStorage.getItem(LOCAL_ORDERS_KEY) || '[]');
+      window.localStorage.setItem(LOCAL_ORDERS_KEY, JSON.stringify([saved, ...all]));
+    } catch {}
+  }
+  return saved;
+}
+
+function isStaticApiFailure(error) {
+  return error?.status === 404 || error?.status === 405 || /failed|network|fetch|404/i.test(error?.message || '');
+}
+
+export async function createOrderApi(order) {
+  try {
+    return await request('/api/orders', { method: 'POST', body: { order } });
+  } catch (error) {
+    if (isStaticApiFailure(error)) return createLocalOrder(order);
+    throw error;
+  }
 }
 
 // ===== Guest Checkout (P4) =====
@@ -201,6 +265,10 @@ export function getAdminConfigApi() {
 
 export function verifyAdminApi(adminEmail, adminToken) {
   return request('/api/admin/verify', { adminEmail, adminToken });
+}
+
+export function getIntegrationsStatusApi(adminEmail) {
+  return request('/api/integrations/status', { adminEmail });
 }
 
 // Products

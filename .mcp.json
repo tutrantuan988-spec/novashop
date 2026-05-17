@@ -1,0 +1,46 @@
+{
+  "$schema": "https://spec.modelcontextprotocol.io/schema/mcp.json",
+  "mcpServers": {
+    "github": {
+      "description": "GitHub API - quản lý repo, issues, PRs, code search",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "<GH_ghp_your_token_here>"
+      }
+    },
+    "playwright": {
+      "description": "Browser automation - E2E testing, screenshot",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    },
+    "context7": {
+      "description": "Persistent context với Upstash Redis serverless",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7"],
+      "env": {
+        "UPSTASH_REDIS_REST_URL": "<https://your-db.upstash.io>",
+        "UPSTASH_REDIS_REST_TOKEN": "<your_upstash_token>"
+      }
+    },
+    "sequential-thinking": {
+      "description": "Structured step-by-step reasoning",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "filesystem": {
+      "description": "File system access",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/path/to/your/project"
+      ]
+    },
+    "markitdown": {
+      "description": "Convert files (PDF, DOCX, XLSX) to Markdown",
+      "command": "pipx",
+      "args": ["run", "markitdown"]
+    }
+  }
+}

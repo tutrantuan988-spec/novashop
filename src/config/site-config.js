@@ -14,6 +14,8 @@ const SITE = {
   facebook: import.meta.env.VITE_SHOP_FACEBOOK || '#',
   instagram: import.meta.env.VITE_SHOP_INSTAGRAM || '#',
   youtube: import.meta.env.VITE_SHOP_YOUTUBE || '#',
+  zalo: import.meta.env.VITE_SHOP_ZALO || '#',
+  tiktok: import.meta.env.VITE_SHOP_TIKTOK || '#',
   description: import.meta.env.VITE_SHOP_DESCRIPTION || `${SHOP_NAME} — Thức ăn chính hãng cho thú cưng, giao nhanh toàn quốc.`
 };
 

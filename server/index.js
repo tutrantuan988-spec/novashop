@@ -1,13 +1,71 @@
 const path = require('path');
 const crypto = require('crypto');
+const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Validate environment variables on startup
+const { validateAndLog } = require('./utils/validateEnv');
+try {
+  validateAndLog(process.env, { strict: false });
+} catch (error) {
+  console.error('❌ Environment validation failed:', error.message);
+  if (IS_PRODUCTION) {
+    console.error('Exiting due to invalid configuration in production');
+    process.exit(1);
+  }
+}
 
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const logger = require('./utils/logger');
+
+// Import new security middleware
+const { correlationId } = require('./middleware/correlationId');
+const { prototypePollutionProtection } = require('./middleware/sanitize');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { requireAdminLegacy } = require('./middleware/auth');
+const { auditLog, AUDIT_EVENTS } = require('./middleware/auditLog');
+
+// Import reusable audit and sanitization middleware
+const {
+  auditProductCreate,
+  auditProductUpdate,
+  auditProductDelete,
+  auditOrderCreate,
+  auditOrderUpdate,
+  auditOrderStatusChange,
+  auditOrderRefund,
+  auditCouponCreate,
+  auditCouponUpdate,
+  auditCouponDelete
+} = require('./middleware/auditMiddleware');
+
+const {
+  sanitizeProductBody,
+  sanitizeOrderBody,
+  sanitizeReviewBody,
+  sanitizeContactBody,
+  sanitizeChatBody,
+  sanitizeReturnBody,
+  sanitizeAddressBody
+} = require('./middleware/sanitizeMiddleware');
+
+// Import enhanced rate limiters
+const {
+  authStrictLimiter,
+  adminStrictLimiter,
+  paymentLimiter,
+  sensitiveDataLimiter,
+  uploadLimiter,
+  contactStrictLimiter,
+  reviewStrictLimiter,
+  trackingLimiter
+} = require('./middleware/rateLimiters');
+
 function getStripe() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) return null;
@@ -22,6 +80,7 @@ function getStripe() {
 const { cert, initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { sendOrderCreatedEmails, sendOrderPaidEmails } = require('./email');
+const { emit, subscribeToEvents } = require('./services/eventBus');
 const {
   reserveInventory,
   releaseInventory,
@@ -42,6 +101,7 @@ const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
+const agentRoutes = require('./routes/agents');
 const {
   isVnpayConfigured,
   buildVnpayUrl,
@@ -55,12 +115,26 @@ const { buildHealth } = require('./health');
 const { swaggerSetup } = require('./swagger');
 const { requestLogger } = require('./logger');
 
+function hasRealEnv(name) {
+  const value = process.env[name];
+  return !!value && value !== 'your_key_here' && value !== '{}';
+}
+
 // Firebase Admin (optional — chỉ init nếu có service account hoặc default credentials)
 let adminDb = null;
 try {
-  const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
   const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (serviceAccountJson) {
+  const serviceAccountFile = process.env.FIREBASE_SERVICE_ACCOUNT_FILE || process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (serviceAccountFile && serviceAccountFile !== 'your_key_here') {
+    const serviceAccountPath = path.isAbsolute(serviceAccountFile)
+      ? serviceAccountFile
+      : path.resolve(__dirname, '..', serviceAccountFile);
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    initializeApp({ credential: cert(serviceAccount), projectId: projectId || serviceAccount.project_id });
+    adminDb = getFirestore();
+    console.log('[Firebase Admin] Initialized with service account file');
+  } else if (serviceAccountJson && serviceAccountJson !== 'your_key_here') {
     initializeApp({ credential: cert(JSON.parse(serviceAccountJson)), projectId });
     adminDb = getFirestore();
     console.log('[Firebase Admin] Initialized with service account JSON');
@@ -75,7 +149,11 @@ try {
     adminDb.collection('_probe').limit(1).get().catch((err) => {
       console.warn('[Firebase Admin] Credentials probe failed, disabling Firestore:', err.message);
       adminDb = null;
+      app.locals.adminDb = null;
     });
+    
+    // Store in app.locals for middleware access
+    app.locals.adminDb = adminDb;
   } else {
     console.warn('[Firebase Admin] No project ID — price validation will fall back to client values');
   }
@@ -84,6 +162,10 @@ try {
 }
 
 const app = express();
+
+// Store adminDb in app.locals for middleware access
+app.locals.adminDb = null; // Will be set after Firebase initialization
+
 const allowedOrigins = [
   process.env.CLIENT_URL,
   process.env.PUBLIC_API_URL,
@@ -103,25 +185,34 @@ app.use(cors({
 
 // Security headers
 app.use(helmet({
-  contentSecurityPolicy: {
+  contentSecurityPolicy: IS_PRODUCTION ? {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com", "https://checkout.stripe.com", "https://*.clerk.accounts.dev"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://*.firebaseapp.com", "https://*.googleusercontent.com"],
-      connectSrc: ["'self'", "https://api.stripe.com", "https://*.clerk.accounts.dev", "https://*.googleapis.com", "https://*.firebaseio.com"],
-      frameSrc: ["'self'", "https://js.stripe.com", "https://checkout.stripe.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      fontSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      mediaSrc: ["'self'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }
-  },
+  } : false,
   crossOriginEmbedderPolicy: false,
   hsts: IS_PRODUCTION ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false
 }));
 
-// Request logging
-app.use(requestLogger);
+// Add correlation ID to all requests for tracking
+app.use(correlationId);
+
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.http(`${req.method} ${req.path}`, {
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
+  next();
+});
 
 // Swagger API docs
 swaggerSetup(app);
@@ -252,6 +343,7 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
 });
 
 app.use(express.json({ limit: '12mb' })); // Higher limit for base64 image upload (P9)
+app.use(prototypePollutionProtection); // Prevent prototype pollution attacks
 app.use(express.static(path.resolve(__dirname, '../dist')));
 
 const PORT = process.env.PORT || 3001;
@@ -342,6 +434,61 @@ app.get('/api/admin/verify', adminLimiter, requireAdmin, (req, res) => {
   res.json({ ok: true, adminEmail: req.adminEmail });
 });
 
+app.get('/api/integrations/status', adminLimiter, requireAdmin, (_req, res) => {
+  res.json({
+    firestore: {
+      configured: !!adminDb,
+      label: 'Firestore database',
+      action: adminDb ? null : 'Kiem tra FIREBASE_PROJECT_ID va FIREBASE_SERVICE_ACCOUNT_FILE'
+    },
+    cloudinary: {
+      configured: hasRealEnv('CLOUDINARY_CLOUD_NAME') && hasRealEnv('CLOUDINARY_API_KEY') && hasRealEnv('CLOUDINARY_API_SECRET'),
+      label: 'Cloudinary upload',
+      action: 'Dien CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET'
+    },
+    resend: {
+      configured: hasRealEnv('RESEND_API_KEY') && hasRealEnv('EMAIL_FROM') && hasRealEnv('ADMIN_NOTIFICATION_EMAIL'),
+      label: 'Resend email',
+      action: 'Dien RESEND_API_KEY, EMAIL_FROM, ADMIN_NOTIFICATION_EMAIL'
+    },
+    stripe: {
+      configured: hasRealEnv('STRIPE_SECRET_KEY') && hasRealEnv('VITE_STRIPE_PUBLISHABLE_KEY') && hasRealEnv('STRIPE_WEBHOOK_SECRET'),
+      label: 'Stripe payments',
+      action: 'Dien VITE_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET'
+    },
+    momo: {
+      configured: isMomoConfigured(),
+      label: 'MoMo payments',
+      action: 'Dien MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, MOMO_SECRET_KEY'
+    },
+    vnpay: {
+      configured: isVnpayConfigured(),
+      label: 'VNPay payments',
+      action: 'Dien VNP_TMN_CODE va VNP_HASH_SECRET'
+    },
+    ghn: {
+      configured: hasRealEnv('GHN_API_TOKEN') && hasRealEnv('GHN_SHOP_ID'),
+      label: 'GHN shipping',
+      action: 'Dien GHN_API_TOKEN va GHN_SHOP_ID'
+    },
+    algolia: {
+      configured: algoliaSync.isAlgoliaConfigured(),
+      label: 'Algolia search',
+      action: 'Dien ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY, VITE_ALGOLIA_SEARCH_KEY'
+    },
+    aiRag: {
+      configured: hasRealEnv('OPENAI_API_KEY') && hasRealEnv('PINECONE_API_KEY'),
+      label: 'AI RAG chatbot',
+      action: 'Dien OPENAI_API_KEY va PINECONE_API_KEY'
+    },
+    sentry: {
+      configured: hasRealEnv('SENTRY_DSN') && hasRealEnv('VITE_SENTRY_DSN'),
+      label: 'Sentry monitoring',
+      action: 'Dien SENTRY_DSN va VITE_SENTRY_DSN'
+    }
+  });
+});
+
 async function buildCheckoutItems(items) {
   if (!adminDb) {
     // Dev fallback: trust client-provided data (no stock/price validation)
@@ -379,7 +526,14 @@ async function buildCheckoutItems(items) {
 const devOrders = [];
 let devOrderId = 1000;
 
-app.post('/api/orders', checkoutLimiter, checkoutHardLimiter, idempotencyMiddleware({ adminDb }), validate(schemas.OrderBody), async (req, res) => {
+app.post('/api/orders', 
+  checkoutLimiter, 
+  checkoutHardLimiter, 
+  idempotencyMiddleware({ adminDb }), 
+  sanitizeOrderBody,
+  validate(schemas.OrderBody),
+  auditOrderCreate,
+  async (req, res) => {
   try {
     const { order } = req.body;
     if (!order?.customer?.name || !order?.customer?.phone || !order?.customer?.address) {
@@ -517,7 +671,12 @@ app.post('/api/orders', checkoutLimiter, checkoutHardLimiter, idempotencyMiddlew
 // =========================
 // Guest Checkout (P4)
 // =========================
-app.post('/api/checkout/guest', checkoutLimiter, checkoutHardLimiter, idempotencyMiddleware({ adminDb }), async (req, res) => {
+app.post('/api/checkout/guest', 
+  checkoutLimiter, 
+  checkoutHardLimiter, 
+  idempotencyMiddleware({ adminDb }), 
+  sanitizeOrderBody,
+  async (req, res) => {
   try {
     const { order } = req.body || {};
     if (!order?.customer?.email || !order?.customer?.phone || !order?.customer?.name) {
@@ -616,7 +775,7 @@ app.post('/api/checkout/guest', checkoutLimiter, checkoutHardLimiter, idempotenc
   }
 });
 
-app.get('/api/track-order', async (req, res) => {
+app.get('/api/track-order', trackingLimiter, async (req, res) => {
   try {
     const token = String(req.query.token || '');
     if (!token) return res.status(400).json({ error: 'Thiếu token' });
@@ -688,7 +847,10 @@ app.post('/api/create-checkout-session', checkoutLimiter, validate(schemas.Check
 // =========================
 // Stripe PaymentIntent (for inline card form)
 // =========================
-app.post('/api/create-payment-intent', async (req, res) => {
+app.post('/api/create-payment-intent', 
+  paymentLimiter,
+  validate(schemas.PaymentIntentBody),
+  async (req, res) => {
   try {
     const { amount, orderId, currency = 'vnd' } = req.body;
     if (!amount || amount <= 0) {
@@ -730,29 +892,57 @@ app.get('/api/products', async (_req, res) => {
   }
 });
 
-app.post('/api/products', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ProductBody), async (req, res) => {
+app.post('/api/products', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  sanitizeProductBody,
+  validate(schemas.ProductBody),
+  auditProductCreate,
+  async (req, res) => {
   try {
     const { product } = req.body;
     if (!product?.name || !product?.price) {
       return res.status(400).json({ error: 'Thiếu thông tin sản phẩm' });
     }
     const id = String(product.id || Date.now());
-    const doc = { ...product, id, createdAt: new Date() };
+    const originalPrice = Number(product.originalPrice ?? product.oldPrice ?? 0) || 0;
+    const doc = {
+      ...product,
+      id,
+      originalPrice,
+      oldPrice: originalPrice,
+      status: product.status || (Number(product.stock) > 0 ? 'active' : 'out_of_stock'),
+      createdAt: new Date()
+    };
     await adminDb.collection('products').doc(id).set(doc);
     algoliaSync.indexProduct(id, doc).catch(() => {});
-    res.json({ id, ...product });
+    res.json(doc);
   } catch (error) {
     console.error('Create product error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.patch('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ProductPatch), async (req, res) => {
+app.patch('/api/products/:id', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  sanitizeProductBody,
+  validate(schemas.ProductPatch),
+  auditProductUpdate,
+  async (req, res) => {
   try {
     const { patch } = req.body;
     const productId = String(req.params.id);
+    const normalizedPatch = { ...patch };
+    if (patch.originalPrice !== undefined || patch.oldPrice !== undefined) {
+      const originalPrice = Number(patch.originalPrice ?? patch.oldPrice ?? 0) || 0;
+      normalizedPatch.originalPrice = originalPrice;
+      normalizedPatch.oldPrice = originalPrice;
+    }
     await adminDb.collection('products').doc(productId).update({
-      ...patch,
+      ...normalizedPatch,
       updatedAt: new Date()
     });
     // Sync Algolia với data mới
@@ -766,7 +956,12 @@ app.patch('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, val
   }
 });
 
-app.delete('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/products/:id', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore,
+  auditProductDelete,
+  async (req, res) => {
   try {
     const productId = String(req.params.id);
     await adminDb.collection('products').doc(productId).delete();
@@ -779,7 +974,11 @@ app.delete('/api/products/:id', adminLimiter, requireAdmin, requireFirestore, as
 });
 
 // Algolia bulk reindex (admin)
-app.post('/api/admin/algolia/reindex', adminLimiter, requireAdmin, requireFirestore, async (_req, res) => {
+app.post('/api/admin/algolia/reindex', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  async (_req, res) => {
   try {
     const snap = await adminDb.collection('products').get();
     const products = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -831,7 +1030,12 @@ app.get('/api/products/:productId/variants', async (req, res) => {
   }
 });
 
-app.post('/api/products/:productId/variants', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.post('/api/products/:productId/variants', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  validate(schemas.VariantBody),
+  async (req, res) => {
   try {
     const { variant } = req.body || {};
     if (!variant?.sku || typeof variant.price !== 'number') {
@@ -859,7 +1063,12 @@ app.post('/api/products/:productId/variants', adminLimiter, requireAdmin, requir
   }
 });
 
-app.put('/api/products/:productId/variants/:variantId', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.put('/api/products/:productId/variants/:variantId', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  validate(schemas.VariantBody),
+  async (req, res) => {
   try {
     const { variant } = req.body || {};
     if (!variant) return res.status(400).json({ error: 'variant payload missing' });
@@ -884,7 +1093,11 @@ app.put('/api/products/:productId/variants/:variantId', adminLimiter, requireAdm
   }
 });
 
-app.delete('/api/products/:productId/variants/:variantId', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/products/:productId/variants/:variantId', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  async (req, res) => {
   try {
     await adminDb
       .collection('products').doc(String(req.params.productId))
@@ -1068,7 +1281,13 @@ app.get('/api/orders/mine', async (req, res) => {
   }
 });
 
-app.patch('/api/orders/:id/status', adminLimiter, requireAdmin, requireFirestore, validate(schemas.OrderStatusBody), async (req, res) => {
+app.patch('/api/orders/:id/status', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  validate(schemas.OrderStatusBody),
+  auditOrderStatusChange,
+  async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: 'Thiếu trạng thái' });
@@ -1147,7 +1366,13 @@ app.patch('/api/orders/:id/status', adminLimiter, requireAdmin, requireFirestore
   }
 });
 
-app.patch('/api/orders/:id/shipping', adminLimiter, requireAdmin, requireFirestore, validate(schemas.ShippingInfoBody), async (req, res) => {
+app.patch('/api/orders/:id/shipping', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  validate(schemas.ShippingInfoBody),
+  auditOrderUpdate,
+  async (req, res) => {
   try {
     const { shippingInfo } = req.body;
     await adminDb.collection('orders').doc(req.params.id).update({
@@ -1199,7 +1424,13 @@ app.get('/api/coupons', adminLimiter, requireAdmin, requireFirestore, async (_re
   }
 });
 
-app.post('/api/coupons', adminLimiter, requireAdmin, requireFirestore, validate(schemas.CouponBody), async (req, res) => {
+app.post('/api/coupons', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  validate(schemas.CouponBody),
+  auditCouponCreate,
+  async (req, res) => {
   try {
     const data = normalizeCoupon(req.body.coupon || {});
     if (!data.code) return res.status(400).json({ error: 'Thiếu mã coupon' });
@@ -1217,7 +1448,13 @@ app.post('/api/coupons', adminLimiter, requireAdmin, requireFirestore, validate(
   }
 });
 
-app.patch('/api/coupons/:code', adminLimiter, requireAdmin, requireFirestore, validate(schemas.CouponPatch), async (req, res) => {
+app.patch('/api/coupons/:code', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  validate(schemas.CouponPatch),
+  auditCouponUpdate,
+  async (req, res) => {
   try {
     const code = String(req.params.code).toUpperCase();
     const patch = normalizeCoupon({ code, ...req.body.patch });
@@ -1234,7 +1471,12 @@ app.patch('/api/coupons/:code', adminLimiter, requireAdmin, requireFirestore, va
   }
 });
 
-app.delete('/api/coupons/:code', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/coupons/:code', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore,
+  auditCouponDelete,
+  async (req, res) => {
   try {
     await adminDb.collection('coupons').doc(String(req.params.code).toUpperCase()).delete();
     res.json({ ok: true });
@@ -1298,7 +1540,12 @@ app.get('/api/products/:id/reviews', requireFirestore, async (req, res) => {
   }
 });
 
-app.post('/api/products/:id/reviews', requireFirestore, validate(schemas.ReviewBody), async (req, res) => {
+app.post('/api/products/:id/reviews', 
+  reviewStrictLimiter,
+  requireFirestore, 
+  sanitizeReviewBody,
+  validate(schemas.ReviewBody),
+  async (req, res) => {
   try {
     const productId = String(req.params.id);
     const { review } = req.body;
@@ -1348,7 +1595,11 @@ app.post('/api/products/:id/reviews', requireFirestore, validate(schemas.ReviewB
   }
 });
 
-app.delete('/api/products/:id/reviews/:reviewId', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.delete('/api/products/:id/reviews/:reviewId', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  async (req, res) => {
   try {
     const productRef = adminDb.collection('products').doc(String(req.params.id));
     await productRef.collection('reviews').doc(String(req.params.reviewId)).delete();
@@ -1389,7 +1640,11 @@ app.get('/api/addresses', async (req, res) => {
   }
 });
 
-app.post('/api/addresses', checkoutLimiter, async (req, res) => {
+app.post('/api/addresses', 
+  checkoutLimiter, 
+  sanitizeAddressBody,
+  validate(schemas.AddressBody),
+  async (req, res) => {
   try {
     if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
     const { address } = req.body || {};
@@ -1423,7 +1678,10 @@ app.post('/api/addresses', checkoutLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/addresses/:id', async (req, res) => {
+app.put('/api/addresses/:id', 
+  sanitizeAddressBody,
+  validate(schemas.AddressBody),
+  async (req, res) => {
   try {
     if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
     const { address } = req.body || {};
@@ -1485,7 +1743,11 @@ app.put('/api/addresses/:id/default', async (req, res) => {
 const { issueStripeRefund } = require('./utils/refundService');
 
 // User tạo return request
-app.post('/api/returns', checkoutLimiter, async (req, res) => {
+app.post('/api/returns', 
+  checkoutLimiter, 
+  sanitizeReturnBody,
+  validate(schemas.ReturnRequestBody),
+  async (req, res) => {
   try {
     if (!adminDb) return res.status(503).json({ error: 'Database không khả dụng' });
     const { returnRequest } = req.body || {};
@@ -1568,7 +1830,14 @@ app.get('/api/returns', async (req, res) => {
 });
 
 // Admin approve → auto refund + release inventory
-app.put('/api/returns/:id/approve', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.put('/api/returns/:id/approve', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  sanitizeReturnBody,
+  validate(schemas.ReturnApproveBody),
+  auditOrderRefund,
+  async (req, res) => {
   try {
     const { adminNote = '', refundAmount: customAmount } = req.body || {};
     const retRef = adminDb.collection('return_requests').doc(String(req.params.id));
@@ -1626,7 +1895,13 @@ app.put('/api/returns/:id/approve', adminLimiter, requireAdmin, requireFirestore
 });
 
 // Admin reject
-app.put('/api/returns/:id/reject', adminLimiter, requireAdmin, requireFirestore, async (req, res) => {
+app.put('/api/returns/:id/reject', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  requireFirestore, 
+  sanitizeReturnBody,
+  validate(schemas.ReturnRejectBody),
+  async (req, res) => {
   try {
     const { adminNote = '' } = req.body || {};
     await adminDb.collection('return_requests').doc(String(req.params.id)).update({
@@ -1683,7 +1958,12 @@ async function markOrderPaid(orderId, paymentExtras = {}) {
   }
 }
 
-app.post('/api/payments/vnpay/create', checkoutLimiter, requireFirestore, validate(schemas.VnpayCreateBody), async (req, res) => {
+app.post('/api/payments/vnpay/create', 
+  paymentLimiter,
+  checkoutLimiter, 
+  requireFirestore, 
+  validate(schemas.VnpayCreateBody), 
+  async (req, res) => {
   try {
     if (!isVnpayConfigured()) return res.status(500).json({ error: 'VNPay chưa được cấu hình' });
     const { orderId } = req.body;
@@ -1732,7 +2012,12 @@ app.get('/api/payments/vnpay/return', async (req, res) => {
 // =========================
 // MoMo
 // =========================
-app.post('/api/payments/momo/create', checkoutLimiter, requireFirestore, validate(schemas.MomoCreateBody), async (req, res) => {
+app.post('/api/payments/momo/create', 
+  paymentLimiter,
+  checkoutLimiter, 
+  requireFirestore, 
+  validate(schemas.MomoCreateBody), 
+  async (req, res) => {
   try {
     if (!isMomoConfigured()) return res.status(500).json({ error: 'MoMo chưa được cấu hình' });
     const { orderId } = req.body;
@@ -1778,59 +2063,126 @@ app.post('/api/payments/momo/ipn', express.json(), async (req, res) => {
 // =========================
 // AI Chat (Claude) API
 // =========================
-const NOVASHOP_SYSTEM_PROMPT = `Bạn là Nova — trợ lý AI của TRỌNG ĐỊNH STORE, một shop thương mại điện tử Việt Nam.
-Bạn thân thiện, nhiệt tình, trả lời bằng tiếng Việt tự nhiên như nhân viên shop thật.
-Giữ câu trả lời ngắn gọn, dưới 150 từ. Dùng emoji vừa phải.
+const NOVASHOP_SYSTEM_PROMPT = `Bạn là Nova — trợ lý AI của TRỌNG ĐỊNH STORE, chuyên gia tư vấn dinh dưỡng và chăm sóc thú cưng.
+Tính cách: thân thiện, am hiểu sâu, tự tin trả lời mọi câu hỏi về thú cưng và sản phẩm shop.
+Ngôn ngữ: tiếng Việt tự nhiên, gần gũi. Dùng markdown (bold, bullet) khi cần, KHÔNG dùng heading ##.
+Độ dài: 80–200 từ. Trả lời đầy đủ, không cắt ngắn khi chưa cần thiết.
 
-=== THÔNG TIN SHOP ===
-TÊN SHOP: TRỌNG ĐỊNH STORE
-SLOGAN: Mua sắm thông minh, chất lượng đảm bảo
-WEBSITE: trongdinhstore.vn
+QUAN TRỌNG — VỀ LIÊN HỆ HOTLINE/EMAIL:
+Chỉ gợi ý số điện thoại 0369712958 hoặc email tutrantuan988@gmail.com khi:
+- Khách đã hỏi đi hỏi lại nhiều lần (3+ lần) mà vẫn chưa giải quyết được, HOẶC
+- Vấn đề cần xử lý trực tiếp (khiếu nại, đơn hàng cụ thể, đổi trả đang xử lý)
+KHÔNG đưa số điện thoại ngay từ đầu hay khi chỉ hỏi thông thường.
 
-DANH MỤC SẢN PHẨM:
-- Thức ăn cho chó: thức ăn hạt, pate, snack, dinh dưỡng bổ sung
-- Thức ăn cho mèo: thức ăn hạt, pate, snack, cát vệ sinh
-- Phụ kiện thú cưng: đồ chơi, bát ăn, vòng cổ, dây dắt
+━━━ THÔNG TIN SHOP ━━━
+Tên: TRỌNG ĐỊNH STORE
+Slogan: Yêu thương thú cưng — Chất lượng đảm bảo
+Website: trongdinhstore.vn
+Hotline/Zalo: 0369712958 (8h–22h hàng ngày)
+Email: tutrantuan988@gmail.com
+TikTok: @nclonf
 
-CHÍNH SÁCH VẬN CHUYỂN:
-- Freeship đơn từ 300.000đ (toàn quốc)
-- Phí ship: 30.000đ cố định cho đơn dưới 300.000đ
-- Nội thành HN: giao trong ngày nếu đặt trước 14h
-- Tỉnh lân cận: 1–2 ngày | Tỉnh xa: 3–5 ngày
-- Đối tác giao hàng: GHN, GHTK, J&T Express, Viettel Post
+━━━ CATALOG SẢN PHẨM ĐẦY ĐỦ ━━━
 
-CHÍNH SÁCH ĐỔI TRẢ:
+[THỨC ĂN CHÓ]
+• Royal Canin Medium Adult 4kg — 890.000đ (sale từ 1.050.000đ) ⭐4.8
+  Chuyên cho chó giống vừa 11–25kg, hỗ trợ tiêu hóa và khớp, giảm còn từ 1.050.000đ
+• Royal Canin Mini Puppy 2kg — 520.000đ ⭐4.9
+  Chó con giống nhỏ <10kg từ 2–10 tháng, tăng cường miễn dịch, DHA não bộ
+• Pedigree Adult Beef & Vegetables 1.5kg — 185.000đ ⭐4.6
+  Chó trưởng thành, canxi + vitamin, bổ sung rau củ, phổ biến nhất phân khúc bình dân
+• Pedigree Puppy Chicken 480g — 68.000đ ⭐4.5
+  Chó con 2–12 tháng, vị gà, hỗ trợ phát triển não, giá rẻ nhất cho puppy
+• SmartHeart Adult Beef 3kg — 245.000đ ⭐4.4
+  Nhập khẩu Thái Lan, vị thịt bò, mọi giống chó trưởng thành, tốt/rẻ
+• Pedigree DentaStix 7 que — 55.000đ ⭐4.7
+  Snack gặm sạch răng, giảm mảng bám, vị thịt bò, chó từ 10kg
+
+[THỨC ĂN MÈO]
+• Whiskas Adult Tuna 1.2kg — 155.000đ ⭐4.7
+  Mèo trưởng thành >1 năm, vị cá ngừ, giảm búi lông, bán chạy nhất shop
+• Me-O Adult Seafood 1.3kg — 125.000đ ⭐4.5
+  Nhập Thái Lan, hải sản, tăng canxi + taurine, giá tốt nhất trong phân khúc
+• Royal Canin Indoor 27 2kg — 580.000đ ⭐4.9
+  Mèo trong nhà 1–7 tuổi, giảm mùi phân, kiểm soát cân nặng, cao cấp nhất
+• Fancy Feast Grilled Chicken 85g — 25.000đ/hộp ⭐4.8
+  Pate thịt gà Mỹ, bổ sung nước, mèo biếng ăn rất thích
+• Catsrang Adult Fish 1.5kg — 195.000đ ⭐4.6
+  Nhập Hàn Quốc, omega-3, lông bóng mượt
+• Nekko Creamy Chicken 4 gói — 35.000đ ⭐4.7
+  Súp kem vị gà, snack thưởng, mèo từ 3 tháng, cực kỳ phổ biến
+
+[PHỤ KIỆN]
+• Vòng cổ da cao cấp — 125.000đ | Dây dắt chó size M — 95.000đ
+• Bát inox chống trượt — 75.000đ | Đồ chơi bóng cao su — 48.000đ
+• Nhà cây mèo 3 tầng — 680.000đ | Khay vệ sinh mèo — 145.000đ
+• Lồng vận chuyển thú cưng — 350.000đ | Bàn chải lông chó mèo — 65.000đ
+
+━━━ CHÍNH SÁCH ━━━
+**Vận chuyển:**
+- Freeship đơn ≥ 300.000đ (toàn quốc, không ngoại lệ)
+- Phí ship: 30.000đ cố định cho đơn dưới ngưỡng
+- Hà Nội nội thành: giao trong ngày nếu đặt trước 14h
+- Tỉnh lân cận HN: 1–2 ngày | Tỉnh xa/miền Nam: 3–5 ngày
+- Đối tác: GHN, GHTK, J&T Express, Viettel Post
+
+**Đổi trả:**
 - 7 ngày đổi/trả kể từ ngày nhận hàng
-- Điều kiện: còn nguyên tem nhãn, chưa qua sử dụng
-- Hàng lỗi sản xuất: đổi mới 100%, shop chịu phí ship
-- Liên hệ qua Zalo hoặc hotline để tạo yêu cầu đổi trả
+- Điều kiện: còn nguyên tem nhãn, chưa qua sử dụng, có hóa đơn
+- Hàng lỗi sản xuất: đổi mới 100%, shop chịu toàn bộ phí vận chuyển 2 chiều
+- Hàng hết hạn/kém chất lượng: hoàn tiền 200% giá trị
 
-CHÍNH SÁCH THANH TOÁN:
-- COD (trả tiền mặt khi nhận hàng) — toàn quốc
-- Chuyển khoản MBBank: TK 0369712958, chủ TK TRAN TUAN TU
-- Đồng kiểm hàng trước khi thanh toán COD
+**Thanh toán:**
+- COD toàn quốc — kiểm hàng trước khi thanh toán (khuyến nghị)
+- Chuyển khoản MBBank: STK 0369712958 — TRAN TUAN TU
+- Thẻ Visa/Mastercard/JCB qua Stripe (thanh toán online bảo mật)
+- Momo (liên hệ để nhận QR)
 
-CAM KẾT CHẤT LƯỢNG:
-- 100% thức ăn chính hãng, có nguồn gốc rõ ràng
-- Hàng nhái/kém chất lượng → hoàn tiền 200% giá trị
+**Cam kết chất lượng:**
+- 100% hàng chính hãng, có tem nhập khẩu và HSD rõ ràng
+- Quay video đóng gói toàn bộ đơn hàng, lưu 30 ngày
+- Đóng gói chống ẩm, chống va đập, seal niêm phong
 
-HỖ TRỢ KHÁCH HÀNG:
-- Zalo: phản hồi trong 5 phút (8h–22h hàng ngày)
-- Hotline: 0369712958 (8h–20h)
-- Chat AI: 24/7
-- Email: tutrantuan988@gmail.com
-- TikTok: @nclonf
+━━━ KIẾN THỨC CHĂM SÓC THÚ CƯNG ━━━
+**Dinh dưỡng chó:**
+- Puppy <6 tháng: ăn 3–4 bữa/ngày, thức ăn puppy giàu DHA+protein
+- Adult 1–7 tuổi: 2 bữa/ngày, khẩu phần 2–3% cân nặng/ngày
+- Senior >7 tuổi: giảm protein, tăng chất xơ, bổ sung glucosamine
+- Chó nhỏ: cần kibble size nhỏ, không dùng thức ăn chó lớn
+- Tuyệt đối KHÔNG cho ăn: hành tây, tỏi, chocolate, nho, xylitol, avocado, macadamia
 
-ĐÓNG GÓI:
-- Thức ăn hạt bọc kín, chống ẩm, có seal niêm phong
-- Pate/snack đóng thùng carton chắc chắn, chống va đập
-- Quay video đóng gói lưu lại cho đơn hàng
+**Dinh dưỡng mèo:**
+- Mèo là carnivore hoàn toàn — cần taurine (thiếu → mù, suy tim)
+- Uống ít nước tự nhiên → nên mix pate/wet food để bổ sung nước
+- Mèo indoor: ít vận động → ăn ít hơn 10–15%, kiểm soát cân nặng
+- Hairball: bổ sung chất xơ, chải lông thường xuyên, dùng thức ăn anti-hairball
+- Tuyệt đối KHÔNG cho ăn: hành, tỏi, sữa bò (lactose), chocolate, rượu bia, xương sống nhỏ
 
-=== HƯỚNG DẪN TRẢ LỜI ===
-- Không biết thông tin → nói "Mình sẽ chuyển câu hỏi này đến nhân viên hỗ trợ nhé!"
-- Không trả lời về chính trị, tôn giáo, hay nội dung không liên quan shop
-- Nếu khách muốn mua hàng → hỏi họ cần thức ăn cho chó hay mèo, loại nào để tư vấn
-- Cuối mỗi câu khó → gợi ý "Bạn có thể nhắn Zalo 0369712958 để được hỗ trợ trực tiếp"`;
+**Chọn thức ăn theo nhu cầu:**
+- Chó/mèo biếng ăn: dùng pate kết hợp, thêm topping nước luộc gà (không muối)
+- Dị ứng da: chọn thức ăn protein đơn (1 loại thịt), tránh ngũ cốc
+- Thừa cân: giảm 20% khẩu phần, thêm rau luộc, tăng vận động
+- Chó/mèo con: KHÔNG dùng thức ăn người lớn, thiếu DHA ảnh hưởng não
+
+━━━ SO SÁNH SẢN PHẨM NỔI BẬT ━━━
+Royal Canin vs Pedigree (cho chó):
+- Royal Canin: nhập khẩu Pháp, formula theo giống+tuổi, giá cao nhưng chất lượng tốt nhất
+- Pedigree: phổ thông, giá thấp, phù hợp ngân sách, chất lượng khá tốt cho chó không kén ăn
+
+Whiskas vs Me-O vs Royal Canin (cho mèo):
+- Royal Canin Indoor: tốt nhất cho mèo nhà, kiểm soát cân và mùi, giá cao
+- Whiskas: cân bằng giữa chất lượng và giá, được mèo ưa thích
+- Me-O: giá rẻ nhất, nhập Thái, phù hợp mèo ăn tạp, ngân sách eo hẹp
+
+━━━ HƯỚNG DẪN TƯ VẤN THÔNG MINH ━━━
+1. Khách hỏi thức ăn → hỏi thêm: loài, tuổi, cân nặng, vấn đề sức khỏe → tư vấn sản phẩm phù hợp CỤ THỂ với giá
+2. Khách phân vân → so sánh cost/ngày (ví dụ: Royal Canin 4kg chỉ tốn ~7.400đ/ngày cho chó 10kg)
+3. Khách hỏi sản phẩm cụ thể → cho ngay thông tin giá, rating, ưu điểm, link trang sản phẩm
+4. Khách hỏi kiến thức thú cưng → trả lời đầy đủ như chuyên gia, không cần đẩy về hotline
+5. Vấn đề đơn hàng/khiếu nại/kỹ thuật → MỚI gợi ý liên hệ trực tiếp
+6. Cuối câu trả lời → gợi ý 1 sản phẩm liên quan hoặc câu hỏi follow-up tự nhiên
+7. KHÔNG bao giờ nói "mình không rõ" với thông tin có sẵn trong catalog trên
+8. KHÔNG đề cập số điện thoại/email trong câu trả lời thông thường`;
 
 const chatLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -1840,7 +2192,11 @@ const chatLimiter = rateLimit({
   message: { error: 'Bạn gửi tin nhắn quá nhanh. Vui lòng thử lại sau 1 phút.' }
 });
 
-app.post('/api/chat', chatLimiter, async (req, res) => {
+app.post('/api/chat', 
+  chatLimiter, 
+  sanitizeChatBody,
+  validate(schemas.ChatBody),
+  async (req, res) => {
   try {
     const { messages } = req.body;
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -1869,9 +2225,11 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: NOVASHOP_SYSTEM_PROMPT },
-          ...validMessages
+          ...validMessages.slice(-10)
         ],
-        max_tokens: 300
+        max_tokens: 500,
+        temperature: 0.7,
+        top_p: 0.9
       })
     });
 
@@ -1895,6 +2253,57 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
     });
   }
 });
+
+// Product Import API (MarkItDown pattern)
+app.use('/api/import', require('./routes/import'));
+
+// Context Cache API (Context7 pattern) — for AI Chatbot context persistence
+app.post('/api/context', publicReadLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.json({ ok: true, skipped: true });
+    const { userId, sessionId, context } = req.body || {};
+    if (!userId || !sessionId) {
+      return res.status(400).json({ error: 'userId và sessionId bắt buộc' });
+    }
+    await adminDb.collection('context_sessions').doc(`${userId}_${sessionId}`).set({
+      userId,
+      sessionId,
+      context: context || {},
+      updatedAt: new Date()
+    }, { merge: true });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Context save error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/context/:userId/:sessionId', publicReadLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.json({});
+    const { userId, sessionId } = req.params;
+    const snap = await adminDb.collection('context_sessions').doc(`${userId}_${sessionId}`).get();
+    res.json(snap.exists ? snap.data() : {});
+  } catch (error) {
+    console.error('Context load error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/context/:userId/:sessionId', publicReadLimiter, async (req, res) => {
+  try {
+    if (!adminDb) return res.json({ ok: true, skipped: true });
+    const { userId, sessionId } = req.params;
+    await adminDb.collection('context_sessions').doc(`${userId}_${sessionId}`).delete();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Context delete error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Agent System API
+app.use('/api/agents', agentRoutes);
 
 // MongoDB API routes
 app.use('/api/v1/products', productRoutes);
@@ -1923,7 +2332,12 @@ app.get('/api/upload/config', (_req, res) => {
   res.json({ cloudinaryConfigured: isCloudinaryConfigured() });
 });
 
-app.post('/api/upload/image', adminLimiter, requireAdmin, async (req, res) => {
+app.post('/api/upload/image', 
+  uploadLimiter,
+  adminStrictLimiter, 
+  requireAdmin, 
+  validate(schemas.ImageUploadBody),
+  async (req, res) => {
   try {
     const { dataUrl, folder, publicId } = req.body || {};
     if (!dataUrl || typeof dataUrl !== 'string') {
@@ -1962,7 +2376,10 @@ app.post('/api/shipping/calculate', publicReadLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/shipping/create', adminLimiter, requireAdmin, async (req, res) => {
+app.post('/api/shipping/create', 
+  adminStrictLimiter, 
+  requireAdmin, 
+  async (req, res) => {
   try {
     const result = await ghn.createShipment(req.body?.order || {});
     if (result.ok && req.body?.order?.id && adminDb) {
@@ -2079,10 +2496,16 @@ app.get('/api/notifications', async (req, res) => {
     const snap = await adminDb
       .collection('notifications')
       .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .limit(50)
       .get();
-    res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    const notifications = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() || a.createdAt?.getTime?.() || new Date(a.createdAt || 0).getTime();
+        const bTime = b.createdAt?.toMillis?.() || b.createdAt?.getTime?.() || new Date(b.createdAt || 0).getTime();
+        return bTime - aTime;
+      })
+      .slice(0, 50);
+    res.json(notifications);
   } catch (error) {
     console.error('List notifications error:', error);
     res.status(500).json({ error: error.message });
@@ -2122,29 +2545,326 @@ app.post('/api/notifications/mark-all-read', async (req, res) => {
   }
 });
 
+// =========================
+// Contact form (POST /api/contact)
+// =========================
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau 1 giờ.' }
+});
+
+// =========================
+// AI Chatbot RAG (POST /api/chat-rag)
+// =========================
+const chatRagLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau 1 phút.' }
+});
+
+// =========================
+// Subscription Management (SaaS)
+// =========================
+const { createSubscriptionCheckout, handleSubscriptionWebhook, cancelSubscription, getSubscriptionStatus } = require('./services/subscription');
+
+app.post('/api/subscription/checkout', async (req, res) => {
+  try {
+    const { tenantId, tier } = req.body || {};
+    
+    if (!tenantId || !tier) {
+      return res.status(400).json({ error: 'Thiếu tenantId hoặc tier' });
+    }
+
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(503).json({ error: 'Stripe không khả dụng' });
+    }
+
+    const checkout = await createSubscriptionCheckout(tenantId, tier, stripe, adminDb);
+    res.json(checkout);
+  } catch (error) {
+    logger.error('[Subscription] Checkout error:', error);
+    res.status(500).json({ error: error.message || 'Không thể tạo checkout session' });
+  }
+});
+
+app.post('/api/subscription/cancel', async (req, res) => {
+  try {
+    const { tenantId } = req.body || {};
+    
+    if (!tenantId) {
+      return res.status(400).json({ error: 'Thiếu tenantId' });
+    }
+
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(503).json({ error: 'Stripe không khả dụng' });
+    }
+
+    const result = await cancelSubscription(tenantId, stripe, adminDb);
+    res.json(result);
+  } catch (error) {
+    logger.error('[Subscription] Cancel error:', error);
+    res.status(500).json({ error: error.message || 'Không thể hủy subscription' });
+  }
+});
+
+app.get('/api/subscription/status/:tenantId', async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    
+    const status = await getSubscriptionStatus(tenantId, adminDb);
+    if (!status) {
+      return res.status(404).json({ error: 'Tenant không tồn tại' });
+    }
+    
+    res.json(status);
+  } catch (error) {
+    logger.error('[Subscription] Status error:', error);
+    res.status(500).json({ error: 'Không thể lấy subscription status' });
+  }
+});
+
+// Stripe webhook for subscription events
+app.post('/api/subscription/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  try {
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(503).json({ error: 'Stripe không khả dụng' });
+    }
+
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_SUBSCRIPTION_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      logger.warn('[Subscription] Webhook secret not configured');
+      return res.status(400).json({ error: 'Webhook secret not configured' });
+    }
+
+    const event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    await handleSubscriptionWebhook(event, stripe, adminDb);
+
+    res.json({ received: true });
+  } catch (error) {
+    logger.error('[Subscription] Webhook error:', error);
+    res.status(400).json({ error: 'Webhook signature verification failed' });
+  }
+});
+
+app.post('/api/chat-rag', chatRagLimiter, async (req, res) => {
+  try {
+    const { message, conversationHistory = [] } = req.body || {};
+    
+    if (!message || String(message).trim().length < 2) {
+      return res.status(400).json({ error: 'Tin nhắn quá ngắn' });
+    }
+
+    const safeMessage = sanitizeText(String(message));
+
+    // Check if OpenAI and Pinecone are configured
+    if (!process.env.OPENAI_API_KEY || !process.env.PINECONE_API_KEY) {
+      // Fallback: simple rule-based response
+      const responses = [
+        'Xin chào! Tôi có thể giúp gì cho bạn về sản phẩm thú cưng?',
+        'Bạn đang tìm kiếm thức ăn cho chó hay mèo?',
+        'Chúng tôi có nhiều thương hiệu như Royal Canin, Pedigree, Whiskas, Me-O.',
+        'Bạn có thể hỏi về giá, thành phần, hoặc cách chọn thức ăn phù hợp.',
+        'Gọi hotline 0369712958 để được tư vấn trực tiếp.'
+      ];
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      return res.json({ response: randomResponse, fallback: true });
+    }
+
+    // RAG with Pinecone
+    const { createEmbedding } = require('./services/embeddings');
+    const { queryEmbeddings } = require('./services/pinecone');
+    const OpenAI = require('openai');
+    
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    // Create embedding for user message
+    const queryEmbedding = await createEmbedding(safeMessage);
+    
+    // Query Pinecone for relevant documents
+    const relevantDocs = await queryEmbeddings(queryEmbedding, 3);
+    
+    // Build context from retrieved documents
+    const context = relevantDocs
+      .map(doc => doc.metadata?.text || '')
+      .filter(Boolean)
+      .join('\n\n');
+
+    // Build system prompt with context
+    const systemPrompt = `Bạn là trợ lý AI cho NovaShop - cửa hàng thức ăn thú cưng.
+Sử dụng thông tin sau đây để trả lời câu hỏi của khách hàng:
+
+${context}
+
+Nếu không có thông tin, hãy trả lời lịch sự và gợi ý khách hàng gọi hotline 0369712958.
+Luôn trả lời bằng tiếng Việt.`;
+
+    // Call OpenAI Chat API
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory.slice(-10),
+        { role: 'user', content: safeMessage }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    });
+
+    const aiResponse = completion.choices[0]?.message?.content || 'Xin lỗi, tôi không thể trả lời lúc này.';
+    
+    logger.info('[Chatbot] Message processed', { messageLength: safeMessage.length, hasContext: !!context });
+
+    res.json({ response: aiResponse, fallback: false });
+  } catch (error) {
+    logger.error('[Chatbot] Error:', error);
+    res.status(500).json({ 
+      error: 'Không thể xử lý tin nhắn. Vui lòng thử lại sau.',
+      fallback: true 
+    });
+  }
+});
+
+app.post('/api/contact', 
+  contactStrictLimiter, 
+  sanitizeContactBody,
+  validate(schemas.ContactBody),
+  async (req, res) => {
+  try {
+    const { name, email, phone, subject, message, recaptchaToken } = req.body || {};
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'Vui lòng điền đầy đủ tên, email và nội dung' });
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Email không hợp lệ' });
+    }
+    if (String(message).length < 10) {
+      return res.status(400).json({ error: 'Nội dung phải có ít nhất 10 ký tự' });
+    }
+
+    // Google reCAPTCHA v3 verification — chống spam
+    const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+    if (recaptchaSecret && recaptchaToken) {
+      try {
+        const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            secret: recaptchaSecret,
+            response: recaptchaToken
+          })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+          console.warn('[reCAPTCHA] Verification failed:', verifyData.score, verifyData['error-codes']);
+          return res.status(400).json({ error: 'Xác thực bảo mật thất bại. Vui lòng thử lại.' });
+        }
+      } catch (recaptchaErr) {
+        // Fail open — không block user nếu Google API lỗi
+        console.warn('[reCAPTCHA] Verification error:', recaptchaErr.message);
+      }
+    }
+
+    const safeName = sanitizeText(String(name));
+    const safeEmail = sanitizeText(String(email));
+    const safePhone = sanitizeText(String(phone || ''));
+    const safeSubject = sanitizeText(String(subject || 'Liên hệ'));
+    const safeMessage = sanitizeText(String(message));
+
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_EMAILS?.split(',')[0] || 'admin@novashop.vn';
+    const fromEmail = process.env.EMAIL_FROM || 'NovaShop <onboarding@resend.dev>';
+    const contactResend = process.env.RESEND_API_KEY ? new (require('resend')).Resend(process.env.RESEND_API_KEY) : null;
+
+    if (contactResend && adminEmail) {
+      await contactResend.emails.send({
+        from: fromEmail,
+        to: adminEmail,
+        subject: `[Liên hệ] ${safeSubject} - ${safeName}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#14213d;">
+            <div style="background:#14213d;color:#fff;padding:24px;border-radius:16px 16px 0 0;">
+              <h1 style="margin:0;font-size:22px;">Tin nhắn liên hệ mới</h1>
+            </div>
+            <div style="border:1px solid #e5e7eb;border-top:0;padding:24px;border-radius:0 0 16px 16px;">
+              <p><strong>Họ tên:</strong> ${safeName}</p>
+              <p><strong>Email:</strong> ${safeEmail}</p>
+              <p><strong>SĐT:</strong> ${safePhone || 'Không có'}</p>
+              <p><strong>Chủ đề:</strong> ${safeSubject}</p>
+              <p><strong>Nội dung:</strong></p>
+              <p style="white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:8px;">${safeMessage}</p>
+              <p style="color:#64748b;font-size:12px;margin-top:16px;">Gửi lúc: ${new Date().toLocaleString('vi-VN')}</p>
+            </div>
+          </div>
+        `
+      });
+    } else {
+      console.log('[Contact] Resend not configured — logged to console only');
+      console.log(`  Name: ${safeName}, Email: ${safeEmail}, Subject: ${safeSubject}`);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('Contact form error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: 'Không thể gửi tin nhắn. Vui lòng thử lại sau.' });
+  }
+});
+
+// Global error handlers (must be after all routes)
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 // SPA fallback — mọi route không phải API trả về index.html
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) return next();
   res.sendFile(path.resolve(__dirname, '../dist/index.html'));
 });
 
-// Catch-all 404 for API routes
+// Catch-all 404 for API routes (this is now redundant with notFoundHandler, but keeping for compatibility)
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'API endpoint không tồn tại' });
 });
 
 async function startServer() {
   await connectDatabase();
+  
+  // Khởi tạo Agent System (orchestrator)
+  try {
+    const orchestrator = require('./services/agent-orchestrator-init');
+    await orchestrator.initialize();
+    logger.info('[AgentSystem] All agents initialized successfully');
+  } catch (err) {
+    logger.warn('[AgentSystem] Could not initialize agent system:', err.message);
+  }
+  
   app.listen(PORT, () => {
-    console.log(`TRỌNG ĐỊNH STORE API server running on http://localhost:${PORT}`);
+    logger.info(`TRỌNG ĐỊNH STORE API server running on http://localhost:${PORT}`);
   });
+
+  // Start event bus subscription (microservices)
+  try {
+    subscribeToEvents();
+    logger.info('[EventBus] Event subscription started');
+  } catch (err) {
+    logger.warn('[EventBus] Could not start event subscription:', err.message);
+  }
 
   // Start abandoned cart job (P6)
   try {
     const { startAbandonedCartJob } = require('./jobs/abandonedCartJob');
     startAbandonedCartJob(adminDb);
+    logger.info('[Jobs] Abandoned cart job started');
   } catch (err) {
-    console.warn('[Jobs] Could not start abandoned cart job:', err.message);
+    logger.warn('[Jobs] Could not start abandoned cart job:', err.message);
   }
 }
 

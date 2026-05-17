@@ -6,7 +6,7 @@
  * - sanitize helpers (text-only) — tránh phụ thuộc thêm package
  */
 
-const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator, rateLimit } = require('express-rate-limit');
 const crypto = require('crypto');
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -29,7 +29,7 @@ const checkoutHardLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Quá nhiều lần đặt hàng, vui lòng đợi.' },
-  keyGenerator: (req) => req.header('x-user-id') || req.ip,
+  keyGenerator: (req) => req.header('x-user-id') || ipKeyGenerator(req.ip),
   skip: skipInDev
 });
 
@@ -47,7 +47,7 @@ const reviewLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Bạn đã viết quá nhiều đánh giá. Vui lòng đợi 1 giờ.' },
-  keyGenerator: (req) => req.header('x-user-id') || req.body?.email || req.ip,
+  keyGenerator: (req) => req.header('x-user-id') || req.body?.email || ipKeyGenerator(req.ip),
   skip: skipInDev
 });
 

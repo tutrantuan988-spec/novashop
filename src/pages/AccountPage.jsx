@@ -34,6 +34,7 @@ function AccountPage() {
   const { addToCart } = useCart();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState(null);
 
   const wishlistProducts = products.filter((p) =>
     wishlistIds.some((id) => String(id) === String(p.id))
@@ -44,7 +45,7 @@ function AccountPage() {
     if (user?.email) {
       listMyOrdersApi(user.email)
         .then((data) => setOrders(data))
-        .catch((err) => console.error('Load orders failed:', err))
+        .catch(() => setOrdersError('Không tải được đơn hàng'))
         .finally(() => setLoading(false));
     } else {
       setLoading(false);

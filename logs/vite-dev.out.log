@@ -1,0 +1,180 @@
+
+> novashop@1.0.0 dev
+> vite --host 0.0.0.0
+
+
+  [32m[1mVITE[22m v8.0.12[39m  [2mready in [0m[1m572[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://26.217.42.9:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://100.82.99.26:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.56.1:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.88.56:[1m5173[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m17:07:26[22m [36m[1m[vite][22m[39m changed tsconfig file detected: C:/Users/TUAN TU/OneDrive/Desktop/Website/apps/web/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:07:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:07:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:09:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:09:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:09:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:09:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:09:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:09:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:13:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:14:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:14:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:14:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:15:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:15:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:15:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:15:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m17:15:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/_not-found.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/analytics.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/architecture.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/billing.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/customers.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/settings.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/index.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/orders.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/products.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard/webhooks.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/app/dashboard.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/404.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/server/pages/500.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/500.html[22m
+[2m17:15:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mapps/web/.next/export/404.html[22m
+[2m18:02:54[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:02:54[22m [36m[1m[vite][22m[39m server restarted.
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://26.217.42.9:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://100.82.99.26:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.56.1:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.88.56:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.22.96.1:[1m5173[22m/[39m
+[2m18:02:54[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:02:55[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:02:55[22m [36m[1m[vite][22m[39m server restarted.
+[2m18:02:55[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:02:55[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:02:55[22m [36m[1m[vite][22m[39m server restarted.
+[2m18:02:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] scanning dependencies...
+[2m18:02:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m18:03:07[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:03:07[22m [36m[1m[vite][22m[39m server restarted.
+[2m18:03:08[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:03:08[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:03:08[22m [36m[1m[vite][22m[39m server restarted.
+[2m18:03:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] scanning dependencies...
+[2m18:03:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m18:14:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/context/CartContext.jsx, /src/context/ProductsContext.jsx, /src/components/ChatWidget.jsx, /src/components/ui/NotificationBell.jsx, /src/components/AIChatWidget.jsx[22m
+[2m18:54:31[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:54:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+[2m18:54:31[22m [36m[1m[vite][22m[39m server restarted.
+[2m18:54:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] scanning dependencies...
+[2m18:54:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m18:55:08[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m18:55:08[22m [36m[1m[vite][22m[39m server restarted.
+[2m19:12:20[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m19:12:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+[2m19:12:20[22m [36m[1m[vite][22m[39m server restarted.
+[2m19:12:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] scanning dependencies...
+[2m19:12:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m19:15:08[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m19:15:08[22m [36m[1m[vite][22m[39m server restarted.
+[2m19:21:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m19:21:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/context/AuthContext.jsx[22m
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/context/AuthContext.jsx[22m Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/context/ProductsContext.jsx, /src/components/Header.jsx, /src/context/CartContext.jsx, /src/components/AuthModal.jsx, /src/components/ProtectedRoute.jsx, /src/components/ui/NotificationBell.jsx[22m
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/context/ProductsContext.jsx[22m Could not Fast Refresh ("useProducts" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/pages/HomePage.jsx[22m
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/context/CartContext.jsx[22m Could not Fast Refresh ("useCart" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m19:26:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/components/Header.jsx, /src/components/CartDrawer.jsx, /src/components/ProductCard.jsx, /src/pages/CategoryPage.jsx[22m
+[2m19:26:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/Header.jsx[22m
+[2m19:31:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m19:36:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m

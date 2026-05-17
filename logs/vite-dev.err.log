@@ -1,0 +1,196 @@
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[2m19:54:34[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mInvalid Sentry Dsn: your_key_here
+[2m19:54:34[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m[Meta Pixel] - Invalid PixelID: null.
+[2m19:54:34[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mClerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[31m(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error: [31m  Failed to scan for dependencies from entries:
+  C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html
+
+  [31mBuild failed with 1 error:
+
+[plugin vite:dep-scan:resolve]
+Error: The server is being restarted or closed. Request is outdated
+    at throwClosedServerError (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:29947:30)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30082:65)
+    at resolveId (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30788:38)
+    at resolve (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30800:22)
+    at PluginContextImpl.resolveId (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30930:29)
+    at plugin (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/bindingify-input-options-zrVFGksD.mjs:1092:30)
+    at plugin.<computed> (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/bindingify-input-options-zrVFGksD.mjs:1625:18)
+    at aggregateBindingErrorsIntoJsError (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/error-BrnLyQ-g.mjs:48:18)
+    at unwrapBindingResult (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/error-BrnLyQ-g.mjs:18:128)
+    at scan (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/experimental-index.mjs:176:3)
+    at async Object.build (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30748:3)
+    at async scan (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30693:4)
+    at async file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:23221:15[39m
+[31m(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error: [31m  Failed to scan for dependencies from entries:
+  C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html
+
+  [31mBuild failed with 1 error:
+
+[plugin vite:dep-scan:resolve]
+Error: The server is being restarted or closed. Request is outdated
+    at throwClosedServerError (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:29947:30)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30082:65)
+    at resolveId (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30788:38)
+    at resolve (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30800:22)
+    at PluginContextImpl.resolveId (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30947:28)
+    at plugin (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/bindingify-input-options-zrVFGksD.mjs:1092:30)
+    at plugin.<computed> (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/bindingify-input-options-zrVFGksD.mjs:1625:18)
+    at aggregateBindingErrorsIntoJsError (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/error-BrnLyQ-g.mjs:48:18)
+    at unwrapBindingResult (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/shared/error-BrnLyQ-g.mjs:18:128)
+    at scan (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/rolldown/dist/experimental-index.mjs:176:3)
+    at async Object.build (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30748:3)
+    at async scan (file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:30693:4)
+    at async file:///C:/Users/TUAN%20TU/OneDrive/Desktop/Website/node_modules/vite/dist/node/chunks/node.js:23221:15[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[2m19:18:05[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mInvalid Sentry Dsn: your_key_here
+[2m19:18:06[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m[Meta Pixel] - Invalid PixelID: null.
+[2m19:18:06[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mClerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview

@@ -1,7 +1,12 @@
+// Backend route stub: POST /api/contact — handled in server/index.js
 import { memo, useState } from 'react';
-import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, MessageCircle, Shield } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { isBackendConfigured } from '../services/api';
+import { isRecaptchaConfigured, executeRecaptcha } from '../lib/recaptcha';
 import SITE from '../config/site-config';
+
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
 
 function ContactPage() {
   const toast = useToast();
@@ -13,6 +18,9 @@ function ContactPage() {
     message: ''
   });
   const [loading, setLoading] = useState(false);
+  const backendOk = isBackendConfigured();
+  const recaptchaEnabled = isRecaptchaConfigured();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,12 +28,32 @@ function ContactPage() {
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
+    if (!backendOk) {
+      toast.info('Hiện tại vui lòng liên hệ qua Zalo hoặc email để được hỗ trợ.');
+      return;
+    }
     setLoading(true);
-    // Simulate sending
-    await new Promise(r => setTimeout(r, 1000));
-    toast.success('Cảm ơn bạn! Chúng tôi sẽ liên hệ lại trong 24 giờ.');
-    setFormData({ name: '', email: '', phone: '', subject: 'Tư vấn sản phẩm', message: '' });
-    setLoading(false);
+    try {
+      // Google reCAPTCHA v3 — chống spam
+      let recaptchaToken = '';
+      if (recaptchaEnabled) {
+        recaptchaToken = await executeRecaptcha('contact_form');
+      }
+
+      const res = await fetch(`${API_BASE}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, recaptchaToken })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gửi thất bại');
+      toast.success('Cảm ơn bạn! Chúng tôi sẽ liên hệ lại trong 24 giờ.');
+      setFormData({ name: '', email: '', phone: '', subject: 'Tư vấn sản phẩm', message: '' });
+    } catch (err) {
+      toast.error(err.message || 'Không thể gửi tin nhắn. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const faqs = [
@@ -88,7 +116,7 @@ function ContactPage() {
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>Hotline</div>
-                  <div style={{ fontSize: 20, color: 'var(--accent)', fontWeight: 700 }}>0901 234 567</div>
+                  <div style={{ fontSize: 20, color: 'var(--accent)', fontWeight: 700 }}>0369712958</div>
                   <div style={{ fontSize: 14, color: 'var(--muted)' }}>8:00 - 21:00 (Tất cả các ngày)</div>
                 </div>
               </div>
@@ -108,7 +136,7 @@ function ContactPage() {
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>Email</div>
-                  <div style={{ color: 'var(--text)' }}>support@novashop.com</div>
+                  <div style={{ color: 'var(--text)' }}>tutrantuan988@gmail.com</div>
                   <div style={{ fontSize: 14, color: 'var(--muted)' }}>Phản hồi trong 24h</div>
                 </div>
               </div>
@@ -164,10 +192,17 @@ function ContactPage() {
           }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Kết Nối Với Chúng Tôi</h3>
             <div style={{ display: 'flex', gap: 12 }}>
-              {['Facebook', 'Zalo', 'Instagram'].map((social) => (
+              {[ 
+            { name: 'Facebook', href: SITE.facebook, icon: 'f' },
+            { name: 'Zalo', href: SITE.zalo, icon: 'zl' },
+            { name: 'TikTok', href: SITE.tiktok, icon: 'tt' },
+            { name: 'Instagram', href: SITE.instagram, icon: 'ig' }
+          ].map((social) => (
                 <a
-                  key={social}
-                  href="#"
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     padding: '10px 20px',
                     background: 'var(--bg)',
@@ -179,7 +214,7 @@ function ContactPage() {
                     border: '1px solid var(--border)'
                   }}
                 >
-                  {social}
+                  {social.name}
                 </a>
               ))}
             </div>
@@ -301,9 +336,36 @@ function ContactPage() {
                 />
               </div>
 
+              {!backendOk && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: '#fef3c7',
+                  border: '1px solid #f59e0b',
+                  borderRadius: 10,
+                  color: '#92400e',
+                  fontSize: 14,
+                  textAlign: 'center'
+                }}>
+                  <strong>Hiện tại vui lòng liên hệ qua Zalo: 0369712958</strong><br />
+                  hoặc email: tutrantuan988@gmail.com
+                </div>
+              )}
+              {recaptchaEnabled && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: 12,
+                  color: 'var(--muted)',
+                  justifyContent: 'center'
+                }}>
+                  <Shield size={14} />
+                  Được bảo vệ bởi Google reCAPTCHA
+                </div>
+              )}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !backendOk}
                 style={{
                   padding: '14px 24px',
                   background: 'var(--accent)',
@@ -312,12 +374,12 @@ function ContactPage() {
                   fontSize: 16,
                   fontWeight: 700,
                   border: 'none',
-                  cursor: loading ? 'wait' : 'pointer',
+                  cursor: (loading || !backendOk) ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
-                  opacity: loading ? 0.7 : 1
+                  opacity: (loading || !backendOk) ? 0.5 : 1
                 }}
               >
                 <Send size={18} />

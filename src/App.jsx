@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ProductsProvider } from './context/ProductsContext';
@@ -12,6 +12,7 @@ import CartDrawer from './components/CartDrawer';
 import AuthModal from './components/AuthModal';
 import Breadcrumb from './components/Breadcrumb';
 import ChatWidget from './components/ChatWidget';
+import AIChatWidget from './components/AIChatWidget';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 
@@ -38,6 +39,8 @@ const AddressesPage = lazy(() => import('./pages/account/AddressesPage'));
 const ReturnRequestPage = lazy(() => import('./pages/ReturnRequestPage'));
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+const DanhGiaPage = lazy(() => import('./pages/DanhGiaPage'));
+const AgentDashboardPage = lazy(() => import('./pages/AgentDashboardPage'));
 
 const Loading = () => (
   <div className="page-loading" role="status" aria-live="polite">
@@ -147,6 +150,18 @@ export default function App() {
                           </ProtectedRoute>
                         )}
                       />
+                      <Route
+                        path="/admin/agents"
+                        element={(
+                          <ProtectedRoute requireAdmin>
+                            <AgentDashboardPage />
+                          </ProtectedRoute>
+                        )}
+                      />
+                      <Route path="/danh-muc" element={<Navigate to="/dog-food" replace />} />
+                      <Route path="/khuyen-mai" element={<Navigate to="/#flash-sale" replace />} />
+                      <Route path="/danh-gia" element={<DanhGiaPage />} />
+                      <Route path="/ho-tro" element={<Navigate to="/contact" replace />} />
                       <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </Suspense>
@@ -155,6 +170,7 @@ export default function App() {
                 <CartDrawer />
                 <AuthModal />
                 <ChatWidget />
+                <AIChatWidget />
               </div>
               </CartProvider>
             </WishlistProvider>
