@@ -44,6 +44,7 @@ const CategoryPage = lazy(() => import('./pages/CategoryPage'));
 const CategoryListPage = lazy(() => import('./pages/CategoryListPage'));
 const BrandPage = lazy(() => import('./pages/BrandPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
 
 const Loading = () => (
   <div className="page-loading" role="status" aria-live="polite">
@@ -75,6 +76,8 @@ export default function App() {
                       <Route path="/chinh-sach/:slug" element={<PolicyPage />} />
                       <Route path="/about" element={<AboutPage />} />
                       <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/blog/:slug" element={<BlogPage />} />
                       <Route path="/track-order" element={<GuestOrderTrackingPage />} />
                       <Route path="/tai-khoan/dia-chi" element={(
                         <ProtectedRoute>
@@ -91,11 +94,7 @@ export default function App() {
                       <Route path="/sign-up/*" element={<SignUpPage />} />
                       <Route
                         path="/thanh-toan"
-                        element={(
-                          <ProtectedRoute>
-                            <CheckoutPage />
-                          </ProtectedRoute>
-                        )}
+                        element={<CheckoutPage />}
                       />
                       <Route
                         path="/thanh-toan/thanh-cong"

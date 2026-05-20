@@ -1,4 +1,4 @@
-# NovaShop - https://yourdomain.com
+# TRỌNG ĐỊNH STORE - https://trong-dinh-store.netlify.app
 # Robots.txt for production
 
 User-agent: *
@@ -7,8 +7,8 @@ Allow: /danh-muc/
 Allow: /san-pham/
 Allow: /thuong-hieu/
 Allow: /chinh-sach/
-Allow: /about
-Allow: /contact
+Allow: /gioi-thieu
+Allow: /lien-he
 
 # Disallow admin and account areas
 Disallow: /admin/
@@ -21,4 +21,4 @@ Disallow: /api/
 Disallow: /tim-kiem?*
 
 # Sitemap
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://trong-dinh-store.netlify.app/sitemap.xml

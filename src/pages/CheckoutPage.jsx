@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BadgeCheck, CheckCircle2, CreditCard, Truck } from 'lucide-react';
+import { BadgeCheck, CheckCircle2, CreditCard, Shield, Truck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCart } from '../context/CartContext';
@@ -13,6 +13,12 @@ import {
   createOrderApi,
   validateCouponApi
 } from '../services/api';
+import {
+  getProvinces,
+  getDistricts,
+  getWards
+} from '../services/locationApi';
+import { isRecaptchaConfigured, executeRecaptcha } from '../lib/recaptcha';
 
 const SHIPPING_FEE = 30000;
 const FREE_SHIP_THRESHOLD = 300000;
@@ -22,6 +28,7 @@ function CheckoutPageInner() {
   const { items, subtotal, clearCart } = useCart();
   const { user } = useAuth();
   const toast = useToast();
+  const recaptchaEnabled = isRecaptchaConfigured();
 
   const {
     register,
@@ -37,6 +44,8 @@ function CheckoutPageInner() {
       phone: '',
       address: '',
       city: '',
+      district: '',
+      ward: '',
       note: '',
       payment: 'cod'
     }
@@ -48,7 +57,15 @@ function CheckoutPageInner() {
   const [couponBusy, setCouponBusy] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
   const [vnpayLoading, setVnpayLoading] = useState(false);
-  const [stockIssues, setStockIssues] = useState([]); // [{ productId, name, requested, available }]
+  const [stockIssues, setStockIssues] = useState([]);
+
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedWard, setSelectedWard] = useState('');
+  const [locationLoading, setLocationLoading] = useState(false);
 
   const payment = watch('payment');
   const isPlacing = isSubmitting;
@@ -56,7 +73,46 @@ function CheckoutPageInner() {
   useEffect(() => {
     document.title = `Thanh toán - ${SITE.name}`;
     window.scrollTo({ top: 0 });
+    getProvinces().then(setProvinces).catch(() => toast.error('Không thể tải danh sách tỉnh/thành phố'));
   }, []);
+
+  useEffect(() => {
+    if (!selectedProvince) {
+      setDistricts([]);
+      setWards([]);
+      setSelectedDistrict('');
+      setSelectedWard('');
+      setValue('district', '');
+      setValue('ward', '');
+      return;
+    }
+    setLocationLoading(true);
+    getDistricts(selectedProvince)
+      .then((d) => {
+        setDistricts(d);
+        setWards([]);
+        setSelectedDistrict('');
+        setSelectedWard('');
+        setValue('district', '');
+        setValue('ward', '');
+      })
+      .catch(() => toast.error('Không thể tải danh sách quận/huyện'))
+      .finally(() => setLocationLoading(false));
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setWards([]);
+      setSelectedWard('');
+      setValue('ward', '');
+      return;
+    }
+    setLocationLoading(true);
+    getWards(selectedDistrict)
+      .then((w) => setWards(w))
+      .catch(() => toast.error('Không thể tải danh sách phường/xã'))
+      .finally(() => setLocationLoading(false));
+  }, [selectedDistrict]);
 
 
   const totals = useMemo(() => {
@@ -89,12 +145,21 @@ function CheckoutPageInner() {
 
   const handleShippingSubmit = async (data) => {
     try {
+      let recaptchaToken = '';
+      if (recaptchaEnabled) {
+        recaptchaToken = await executeRecaptcha('checkout');
+      }
+
+      const wardName = selectedWard ? wards.find(w => w.code === Number(selectedWard))?.name || '' : '';
+      const districtName = selectedDistrict ? districts.find(d => d.code === Number(selectedDistrict))?.name || '' : '';
+      const cityName = selectedProvince ? provinces.find(p => p.code === Number(selectedProvince))?.name || '' : '';
+
       const orderData = {
         customer: {
           name: data.fullName,
           email: data.email,
           phone: data.phone,
-          address: `${data.address}, ${data.city}`
+          address: `${data.address}, ${wardName}, ${districtName}, ${cityName}`
         },
         items: items.map((i) => ({
           id: i.id,
@@ -110,7 +175,8 @@ function CheckoutPageInner() {
         total: totals.total,
         paymentMethod: data.payment,
         coupon: appliedCoupon?.code || null,
-        note: data.note
+        note: data.note,
+        recaptchaToken
       };
 
       setStockIssues([]); // Reset trước mỗi lần submit
@@ -132,6 +198,26 @@ function CheckoutPageInner() {
         } catch (err) {
           setVnpayLoading(false);
           toast.error(`VNPay: ${err.message}`);
+          return;
+        }
+      }
+
+      if (data.payment === 'momo') {
+        setVnpayLoading(true);
+        try {
+          const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+          const momoRes = await fetch(`${apiBase}/api/payments/momo/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: saved.id })
+          });
+          const momoData = await momoRes.json();
+          if (!momoRes.ok) throw new Error(momoData.error || 'Không thể tạo thanh toán MoMo');
+          window.location.href = momoData.payUrl;
+          return;
+        } catch (err) {
+          setVnpayLoading(false);
+          toast.error(`MoMo: ${err.message}`);
           return;
         }
       }
@@ -213,8 +299,56 @@ function CheckoutPageInner() {
               </label>
               <label className="full">
                 <span>Tỉnh/Thành phố *</span>
-                <input {...register('city')} autoComplete="address-level2" placeholder="TP. Hồ Chí Minh" aria-invalid={!!errors.city} />
+                <select
+                  value={selectedProvince}
+                  onChange={(e) => {
+                    setSelectedProvince(e.target.value);
+                    setValue('city', e.target.value ? provinces.find(p => p.code === Number(e.target.value))?.name || '' : '');
+                  }}
+                  aria-invalid={!!errors.city}
+                >
+                  <option value="">-- Chọn tỉnh/thành phố --</option>
+                  {provinces.map((p) => (
+                    <option key={p.code} value={p.code}>{p.name}</option>
+                  ))}
+                </select>
                 {errors.city && <span className="field-error">{errors.city.message}</span>}
+              </label>
+              <label>
+                <span>Quận/Huyện *</span>
+                <select
+                  value={selectedDistrict}
+                  onChange={(e) => {
+                    setSelectedDistrict(e.target.value);
+                    setValue('district', e.target.value ? districts.find(d => d.code === Number(e.target.value))?.name || '' : '');
+                  }}
+                  disabled={!districts.length || locationLoading}
+                  aria-invalid={!!errors.district}
+                >
+                  <option value="">-- Chọn quận/huyện --</option>
+                  {districts.map((d) => (
+                    <option key={d.code} value={d.code}>{d.name}</option>
+                  ))}
+                </select>
+                {errors.district && <span className="field-error">{errors.district.message}</span>}
+              </label>
+              <label>
+                <span>Phường/Xã *</span>
+                <select
+                  value={selectedWard}
+                  onChange={(e) => {
+                    setSelectedWard(e.target.value);
+                    setValue('ward', e.target.value ? wards.find(w => w.code === Number(e.target.value))?.name || '' : '');
+                  }}
+                  disabled={!wards.length || locationLoading}
+                  aria-invalid={!!errors.ward}
+                >
+                  <option value="">-- Chọn phường/xã --</option>
+                  {wards.map((w) => (
+                    <option key={w.code} value={w.code}>{w.name}</option>
+                  ))}
+                </select>
+                {errors.ward && <span className="field-error">{errors.ward.message}</span>}
               </label>
               <label className="full">
                 <span>Ghi chú</span>
@@ -248,6 +382,13 @@ function CheckoutPageInner() {
                   <span>Thanh toán qua VNPay — hỗ trợ thẻ ATM, Visa, MasterCard, QR Pay</span>
                 </div>
               </label>
+              <label className={payment === 'momo' ? 'payment active' : 'payment'}>
+                <input type="radio" {...register('payment')} value="momo" />
+                <div>
+                  <strong>Ví MoMo</strong>
+                  <span>Thanh toán nhanh qua ví điện tử MoMo</span>
+                </div>
+              </label>
             </div>
 
             {payment === 'bank' && (
@@ -276,6 +417,17 @@ function CheckoutPageInner() {
                   ))}
                 </div>
                 <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Thanh toán VNPay" → chuyển sang cổng VNPay để thanh toán</p>
+              </div>
+            )}
+
+            {payment === 'momo' && (
+              <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: '#a5002e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                  <span style={{ color: '#fff', fontWeight: 900, fontSize: 18 }}>M</span>
+                </div>
+                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Thanh toán qua MoMo</p>
+                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Quét QR hoặc mở ứng dụng MoMo để thanh toán</p>
+                <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Thanh toán MoMo" → chuyển sang cổng MoMo để thanh toán</p>
               </div>
             )}
           </div>
@@ -350,9 +502,26 @@ function CheckoutPageInner() {
             className="primary-button submit-btn"
             disabled={isPlacing || vnpayLoading}
           >
-            {isPlacing || vnpayLoading ? 'Đang xử lý...' : payment === 'vnpay' ? <><CreditCard size={18} aria-hidden /> Thanh toán VNPay</> : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
+            {isPlacing || vnpayLoading ? 'Đang xử lý...' : payment === 'vnpay' ? <><CreditCard size={18} aria-hidden /> Thanh toán VNPay</> : payment === 'momo' ? <><CreditCard size={18} aria-hidden /> Thanh toán MoMo</> : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
           </button>
           <p className="checkout-note">Bằng việc đặt hàng, bạn đồng ý với điều khoản và chính sách của {SITE.name}.</p>
+
+          <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--muted)', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Shield size={14} style={{ color: '#10b981' }} /> SSL bảo mật
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Shield size={14} style={{ color: '#10b981' }} /> Bảo vệ dữ liệu
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <CheckCircle2 size={14} style={{ color: '#10b981' }} /> Thanh toán an toàn
+            </span>
+          </div>
+          {recaptchaEnabled && (
+            <p style={{ marginTop: 8, fontSize: 11, color: 'var(--muted)', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+              <Shield size={12} /> Form được bảo vệ bởi Google reCAPTCHA
+            </p>
+          )}
         </aside>
       </form>
     </section>

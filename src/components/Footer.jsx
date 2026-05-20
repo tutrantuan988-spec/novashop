@@ -39,6 +39,7 @@ function Footer() {
           <h3>{t.footer.about} {SITE.name}</h3>
           <ul>
             <li><a href="/about">Giới thiệu</a></li>
+            <li><a href="/blog">Blog & Kiến thức</a></li>
             <li><a href="/chinh-sach/bao-mat">{t.footer.privacy}</a></li>
             <li><a href="/danh-gia">{t.footer.reviews}</a></li>
             <li><a href="/contact">{t.footer.contact}</a></li>
@@ -51,6 +52,7 @@ function Footer() {
             <li><Phone size={16} aria-hidden /> {SITE.phone}</li>
             <li><Mail size={16} aria-hidden /> {SITE.email}</li>
             <li><MapPin size={16} aria-hidden /> {SITE.address}</li>
+            <li style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>MST: {SITE.taxId}</li>
           </ul>
         </div>
       </div>

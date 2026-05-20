@@ -1,12 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, Loader } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CreditCard, Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, Loader } from 'lucide-react';
 import { fetchProductBySlug, fetchRelatedProducts } from '../services/apiV2';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import SITE from '../config/site-config';
 import ProductCard from '../components/ProductCard';
 import ProductReviews from '../components/ProductReviews';
+import SocialProof from '../components/SocialProof';
 import SEO from '../components/SEO';
 import { formatVND } from '../utils/format';
 
@@ -308,9 +309,24 @@ function ProductDetailPage() {
             </span>
           </div>
 
+          <SocialProof productId={product.id} />
+
           <div className="detail-price">
             <strong>{formatVND(currentPrice)}</strong>
             {currentOldPrice ? <span>{formatVND(currentOldPrice)}</span> : null}
+            {currentOldPrice && currentOldPrice > currentPrice && (
+              <span style={{
+                background: '#ef4444',
+                color: '#fff',
+                padding: '2px 8px',
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 700,
+                marginLeft: 8
+              }}>
+                -{Math.round((1 - currentPrice / currentOldPrice) * 100)}%
+              </span>
+            )}
           </div>
 
           {product.badge && (
@@ -407,13 +423,35 @@ function ProductDetailPage() {
               <ShoppingCart size={18} aria-hidden />
               {currentStock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
             </button>
+            <button
+              type="button"
+              className="primary-button"
+              disabled={currentStock <= 0}
+              onClick={() => {
+                addToCart(product, quantity, selectedVariant);
+                navigate('/thanh-toan');
+              }}
+              style={{
+                background: '#10b981',
+                opacity: currentStock <= 0 ? 0.5 : 1,
+                cursor: currentStock <= 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <CreditCard size={18} aria-hidden />
+              Mua ngay
+            </button>
             <button type="button" className="secondary-button" aria-label="Yêu thích" onClick={() => product && toggleWishlist(product.id)}>
               <Heart size={18} fill={product && isInWishlist(product.id) ? 'currentColor' : 'none'} />
             </button>
-            <button type="button" className="secondary-button" aria-label="Chia sẻ" onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
+            <button type="button" className="secondary-button" aria-label="Chia sẻ Facebook" onClick={() => {
+              window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400');
             }}>
-              <Share2 size={18} />
+              <span style={{ fontSize: 16, fontWeight: 700 }}>f</span>
+            </button>
+            <button type="button" className="secondary-button" aria-label="Chia sẻ Zalo" onClick={() => {
+              window.open(`https://zalo.me/share?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(product?.name || '')}`, '_blank');
+            }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#0068ff' }}>Zalo</span>
             </button>
           </div>
 

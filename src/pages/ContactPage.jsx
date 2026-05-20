@@ -188,7 +188,8 @@ function ContactPage() {
             background: 'var(--surface)', 
             borderRadius: 20, 
             padding: 30,
-            border: '1px solid var(--border)'
+            border: '1px solid var(--border)',
+            marginBottom: 24
           }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Kết Nối Với Chúng Tôi</h3>
             <div style={{ display: 'flex', gap: 12 }}>
@@ -218,6 +219,26 @@ function ContactPage() {
                 </a>
               ))}
             </div>
+          </div>
+
+          {/* Google Maps */}
+          <div style={{ 
+            background: 'var(--surface)', 
+            borderRadius: 20, 
+            overflow: 'hidden',
+            border: '1px solid var(--border)'
+          }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, padding: '20px 30px 0' }}>Bản Đồ</h3>
+            <iframe
+              title="Bản đồ cửa hàng"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.506841849408!2d106.69830631533484!3d10.776910992320032!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4b4e3db4e1%3A0x7e5e5e5e5e5e5e5e!2zMTIzIE5ndXnhu4VuIFbEg24gQSwgUXXhuq1uIDEsIFRQLiBIQ00!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn"
+              width="100%"
+              height="250"
+              style={{ border: 0, marginTop: 16 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
 

@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Minus, Plus, ShoppingCart, Trash2, ArrowLeft, Package } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Trash2, ArrowLeft, Package, Tag } from 'lucide-react';
 import { formatVND } from '../utils/format';
-import { fetchPgCart, addToPgCart, updatePgCartItem, removePgCartItem, clearPgCart, getSessionId } from '../services/api';
+import { fetchPgCart, addToPgCart, updatePgCartItem, removePgCartItem, clearPgCart, getSessionId, validateCouponApi } from '../services/api';
 import { useCart } from '../context/CartContext';
 import SITE from '../config/site-config';
 
@@ -13,6 +13,11 @@ function CartPageInner() {
   const [error, setError] = useState(null);
   const [updatingItems, setUpdatingItems] = useState(new Set());
   const { addToCart } = useCart();
+
+  const [coupon, setCoupon] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [couponBusy, setCouponBusy] = useState(false);
 
   const loadCart = useCallback(async () => {
     try {
@@ -73,6 +78,29 @@ function CartPageInner() {
         return next;
       });
     }
+  };
+
+  const applyCoupon = async (event) => {
+    event.preventDefault();
+    const code = coupon.trim().toUpperCase();
+    if (!code) return;
+    setCouponBusy(true);
+    try {
+      const result = await validateCouponApi(code, cart?.subtotal || 0);
+      setAppliedCoupon(result);
+      setCouponMessage(result.message || 'Áp dụng mã thành công');
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponMessage(err.message || 'Mã không hợp lệ');
+    } finally {
+      setCouponBusy(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon('');
+    setAppliedCoupon(null);
+    setCouponMessage('');
   };
 
   const handleCheckout = async () => {
@@ -332,43 +360,125 @@ function CartPageInner() {
         border: '1.5px solid var(--border)',
         padding: '24px 28px',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
+        flexDirection: 'column',
         gap: 16
       }}>
-        <div>
-          <span style={{ fontSize: 14, color: 'var(--muted)' }}>Tạm tính</span>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)', lineHeight: 1.2 }}>
-            {formatVND(cart?.subtotal || 0)}
-          </div>
+        {/* Coupon row */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Tag size={18} style={{ color: 'var(--muted)', flexShrink: 0 }} />
+          {appliedCoupon ? (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <span style={{
+                padding: '6px 12px',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 700,
+                color: '#10b981'
+              }}>
+                {appliedCoupon.code} — Giảm {formatVND(appliedCoupon.discount || 0)}
+              </span>
+              <button
+                type="button"
+                onClick={removeCoupon}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 8,
+                  border: '1px solid var(--border)',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  color: 'var(--muted)'
+                }}
+              >
+                Xóa
+              </button>
+            </div>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={coupon}
+                onChange={(e) => setCoupon(e.target.value)}
+                placeholder="Nhập mã giảm giá"
+                disabled={couponBusy}
+                style={{
+                  flex: 1,
+                  minWidth: 180,
+                  padding: '10px 14px',
+                  borderRadius: 10,
+                  border: '1.5px solid var(--border)',
+                  background: 'var(--bg)',
+                  fontSize: 14,
+                  color: 'var(--text)',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="button"
+                onClick={applyCoupon}
+                disabled={couponBusy || !coupon.trim()}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: couponBusy || !coupon.trim() ? 'var(--border)' : 'var(--accent)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: couponBusy || !coupon.trim() ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {couponBusy ? 'Đang kiểm tra...' : 'Áp dụng'}
+              </button>
+            </>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link to="/" style={{
-            padding: '12px 20px',
-            borderRadius: 12,
-            border: '1.5px solid var(--border)',
-            background: 'transparent',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: 14,
-            color: 'var(--text)',
-            textDecoration: 'none'
-          }}>
-            Tiếp tục mua
-          </Link>
-          <button
-            type="button"
-            className="primary-button"
-            onClick={handleCheckout}
-            style={{
-              padding: '12px 28px',
-              fontSize: 15,
-              fontWeight: 700
-            }}
-          >
-            Tiến hành thanh toán
-          </button>
+        {couponMessage && !appliedCoupon && (
+          <p style={{ fontSize: 13, color: '#ef4444', margin: 0, paddingLeft: 26 }}>{couponMessage}</p>
+        )}
+
+        {/* Totals and checkout */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+          <div>
+            <span style={{ fontSize: 14, color: 'var(--muted)' }}>Tạm tính</span>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)', lineHeight: 1.2 }}>
+              {formatVND(cart?.subtotal || 0)}
+            </div>
+            {appliedCoupon && appliedCoupon.discount > 0 && (
+              <div style={{ fontSize: 14, color: '#10b981', fontWeight: 600 }}>
+                Giảm giá: -{formatVND(appliedCoupon.discount)}
+              </div>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Link to="/" style={{
+              padding: '12px 20px',
+              borderRadius: 12,
+              border: '1.5px solid var(--border)',
+              background: 'transparent',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: 14,
+              color: 'var(--text)',
+              textDecoration: 'none'
+            }}>
+              Tiếp tục mua
+            </Link>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleCheckout}
+              style={{
+                padding: '12px 28px',
+                fontSize: 15,
+                fontWeight: 700
+              }}
+            >
+              Tiến hành thanh toán
+            </button>
+          </div>
         </div>
       </div>
     </section>

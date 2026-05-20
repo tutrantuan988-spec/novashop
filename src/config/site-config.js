@@ -10,6 +10,7 @@ const SITE = {
   phone: import.meta.env.VITE_SHOP_PHONE || '0369712958',
   email: import.meta.env.VITE_SHOP_EMAIL || 'tutrantuan988@gmail.com',
   address: import.meta.env.VITE_SHOP_ADDRESS || 'Hà Nội, Việt Nam',
+  taxId: import.meta.env.VITE_SHOP_TAX_ID || '0109876543',
   facebook: import.meta.env.VITE_SHOP_FACEBOOK || '#',
   instagram: import.meta.env.VITE_SHOP_INSTAGRAM || '#',
   youtube: import.meta.env.VITE_SHOP_YOUTUBE || '#',

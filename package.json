@@ -15,6 +15,7 @@
     "seed": "node server/seed.js",
     "seed:firestore": "node server/seed.js",
     "seed:mongo": "node server/seed-mongodb.js",
+    "seed:postgres": "node scripts/seed-postgres.js",
     "deploy:docker": "docker-compose up --build -d",
     "deploy:render": "render deploy --config render.yaml",
     "prisma:generate": "prisma generate",

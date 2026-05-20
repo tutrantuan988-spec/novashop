@@ -131,6 +131,25 @@
       })();
     </script>
 
+    <!-- Facebook Messenger Chat Button -->
+    <script>
+      (function() {
+        var fbPageId = '%VITE_FACEBOOK_PAGE_ID%';
+        if (!fbPageId || fbPageId === '000000000000000') return;
+        var btn = document.createElement('div');
+        btn.style.cssText = 'position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:#0084ff;cursor:pointer;z-index:9998;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,132,255,0.35);transition:transform 0.2s';
+        btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.712 7.288V22l3.402-1.872c.936.258 1.928.402 2.956.415l-.07-.015c5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.191 11.977l-2.547-2.722-4.99 2.722 5.475-5.803 2.605 2.722 4.932-2.722-5.475 5.803z"/></svg>';
+        btn.id = 'messenger-btn';
+        btn.title = 'Chat với chúng tôi qua Messenger';
+        btn.onmouseenter = function() { this.style.transform = 'scale(1.1)'; };
+        btn.onmouseleave = function() { this.style.transform = 'scale(1)'; };
+        btn.onclick = function() {
+          window.open('https://m.me/' + fbPageId, '_blank', 'width=400,height=600');
+        };
+        document.body.appendChild(btn);
+      })();
+    </script>
+
     <!-- Schema.org: Organization -->
     <script type="application/ld+json">
     {
