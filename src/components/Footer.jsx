@@ -28,6 +28,8 @@ function Footer() {
           <h3>{t.footer.support}</h3>
           <ul>
             <li><a href="/danh-muc">Danh mục sản phẩm</a></li>
+            <li><a href="/so-sanh">So sánh sản phẩm</a></li>
+            <li><a href="/flash-sale">Flash Sale</a></li>
             <li><a href="/chinh-sach/doi-tra">{t.footer.returns}</a></li>
             <li><a href="/chinh-sach/van-chuyen">{t.footer.shipping}</a></li>
             <li><a href="/chinh-sach/dieu-khoan">{t.footer.terms}</a></li>
