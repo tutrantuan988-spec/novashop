@@ -9,10 +9,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
-import AuthModal from './components/AuthModal';
 import Breadcrumb from './components/Breadcrumb';
 import ChatWidget from './components/ChatWidget';
-import AIChatWidget from './components/AIChatWidget';
+import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 
@@ -175,9 +174,8 @@ export default function App() {
                 </main>
                 <Footer />
                 <CartDrawer />
-                <AuthModal />
                 <ChatWidget />
-                <AIChatWidget />
+                <ScrollToTop />
               </div>
               </CartProvider>
             </WishlistProvider>

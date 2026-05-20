@@ -1,30 +1,29 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Eraser, Send, Sparkles, X, Zap } from 'lucide-react';
 import { isBackendConfigured } from '../services/api';
+import SITE from '../config/site-config';
 
-const STORAGE_KEY = 'trongdinhstore:chatMessages_v2';
+const STORAGE_KEY = 'chatMessages_v2';
 const BACKEND_OK = isBackendConfigured();
 
-const WELCOME = { role: 'assistant', content: 'Xin chào! Mình là **Nova** — trợ lý AI của NovaShop.\n\nMình có thể giúp bạn **tư vấn sản phẩm**, **so sánh giá**, hoặc giải đáp mọi câu hỏi. Bạn cần hỏi gì nào?' };
+const WELCOME = { role: 'assistant', content: `Xin chao! Minh la tro ly AI cua ${SITE.name}.\n\nMình có thể giúp bạn **tư vấn sản phẩm**, **so sánh giá**, hoặc giải đáp mọi câu hỏi. Bạn cần hỏi gì nào?` };
 
 const QUICK_QUESTIONS = [
-  '🐕 Thức ăn cho chó nào tốt?',
-  '🐈 Gợi ý thức ăn cho mèo',
+  '🛍️ Sản phẩm nào đang hot?',
   '🚚 Freeship từ bao nhiêu?',
   '↩️ Đổi trả như thế nào?',
-  '💳 Thanh toán COD được không?',
+  '💳 Thanh toán ra sao?',
   '⚡ Giao hàng mất bao lâu?',
+  '📦 Theo dõi đơn hàng?',
 ];
 
 const SUGGESTED_REPLIES = {
   freeship:   ['Đơn tôi đã đủ 300k chưa?', 'Giao hàng mất bao lâu?'],
   doi_tra:    ['Cách tạo yêu cầu đổi trả', 'Điều kiện hàng được đổi'],
-  cho:        ['Royal Canin giá bao nhiêu?', 'Pedigree cho chó con được không?', 'Chó tôi bị kén ăn thì dùng gì?'],
-  meo:        ['Whiskas hay Me-O tốt hơn?', 'Mèo trong nhà nên ăn gì?', 'Nekko Creamy là gì?'],
-  puppy:      ['Chó con mấy tháng ăn được hạt khô?', 'Royal Canin Puppy giá bao nhiêu?'],
-  dinh_duong: ['Cho chó ăn mấy lần/ngày?', 'Khẩu phần theo cân nặng thế nào?'],
-  phu_kien:   ['Vòng cổ loại nào tốt?', 'Nhà cây mèo 3 tầng giá bao nhiêu?'],
-  compare:    ['So sánh Royal Canin và Pedigree', 'Loại nào tốt cho chó nhỏ?'],
+  gia:        ['Sản phẩm nào giá tốt?', 'Có khuyến mãi gì không?'],
+  san_pham:   ['Có sản phẩm mới không?', 'Gợi ý sản phẩm hot'],
+  thanh_toan: ['Có thanh toán COD không?', 'Chuyển khoản được không?'],
+  don_hang:   ['Làm sao theo dõi đơn hàng?', 'Đơn hàng của tôi ở đâu?'],
 };
 
 function localNovaReply(text) {
@@ -33,24 +32,21 @@ function localNovaReply(text) {
     return 'Bạn bấm nút **Đăng nhập** màu cam trên thanh đầu trang. Nếu chưa có tài khoản, chọn **Đăng ký ngay** trong form đăng nhập nhé.';
   }
   if (t.includes('thanh toán') || t.includes('cod') || t.includes('chuyển khoản') || t.includes('visa') || t.includes('stripe')) {
-    return 'Shop hỗ trợ **COD khi nhận hàng** và **chuyển khoản MBBank**. Thanh toán thẻ quốc tế đang cần backend Stripe nên trên bản cloud có thể tạm bảo trì.';
+    return `Shop hỗ trợ **COD khi nhận hàng** và **chuyển khoản MBBank**. ${SITE.name} đang tích hợp thêm thanh toán online đa dạng.`;
   }
   if (t.includes('giao') || t.includes('ship') || t.includes('freeship')) {
-    return 'Shop giao toàn quốc. Đơn từ **300K được freeship**. Nội thành thường giao trong ngày, tỉnh thành khoảng 2-4 ngày.';
+    return `Shop giao toàn quốc. Đơn từ **300K được freeship**. Nội thành thường giao trong ngày, tỉnh thành khoảng 2-4 ngày.`;
   }
   if (t.includes('đổi') || t.includes('trả') || t.includes('hoàn')) {
-    return 'Bạn được hỗ trợ **đổi trả 7 ngày** nếu sản phẩm còn nguyên tem nhãn hoặc có lỗi từ nhà sản xuất. Liên hệ Zalo **0369712958** để xử lý nhanh.';
-  }
-  if (t.includes('chó') || t.includes('dog') || t.includes('puppy')) {
-    return 'Với chó, bạn có thể tham khảo **Royal Canin**, **Pedigree** hoặc **SmartHeart**. Chó con nên dùng dòng puppy, hạt nhỏ và dễ tiêu hóa.';
-  }
-  if (t.includes('mèo') || t.includes('cat') || t.includes('whiskas') || t.includes('me-o')) {
-    return 'Với mèo, các lựa chọn phổ biến là **Whiskas**, **Me-O**, **Royal Canin** và **Nekko**. Mèo trong nhà nên chọn loại hỗ trợ tiêu búi lông và kiểm soát cân nặng.';
+    return `Bạn được hỗ trợ **đổi trả 7 ngày** nếu sản phẩm còn nguyên tem nhãn hoặc có lỗi từ nhà sản xuất. Liên hệ Zalo **${SITE.phone}** để xử lý nhanh.`;
   }
   if (t.includes('giá') || t.includes('rẻ') || t.includes('khuyến mãi')) {
-    return 'Bạn có thể dùng ô **tìm kiếm** trên đầu trang hoặc vào mục **Khuyến mãi** để xem sản phẩm giá tốt. Nếu cần tư vấn nhanh, nhắn Zalo **0369712958**.';
+    return `Bạn có thể dùng ô **tìm kiếm** trên đầu trang hoặc vào mục **Khuyến mãi** để xem sản phẩm giá tốt. Nếu cần tư vấn nhanh, nhắn Zalo **${SITE.phone}**.`;
   }
-  return 'Mình đã nhận được câu hỏi của bạn. Hiện Nova đang chạy ở chế độ hỗ trợ nhanh trên cloud. Bạn có thể hỏi về **thức ăn chó mèo**, **giao hàng**, **thanh toán**, **đổi trả**, hoặc liên hệ Zalo **0369712958** để được tư vấn trực tiếp.';
+  if (t.includes('theo dõi') || t.includes('tình trạng') || t.includes('đơn hàng')) {
+    return `Bạn vào mục **Theo dõi đơn hàng** trên website, nhập mã đơn hàng để xem tình trạng giao hàng nhé.`;
+  }
+  return `Mình đã nhận được câu hỏi của bạn. Bạn có thể hỏi về **sản phẩm**, **giao hàng**, **thanh toán**, **đổi trả**, hoặc liên hệ Zalo **${SITE.phone}** để được tư vấn trực tiếp.`;
 }
 
 function renderMarkdown(text) {
@@ -119,14 +115,12 @@ function ChatWidget() {
 
   const getSuggestions = useCallback((text) => {
     const t = text.toLowerCase();
-    if (t.includes('puppy') || t.includes('chó con') || t.includes('2 tháng') || t.includes('3 tháng')) return SUGGESTED_REPLIES.puppy;
-    if (t.includes('royal canin') || t.includes('pedigree') || t.includes('so sánh')) return SUGGESTED_REPLIES.compare;
-    if (t.includes('chó') || t.includes('dog')) return SUGGESTED_REPLIES.cho;
-    if (t.includes('mèo') || t.includes('cat') || t.includes('whiskas') || t.includes('nekko')) return SUGGESTED_REPLIES.meo;
+    if (t.includes('theo dõi') || t.includes('tình trạng') || t.includes('đơn hàng')) return SUGGESTED_REPLIES.don_hang;
+    if (t.includes('giá') || t.includes('rẻ') || t.includes('khuyến mãi')) return SUGGESTED_REPLIES.gia;
+    if (t.includes('sản phẩm') || t.includes('gợi ý') || t.includes('hot')) return SUGGESTED_REPLIES.san_pham;
+    if (t.includes('thanh toán') || t.includes('cod') || t.includes('chuyển khoản')) return SUGGESTED_REPLIES.thanh_toan;
     if (t.includes('freeship') || t.includes('vận chuyển') || t.includes('giao hàng') || t.includes('300')) return SUGGESTED_REPLIES.freeship;
     if (t.includes('đổi') || t.includes('trả') || t.includes('hoàn tiền')) return SUGGESTED_REPLIES.doi_tra;
-    if (t.includes('dinh dưỡng') || t.includes('khẩu phần') || t.includes('bữa') || t.includes('ăn')) return SUGGESTED_REPLIES.dinh_duong;
-    if (t.includes('vòng cổ') || t.includes('dây dắt') || t.includes('phụ kiện') || t.includes('nhà cây')) return SUGGESTED_REPLIES.phu_kien;
     return [];
   }, []);
 
@@ -160,7 +154,7 @@ function ChatWidget() {
     } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Không thể kết nối 😔 Liên hệ Zalo: 0369712958 để được hỗ trợ.'
+        content: `Không thể kết nối 😔 Liên hệ Zalo: ${SITE.phone} để được hỗ trợ.`
       }]);
     } finally {
       setLoading(false);
@@ -178,12 +172,12 @@ function ChatWidget() {
   return (
     <div className="chat-widget">
       {open && (
-        <div className="chat-panel" role="dialog" aria-label="Chat hỗ trợ Nova">
+        <div className="chat-panel" role="dialog" aria-label={`Chat hỗ trợ ${SITE.name}`}>
           <div className="chat-header">
             <div className="chat-header-left">
               <div className="nova-header-avatar">🐾</div>
               <div>
-                <strong>Nova <Zap size={13} className="nova-zap" /></strong>
+                <strong>{SITE.name} <Zap size={13} className="nova-zap" /></strong>
                 <span className="chat-status">
                   <span className="chat-online-dot" />
                   AI trợ lý · 24/7
@@ -205,7 +199,7 @@ function ChatWidget() {
               <div className="chat-bubble assistant">
                 <div className="nova-avatar" aria-hidden>🐾</div>
                 <div className="chat-bubble-inner">
-                  <p>Chat đang bảo trì 🛠️ Liên hệ Zalo: <strong>0369712958</strong> để được hỗ trợ ngay.</p>
+                  <p>Chat đang bảo trì 🛠️ Liên hệ Zalo: <strong>{SITE.phone}</strong> để được hỗ trợ ngay.</p>
                 </div>
               </div>
             )}
@@ -254,8 +248,8 @@ function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-                placeholder="Hỏi Nova về sản phẩm..."
-                aria-label="Tin nhắn cho Nova"
+                placeholder={`Hỏi ${SITE.name} về sản phẩm...`}
+                aria-label={`Tin nhắn cho ${SITE.name}`}
                 disabled={loading}
               />
               <button type="submit" aria-label="Gửi" disabled={!input.trim() || loading}>
@@ -265,10 +259,10 @@ function ChatWidget() {
           ) : (
             <p style={{ textAlign: 'center', padding: '12px', color: '#888', fontSize: '13px' }}>
               Chat đang bảo trì 🛠️<br/>
-              Liên hệ Zalo: <strong>0369712958</strong>
+              Liên hệ Zalo: <strong>{SITE.phone}</strong>
             </p>
           )}
-          <p className="chat-powered">Powered by <Sparkles size={10} /> Groq LLaMA 3.3</p>
+          <p className="chat-powered">Powered by <Sparkles size={10} /> AI</p>
         </div>
       )}
 
@@ -276,14 +270,14 @@ function ChatWidget() {
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        {!open && showTooltip && <div className="chat-tooltip">Chat với Nova �</div>}
+        {!open && showTooltip && <div className="chat-tooltip">Chat với {SITE.name} 💬</div>}
         {!open && unreadCount > 0 && <span className="chat-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
         <button
           type="button"
           className={`chat-toggle ${!open ? 'chat-pulse' : ''}`}
           onClick={() => setOpen((p) => !p)}
-          aria-label={open ? 'Đóng chat' : 'Chat với Nova AI'}
-          title={open ? 'Đóng chat' : 'Chat với Nova'}
+          aria-label={open ? 'Đóng chat' : `Chat với ${SITE.name}`}
+          title={open ? 'Đóng chat' : `Chat với ${SITE.name}`}
         >
           {open ? <X size={22} /> : <span style={{ fontSize: 22 }}>🐾</span>}
         </button>

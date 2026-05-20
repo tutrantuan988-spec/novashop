@@ -44,8 +44,8 @@ function Header() {
       <div className="header-row1">
         <Link className="logo" to="/" aria-label={`${SITE.name} trang chủ`}>
           <span><ShoppingBag size={22} aria-hidden /></span>
-          <strong>TRỌNG ĐỊNH STORE</strong>
-          <small>Trang chủ</small>
+          <strong>{SITE.name}</strong>
+          <small>{SITE.slogan}</small>
         </Link>
 
         <div className="header-search-wrap">

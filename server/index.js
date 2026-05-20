@@ -4050,6 +4050,63 @@ app.post('/api/contact',
   }
 });
 
+// =========================
+// AI Chat Proxy (backend-only — không lộ API key ra frontend)
+// =========================
+const aiChatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: { error: 'Too many AI requests. Please try again later.' }
+});
+
+app.post('/api/ai/chat', aiChatLimiter, async (req, res) => {
+  try {
+    const { message, history = [] } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message required' });
+
+    const shopName = process.env.SHOP_NAME || 'NovaShop';
+    const systemPrompt = `Ban la tro ly AI cua ${shopName}. Tra loi ngan gon, than thien bang tieng Viet. Khong tra loi cac cau hoi khong lien quan den mua sam.`;
+
+    // Try OpenAI first, then Groq fallback
+    let reply;
+    try {
+      const { OpenAI } = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const response = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...history.slice(-10),
+          { role: 'user', content: message }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      });
+      reply = response.choices[0].message.content;
+    } catch (openaiErr) {
+      // Fallback to Groq
+      const Groq = require('groq-sdk');
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const response = await groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...history.slice(-10),
+          { role: 'user', content: message }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      });
+      reply = response.choices[0].message.content;
+    }
+
+    res.json({ message: reply });
+  } catch (err) {
+    logger.error('AI chat error:', { error: err.message });
+    res.status(500).json({ error: 'Khong the ket noi AI. Vui long thu lai sau.' });
+  }
+});
+
 // Global error handlers (must be after all routes)
 app.use(notFoundHandler);
 app.use(errorHandler);

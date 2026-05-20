@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, Loader } from 'lucide-react';
 import { fetchProductBySlug, fetchRelatedProducts } from '../services/apiV2';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import SITE from '../config/site-config';
 import ProductCard from '../components/ProductCard';
 import ProductReviews from '../components/ProductReviews';
@@ -41,6 +42,7 @@ const badgeColors = {
 function ProductDetailPage() {
   const { slug } = useParams();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -422,8 +424,14 @@ function ProductDetailPage() {
               <ShoppingCart size={18} aria-hidden />
               {currentStock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
             </button>
-            <button type="button" className="secondary-button" aria-label="Yêu thích"><Heart size={18} /></button>
-            <button type="button" className="secondary-button" aria-label="Chia sẻ"><Share2 size={18} /></button>
+            <button type="button" className="secondary-button" aria-label="Yêu thích" onClick={() => product && toggleWishlist(product.id)}>
+              <Heart size={18} fill={product && isInWishlist(product.id) ? 'currentColor' : 'none'} />
+            </button>
+            <button type="button" className="secondary-button" aria-label="Chia sẻ" onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+            }}>
+              <Share2 size={18} />
+            </button>
           </div>
 
           <ul className="detail-policy">

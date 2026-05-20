@@ -23,7 +23,7 @@ function AboutPage() {
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 16 }}>Về {SITE.name}</h1>
         <p style={{ fontSize: 20, color: 'var(--muted)', maxWidth: 600, margin: '0 auto' }}>
-          Người Bạn Đồng Hành Cùng Thú Cưng Của Bạn
+          Mua Sắm Thông Minh, Chất Lượng Hàng Đầu
         </p>
       </div>
 
@@ -156,15 +156,15 @@ function AboutPage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Phone size={20} style={{ color: 'var(--accent)' }} />
-            <span>0901 234 567</span>
+            <span>{SITE.phone}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Mail size={20} style={{ color: 'var(--accent)' }} />
-            <span>support@novashop.com</span>
+            <span>{SITE.email}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <MapPin size={20} style={{ color: 'var(--accent)' }} />
-            <span>TP. Hồ Chí Minh</span>
+            <span>{SITE.address}</span>
           </div>
         </div>
         <a 
