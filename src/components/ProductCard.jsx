@@ -1,14 +1,17 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Star } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Scale } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useComparison } from '../context/ComparisonContext';
 import { formatVND } from '../utils/format';
 
 function ProductCard({ product }) {
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { isInCompare, addToCompare, removeFromCompare } = useComparison();
   const liked = isWishlisted(product.id);
+  const comparing = isInCompare(product.id);
 
   return (
     <article className="product-card">
@@ -47,10 +50,30 @@ function ProductCard({ product }) {
             <strong>{formatVND(product.price)}</strong>
             {product.oldPrice ? <span>{formatVND(product.oldPrice)}</span> : null}
           </div>
-          <button type="button" onClick={() => addToCart(product)} aria-label={`Thêm ${product.name} vào giỏ`}>
-            <ShoppingBag size={15} aria-hidden />
-            Thêm
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              onClick={() => comparing ? removeFromCompare(product.id) : addToCompare(product)}
+              aria-label={comparing ? 'Bỏ so sánh' : 'Thêm so sánh'}
+              style={{
+                border: '1.5px solid var(--border)',
+                background: comparing ? 'var(--accent)' : 'transparent',
+                color: comparing ? '#fff' : 'var(--muted)',
+                padding: '6px 8px',
+                borderRadius: 8,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.2s'
+              }}
+            >
+              <Scale size={15} aria-hidden />
+            </button>
+            <button type="button" onClick={() => addToCart(product)} aria-label={`Thêm ${product.name} vào giỏ`}>
+              <ShoppingBag size={15} aria-hidden />
+              Thêm
+            </button>
+          </div>
         </div>
       </div>
     </article>

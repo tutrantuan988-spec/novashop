@@ -1,11 +1,12 @@
 import { memo, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ArrowRight, Crown, Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, ShoppingCart, Sun, User, X, ChevronDown } from 'lucide-react';
+import { ArrowRight, Crown, Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, ShoppingCart, Sun, User, X, ChevronDown, Scale } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useI18n } from '../context/I18nContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useComparison } from '../context/ComparisonContext';
 import { fetchCategoryTree } from '../services/apiV2';
 import NotificationBell from './ui/NotificationBell';
 import SearchBar from './search/SearchBar';
@@ -15,6 +16,7 @@ function Header() {
   const { totalItems, openCart } = useCart();
   const { user, isAuthenticated, isAdmin, authLoading, openAuthModal, logout } = useAuth();
   const { count: wishlistCount } = useWishlist();
+  const { compareList } = useComparison();
   const { isDark, toggleTheme } = useTheme();
   const { lang, toggleLang, t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -208,6 +210,17 @@ function Header() {
             </Link>
           )}
 
+          {compareList.length > 0 && (
+            <Link to="/so-sanh" className="icon-button compare-pill" aria-label={`So sánh (${compareList.length})`} style={{
+              background: 'rgba(139, 92, 246, 0.1)',
+              color: '#8b5cf6',
+              border: '1.5px solid rgba(139, 92, 246, 0.3)'
+            }}>
+              <Scale size={18} />
+              <strong>{compareList.length}</strong>
+            </Link>
+          )}
+
           <NotificationBell />
 
           <Link to="/tim-kiem" className="icon-button mobile-only" aria-label="Tìm kiếm">
@@ -278,6 +291,7 @@ function Header() {
             )}
           </div>
           <NavLink to="/khuyen-mai" onClick={() => setIsMenuOpen(false)}>{navLabels.deals}</NavLink>
+          <NavLink to="/blog" onClick={() => setIsMenuOpen(false)}>Blog</NavLink>
           <NavLink to="/danh-gia" onClick={() => setIsMenuOpen(false)}>{navLabels.reviews}</NavLink>
           <NavLink to="/ho-tro" onClick={() => setIsMenuOpen(false)}>{navLabels.concierge}</NavLink>
           {isAdmin && <NavLink to="/admin" onClick={() => setIsMenuOpen(false)}>{navLabels.admin}</NavLink>}

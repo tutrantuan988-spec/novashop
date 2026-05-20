@@ -12,6 +12,7 @@ import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import Breadcrumb from './components/Breadcrumb';
 import ChatWidget from './components/ChatWidget';
+import CompareBar from './components/CompareBar';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
@@ -181,6 +182,7 @@ export default function App() {
                 <Footer />
                 <CartDrawer />
                 <ChatWidget />
+                <CompareBar />
                 <ScrollToTop />
               </div>
               </CartProvider>
