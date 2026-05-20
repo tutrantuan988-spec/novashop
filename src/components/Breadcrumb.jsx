@@ -4,6 +4,7 @@ import { ChevronRight, Home } from 'lucide-react';
 
 const LABELS = {
   'san-pham': 'Sản phẩm',
+  'danh-muc': 'Danh mục',
   'thanh-toan': 'Thanh toán',
   'tai-khoan': 'Tài khoản',
   'profile': 'Thông tin cá nhân',
@@ -16,10 +17,7 @@ const LABELS = {
   'bao-mat': 'Bảo mật',
   'dieu-khoan': 'Điều khoản',
   'faq': 'FAQ',
-  'lien-he': 'Liên hệ',
-  'dog-food': 'Thức ăn cho chó',
-  'cat-food': 'Thức ăn cho mèo',
-  'pet-accessories': 'Phụ kiện thú cưng'
+  'lien-he': 'Liên hệ'
 };
 
 function Breadcrumb() {
@@ -32,7 +30,8 @@ function Breadcrumb() {
   let path = '';
   for (const seg of segments) {
     path += `/${seg}`;
-    items.push({ label: LABELS[seg] || seg, to: path });
+    const label = LABELS[seg] || seg.replace(/-/g, ' ');
+    items.push({ label, to: path });
   }
 
   // Last item is not clickable

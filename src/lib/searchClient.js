@@ -4,26 +4,8 @@
  * Priority:
  * 1. Algolia (if env keys present)
  * 2. /api/search backend
- * 3. Local categoryProducts fallback (always works offline)
+ * 3. Empty fallback
  */
-import { ALL_CATEGORY_PRODUCTS } from '../data/categoryProducts';
-
-function localSearch(query, filters = {}, hitsPerPage = 20) {
-  const q = query.toLowerCase();
-  let hits = ALL_CATEGORY_PRODUCTS.filter(
-    (p) =>
-      p.name?.toLowerCase().includes(q) ||
-      (p.description || '').toLowerCase().includes(q) ||
-      (p.brand || '').toLowerCase().includes(q) ||
-      (p.category || '').toLowerCase().includes(q)
-  );
-  if (filters.brand) hits = hits.filter((p) => p.brand === filters.brand);
-  if (filters.category) hits = hits.filter((p) => p.category === filters.category);
-  if (filters.minPrice) hits = hits.filter((p) => (p.price || 0) >= filters.minPrice);
-  if (filters.maxPrice) hits = hits.filter((p) => (p.price || 0) <= filters.maxPrice);
-  if (filters.minRating) hits = hits.filter((p) => (p.rating || 0) >= filters.minRating);
-  return hits.slice(0, hitsPerPage).map((p) => ({ ...p, objectID: p.id }));
-}
 
 const ALGOLIA_APP_ID = import.meta.env.VITE_ALGOLIA_APP_ID;
 const ALGOLIA_SEARCH_KEY = import.meta.env.VITE_ALGOLIA_SEARCH_KEY;

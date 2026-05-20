@@ -1,9 +1,9 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Edit3, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useProducts } from '../../context/ProductsContext';
+import { fetchCategories } from '../../services/apiV2';
 import SITE from '../../config/site-config';
-import { categories } from '../../data/products';
 import { formatVND } from '../../utils/format';
 import { uploadProductImage } from '../../services/upload';
 
@@ -17,13 +17,26 @@ const emptyForm = {
   stock: '',
   badge: '',
   image: '',
-  description: ''
+  description: '',
+  brand: ''
 };
 
 function ProductsTab() {
   const { items, addProduct, updateProduct, removeProduct, resetProducts } = useProducts();
   const toast = useToast();
   const [form, setForm] = useState(emptyForm);
+  const [categories, setCategories] = useState(['Tất cả']);
+
+  // Fetch categories from PostgreSQL on mount
+  useEffect(() => {
+    fetchCategories().then((cats) => {
+      if (cats?.names?.length > 1) {
+        setCategories(cats.names);
+      }
+    }).catch(() => {
+      // Keep defaults on error
+    });
+  }, []);
   const [editingId, setEditingId] = useState(null);
   const [filter, setFilter] = useState('Tất cả');
   const [query, setQuery] = useState('');
@@ -65,6 +78,7 @@ function ProductsTab() {
       originalPrice: Number(form.oldPrice) || 0,
       stock: Number(form.stock) || 0,
       badge: form.badge || 'Mới',
+      brand: form.brand || '',
       image: form.image || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=900&q=80',
       description: form.description || `Sản phẩm mới của ${SITE.name}.`
     };
@@ -93,7 +107,8 @@ function ProductsTab() {
       stock: String(product.stock || 0),
       badge: product.badge || '',
       image: product.image,
-      description: product.description || ''
+      description: product.description || '',
+      brand: product.brand || ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -130,6 +145,10 @@ function ProductsTab() {
           <label>
             <span>Badge</span>
             <input name="badge" value={form.badge} onChange={onChange} placeholder="Mới, Hot, Sale..." />
+          </label>
+          <label>
+            <span>Thương hiệu</span>
+            <input name="brand" value={form.brand} onChange={onChange} placeholder="Royal Canin, Pedigree..." />
           </label>
           <label>
             <span>Giá bán (VND) *</span>

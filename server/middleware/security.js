@@ -65,6 +65,42 @@ function sanitizeText(input) {
 }
 
 /**
+ * Deep sanitize an object — sanitize all string values recursively.
+ * Useful for request body sanitization.
+ */
+function sanitizeObject(obj, maxDepth = 5) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (maxDepth <= 0) return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item, maxDepth - 1));
+  }
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'string') {
+      sanitized[key] = sanitizeText(value);
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeObject(value, maxDepth - 1);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
+/**
+ * Middleware: Sanitize request body strings to prevent XSS.
+ * Apply to routes that accept user input.
+ */
+function sanitizeBody(req, res, next) {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
+  }
+  next();
+}
+
+/**
  * Idempotency middleware:
  * - Read `Idempotency-Key` header
  * - Nếu key đã thấy trong 24h → return cached response
@@ -118,5 +154,7 @@ module.exports = {
   publicReadLimiter,
   reviewLimiter,
   sanitizeText,
+  sanitizeObject,
+  sanitizeBody,
   idempotencyMiddleware
 };

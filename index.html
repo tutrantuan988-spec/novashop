@@ -78,12 +78,6 @@
         fbq('track', 'PageView');
       })();
     </script>
-    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=PageView&noscript=1" alt="" /></noscript>
-
-    <!-- Google Tag Manager (noscript) -->
-    <noscript>
-      <iframe src="https://www.googletagmanager.com/ns.html?id=%VITE_GTM_ID%" height="0" width="0" style="display:none;visibility:hidden"></iframe>
-    </noscript>
 
     <!-- Tawk.to Live Chat (chỉ load khi có TAWKTO_ID) -->
     <script>
@@ -201,6 +195,10 @@
     </script>
   </head>
   <body>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=PageView&noscript=1" alt="" /></noscript>
+    <noscript>
+      <iframe src="https://www.googletagmanager.com/ns.html?id=%VITE_GTM_ID%" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
     <div id="root"></div>
     <noscript>Bạn cần bật JavaScript để trải nghiệm %VITE_SHOP_NAME%.</noscript>
     <script type="module" src="/src/main.jsx"></script>

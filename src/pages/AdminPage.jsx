@@ -1,6 +1,6 @@
 import { lazy, memo, Suspense, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { RotateCcw, Package, BarChart3, ShoppingBag, Tag, ShieldCheck, RotateCw } from 'lucide-react';
+import { RotateCcw, Package, BarChart3, ShoppingBag, Tag, ShieldCheck, RotateCw, Layers } from 'lucide-react';
 import {
   clearAdminSessionToken,
   getAdminConfigApi,
@@ -13,6 +13,7 @@ import { useToast } from '../context/ToastContext';
 import SITE from '../config/site-config';
 import { useProducts } from '../context/ProductsContext';
 import CouponManager from '../components/CouponManager';
+import CategoryManager from '../components/admin/CategoryManager';
 import ReturnsManager from '../components/admin/ReturnsManager';
 import ProductImportManager from '../components/admin/ProductImportManager';
 
@@ -196,6 +197,13 @@ function AdminPage() {
         </button>
         <button
           type="button"
+          className={activeTab === 'categories' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('categories')}
+        >
+          <Layers size={16} aria-hidden /> Danh mục
+        </button>
+        <button
+          type="button"
           className={activeTab === 'returns' ? 'tab active' : 'tab'}
           onClick={() => setActiveTab('returns')}
         >
@@ -215,6 +223,7 @@ function AdminPage() {
         {activeTab === 'products' && <ProductsTab />}
         {activeTab === 'orders' && <OrdersTab />}
         {activeTab === 'coupons' && <CouponManager adminEmail={user?.email} />}
+        {activeTab === 'categories' && <CategoryManager adminEmail={user?.email} />}
         {activeTab === 'returns' && <ReturnsManager adminEmail={user?.email} />}
         {activeTab === 'import' && <ProductImportManager adminEmail={user?.email} />}
       </Suspense>

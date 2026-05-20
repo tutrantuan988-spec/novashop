@@ -297,6 +297,19 @@ export function listMyOrdersApi(email) {
   return request(`/api/orders/mine?email=${encodeURIComponent(email)}`);
 }
 
+export async function listMyPgOrdersApi() {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const res = await fetch(`${API_BASE}/api/orders/pg`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to load orders');
+  }
+  return res.json();
+}
+
 export function getOrderSummaryApi(id) {
   return request(`/api/orders/${id}/summary`);
 }
@@ -355,4 +368,233 @@ export function createReviewApi(productId, review) {
 
 export function deleteReviewApi(productId, reviewId, adminEmail) {
   return request(`/api/products/${productId}/reviews/${reviewId}`, { method: 'DELETE', adminEmail });
+}
+
+// ===== PostgreSQL Cart API (Commerce Core) =====
+// Session ID is stored in localStorage; generated on first visit
+export function getSessionId() {
+  if (typeof window === 'undefined') return '';
+  let sid = window.localStorage.getItem('novashop:sessionId');
+  if (!sid) {
+    sid = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
+    window.localStorage.setItem('novashop:sessionId', sid);
+  }
+  return sid;
+}
+
+export async function fetchPgCart() {
+  const sid = getSessionId();
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/api/cart?session_id=${encodeURIComponent(sid)}`, { headers });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to load cart');
+  }
+  return res.json();
+}
+
+export async function addToPgCart(productId, { variantId, quantity } = {}) {
+  const sid = getSessionId();
+  const token = getAuthToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/api/cart/add`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ session_id: sid, product_id: productId, variant_id: variantId || null, quantity: quantity || 1 })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to add to cart');
+  }
+  return res.json();
+}
+
+export async function updatePgCartItem(itemId, quantity) {
+  const res = await fetch(`${API_BASE}/api/cart/item/${encodeURIComponent(itemId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quantity })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update cart item');
+  }
+  return res.json();
+}
+
+export async function removePgCartItem(itemId) {
+  const res = await fetch(`${API_BASE}/api/cart/item/${encodeURIComponent(itemId)}`, {
+    method: 'DELETE'
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to remove cart item');
+  }
+  return res.json();
+}
+
+export async function clearPgCart() {
+  const sid = getSessionId();
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/api/cart?session_id=${encodeURIComponent(sid)}`, {
+    method: 'DELETE',
+    headers
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to clear cart');
+  }
+  return res.json();
+}
+
+export async function checkoutPgCart({ customer_name, customer_phone, customer_email, shipping_address, payment_method, notes }) {
+  const sid = getSessionId();
+  const token = getAuthToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/api/checkout`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ session_id: sid, customer_name, customer_phone, customer_email, shipping_address, payment_method: payment_method || 'cod', notes })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data.error || 'Checkout failed');
+    err.code = data.code;
+    err.insufficient_items = data.insufficient_items;
+    throw err;
+  }
+  return res.json();
+}
+
+export async function fetchPgOrders({ limit, offset } = {}) {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const params = new URLSearchParams();
+  if (limit) params.set('limit', limit);
+  if (offset) params.set('offset', offset);
+  const res = await fetch(`${API_BASE}/api/orders/pg?${params.toString()}`, { headers });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to load orders');
+  }
+  return res.json();
+}
+
+// ===== PostgreSQL Auth API (Commerce Core) =====
+const AUTH_TOKEN_KEY = 'novashop:authToken';
+
+export function getAuthToken() {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+export function setAuthToken(token) {
+  if (typeof window === 'undefined') return;
+  if (token) {
+    window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+  } else {
+    window.localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
+
+export function clearAuthToken() {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+async function authRequest(path, { method = 'GET', body } = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Request failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function registerApi({ email, password, full_name }) {
+  return authRequest('/api/auth/register', {
+    method: 'POST',
+    body: { email, password, full_name }
+  });
+}
+
+export async function loginApi({ email, password }) {
+  return authRequest('/api/auth/login', {
+    method: 'POST',
+    body: { email, password }
+  });
+}
+
+export async function loginWithGoogleApi(idToken) {
+  return authRequest('/api/auth/google', {
+    method: 'POST',
+    body: { idToken }
+  });
+}
+
+export async function getMeApi() {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const res = await fetch(`${API_BASE}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    if (res.status === 401) clearAuthToken();
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Session expired');
+  }
+  return res.json();
+}
+
+export async function updateProfileApi(data) {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const res = await fetch(`${API_BASE}/api/auth/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to update profile');
+  }
+  return res.json();
+}
+
+export async function changePasswordApi(currentPassword, newPassword) {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const res = await fetch(`${API_BASE}/api/auth/change-password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to change password');
+  }
+  return res.json();
+}
+
+export async function fetchPgOrderDetail(orderId) {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/api/orders/pg/${encodeURIComponent(orderId)}`, { headers });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to load order');
+  }
+  return res.json();
 }

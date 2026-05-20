@@ -39,3 +39,15 @@ product-import-template.*
 
 # Project setup
 project-setup.log
+
+# Runtime logs
+logs/
+*.log
+server*.log
+nul
+
+# AI agent specs
+.kiro/
+
+# Legacy backend
+backend/

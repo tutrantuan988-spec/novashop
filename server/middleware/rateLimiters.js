@@ -129,6 +129,21 @@ const trackingLimiter = rateLimit({
   }
 });
 
+/**
+ * Rate limiter for checkout operations
+ * Prevents checkout abuse
+ */
+const checkoutLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  limit: 20, // 20 checkouts per hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { 
+    error: 'Quá nhiều lần đặt hàng. Vui lòng thử lại sau.',
+    code: 'RATE_LIMIT_CHECKOUT'
+  }
+});
+
 module.exports = {
   authStrictLimiter,
   adminStrictLimiter,
@@ -137,5 +152,6 @@ module.exports = {
   uploadLimiter,
   contactStrictLimiter,
   reviewStrictLimiter,
-  trackingLimiter
+  trackingLimiter,
+  checkoutLimiter
 };

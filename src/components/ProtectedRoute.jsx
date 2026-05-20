@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ForbiddenPage from '../pages/ForbiddenPage';
 
 function ProtectedRoute({ children, requireAdmin = false }) {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -10,7 +11,7 @@ function ProtectedRoute({ children, requireAdmin = false }) {
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/" replace />;
+    return <ForbiddenPage />;
   }
 
   return children;

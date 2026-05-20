@@ -1,7 +1,7 @@
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local'), override: true });
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -27,7 +27,7 @@ const logger = require('./utils/logger');
 const { correlationId } = require('./middleware/correlationId');
 const { prototypePollutionProtection } = require('./middleware/sanitize');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-const { requireAdminLegacy } = require('./middleware/auth');
+const { requireAdminLegacy, requireAuth, requireAdmin: requireJwtAdmin } = require('./middleware/auth');
 const { auditLog, AUDIT_EVENTS } = require('./middleware/auditLog');
 
 // Import reusable audit and sanitization middleware
@@ -63,7 +63,8 @@ const {
   uploadLimiter,
   contactStrictLimiter,
   reviewStrictLimiter,
-  trackingLimiter
+  trackingLimiter,
+  checkoutLimiter
 } = require('./middleware/rateLimiters');
 
 function getStripe() {
@@ -96,11 +97,6 @@ const {
   idempotencyMiddleware
 } = require('./middleware/security');
 const algoliaSync = require('./utils/algoliaSync');
-const { connectDatabase } = require('./models');
-const productRoutes = require('./routes/products');
-const orderRoutes = require('./routes/orders');
-const userRoutes = require('./routes/users');
-const adminRoutes = require('./routes/admin');
 const agentRoutes = require('./routes/agents');
 const {
   isVnpayConfigured,
@@ -149,17 +145,24 @@ try {
     adminDb.collection('_probe').limit(1).get().catch((err) => {
       console.warn('[Firebase Admin] Credentials probe failed, disabling Firestore:', err.message);
       adminDb = null;
-      app.locals.adminDb = null;
     });
-    
-    // Store in app.locals for middleware access
-    app.locals.adminDb = adminDb;
   } else {
     console.warn('[Firebase Admin] No project ID — price validation will fall back to client values');
   }
 } catch (err) {
   console.warn('[Firebase Admin] Init failed:', err.message);
 }
+
+// PostgreSQL Database (Commerce Core Refactor - Phase 1)
+const { initializePool: initPostgresPool } = require('./db/postgres');
+(async () => {
+  try {
+    await initPostgresPool();
+    console.log('[PostgreSQL] Connection pool initialized');
+  } catch (err) {
+    console.warn('[PostgreSQL] Init failed:', err.message);
+  }
+})();
 
 const app = express();
 
@@ -223,447 +226,150 @@ app.get('/api/health', async (_req, res) => {
   res.status(report.status === 'healthy' ? 200 : 503).json(report);
 });
 
-// Dynamic SEO files (sử dụng domain từ CLIENT_URL)
-const siteDomain = process.env.CLIENT_URL ? new URL(process.env.CLIENT_URL).hostname : 'localhost';
-app.get('/robots.txt', (_req, res) => {
-  res.type('text/plain');
-  res.send(`User-agent: *\nAllow: /\nSitemap: ${process.env.CLIENT_URL || 'https://' + siteDomain}/sitemap.xml`);
-});
-app.get('/sitemap.xml', (_req, res) => {
-  const base = process.env.CLIENT_URL || `https://${siteDomain}`;
-  res.type('application/xml');
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+// GET /sitemap.xml — Dynamic sitemap for SEO
+app.get('/sitemap.xml', async (_req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const baseUrl = process.env.SITE_URL || 'http://localhost:5173';
+    const now = new Date().toISOString();
+
+    const [catsResult, prodsResult] = await Promise.all([
+      pgQuery(`SELECT slug, updated_at FROM categories WHERE is_active = true AND show_in_homepage = true ORDER BY display_order`),
+      pgQuery(`SELECT slug, updated_at FROM products WHERE status = 'active' ORDER BY created_at DESC LIMIT 5000`)
+    ]);
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${base}/</loc><priority>1.0</priority></url>
-  <url><loc>${base}/thanh-toan</loc><priority>0.6</priority></url>
-  <url><loc>${base}/tai-khoan</loc><priority>0.5</priority></url>
-  <url><loc>${base}/chinh-sach/doi-tra</loc><priority>0.6</priority></url>
-  <url><loc>${base}/chinh-sach/van-chuyen</loc><priority>0.6</priority></url>
-  <url><loc>${base}/chinh-sach/bao-mat</loc><priority>0.6</priority></url>
-  <url><loc>${base}/chinh-sach/dieu-khoan</loc><priority>0.6</priority></url>
-  <url><loc>${base}/chinh-sach/faq</loc><priority>0.6</priority></url>
-  <url><loc>${base}/chinh-sach/lien-he</loc><priority>0.6</priority></url>
-</urlset>`);
-});
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${now}</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/danh-muc</loc>
+    <lastmod>${now}</lastmod>
+    <priority>0.8</priority>
+  </url>
+`;
 
-// Webhook cần raw body — đăng ký TRƯỚC json parser
-app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  let event;
-  try {
-    const stripe = getStripe();
-    if (stripe && webhookSecret) {
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } else {
-      event = JSON.parse(req.body.toString());
-      if (!stripe) console.warn('[Webhook] Stripe not configured');
-      if (!webhookSecret) console.warn('[Webhook] No STRIPE_WEBHOOK_SECRET — signature not verified');
-    }
-  } catch (err) {
-    console.error('[Webhook] Signature error:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const orderId = session.metadata?.orderId;
-    console.log('[Webhook] checkout.session.completed for order:', orderId);
-    if (orderId && adminDb) {
-      try {
-        // Idempotency: chống xử lý webhook 2 lần
-        const processedRef = adminDb.collection('processed_webhooks').doc(event.id);
-        const processedSnap = await processedRef.get();
-        if (processedSnap.exists) {
-          console.log('[Webhook] Already processed:', event.id);
-          return res.json({ received: true });
-        }
-
-        const orderRef = adminDb.collection('orders').doc(orderId);
-        const orderSnap = await orderRef.get();
-        const order = orderSnap.exists ? orderSnap.data() : null;
-        const paidOrder = order ? { ...order, id: orderId } : null;
-
-        await orderRef.update({
-          status: 'paid',
-          paymentStatus: 'paid',
-          stripeSessionId: session.id,
-          paymentIntentId: session.payment_intent || null,
-          paidAt: new Date()
-        });
-
-        // Reserve inventory atomically — chỉ khi order chưa được reserve
-        if (order?.items?.length && !order.inventoryReserved) {
-          try {
-            const reserveItems = order.items.map((it) => ({
-              productId: it.id || it.productId,
-              variantId: it.variantId || null,
-              quantity: Number(it.quantity) || 1,
-              name: it.name
-            }));
-            await reserveInventory(adminDb, reserveItems, {
-              orderId,
-              userId: order.customer?.userId || order.userId || null,
-              type: 'sale',
-              note: `Stripe payment ${session.id}`
-            });
-            await orderRef.update({ inventoryReserved: true });
-          } catch (invErr) {
-            // Đã thanh toán nhưng hết hàng → flag để admin xử lý refund
-            console.error('[Webhook] Inventory reserve failed:', invErr.message);
-            await orderRef.update({
-              status: 'paid_oversold',
-              inventoryError: invErr.message,
-              insufficientItems: invErr.insufficientItems || []
-            });
-          }
-        }
-
-        await processedRef.set({
-          eventId: event.id,
-          eventType: event.type,
-          orderId,
-          processedAt: new Date()
-        });
-
-        if (paidOrder) {
-          await sendOrderPaidEmails({
-            ...paidOrder,
-            status: 'paid',
-            paymentStatus: 'paid'
-          });
-        }
-      } catch (err) {
-        console.error('[Webhook] Update order failed:', err.message);
-      }
-    }
-  }
-
-  res.json({ received: true });
-});
-
-app.use(express.json({ limit: '12mb' })); // Higher limit for base64 image upload (P9)
-app.use(prototypePollutionProtection); // Prevent prototype pollution attacks
-app.use(express.static(path.resolve(__dirname, '../dist')));
-
-const PORT = process.env.PORT || 3001;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
-
-const checkoutLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Bạn thao tác quá nhanh. Vui lòng thử lại sau.' }
-});
-
-const adminLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  limit: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Bạn thao tác quá nhanh. Vui lòng thử lại sau 1 phút.' }
-});
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' }
-});
-
-// General API rate limiting (excludes webhook registered earlier)
-app.use('/api', apiLimiter);
-
-function isAdminEmail(email) {
-  const admins = (process.env.ADMIN_EMAILS || 'admin@example.com')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  return admins.includes(String(email || '').toLowerCase());
-}
-
-function readBearerToken(req) {
-  const header = req.header('authorization') || '';
-  if (!header.toLowerCase().startsWith('bearer ')) return '';
-  return header.slice(7).trim();
-}
-
-function safeTokenEqual(actual, expected) {
-  const actualBuffer = Buffer.from(String(actual || ''));
-  const expectedBuffer = Buffer.from(String(expected || ''));
-  return actualBuffer.length === expectedBuffer.length
-    && crypto.timingSafeEqual(actualBuffer, expectedBuffer);
-}
-
-function requireAdmin(req, res, next) {
-  const email = req.header('x-admin-email');
-  if (!isAdminEmail(email)) {
-    return res.status(403).json({ error: 'Bạn không có quyền admin' });
-  }
-  const expectedToken = process.env.ADMIN_API_TOKEN;
-  if (!expectedToken && IS_PRODUCTION) {
-    return res.status(503).json({ error: 'ADMIN_API_TOKEN chưa được cấu hình trên server production' });
-  }
-  if (expectedToken) {
-    const token = readBearerToken(req);
-    if (!safeTokenEqual(token, expectedToken)) {
-      return res.status(403).json({ error: 'Token admin không hợp lệ' });
-    }
-  }
-  req.adminEmail = email;
-  next();
-}
-
-function requireFirestore(req, res, next) {
-  if (!adminDb) {
-    return res.status(503).json({ error: 'Firestore không khả dụng — máy chủ chưa cấu hình credentials' });
-  }
-  next();
-}
-
-app.get('/api/admin/config', (_req, res) => {
-  res.json({
-    tokenRequired: IS_PRODUCTION || !!process.env.ADMIN_API_TOKEN,
-    tokenConfigured: !!process.env.ADMIN_API_TOKEN
-  });
-});
-
-app.get('/api/admin/verify', adminLimiter, requireAdmin, (req, res) => {
-  res.json({ ok: true, adminEmail: req.adminEmail });
-});
-
-app.get('/api/integrations/status', adminLimiter, requireAdmin, (_req, res) => {
-  res.json({
-    firestore: {
-      configured: !!adminDb,
-      label: 'Firestore database',
-      action: adminDb ? null : 'Kiem tra FIREBASE_PROJECT_ID va FIREBASE_SERVICE_ACCOUNT_FILE'
-    },
-    cloudinary: {
-      configured: hasRealEnv('CLOUDINARY_CLOUD_NAME') && hasRealEnv('CLOUDINARY_API_KEY') && hasRealEnv('CLOUDINARY_API_SECRET'),
-      label: 'Cloudinary upload',
-      action: 'Dien CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET'
-    },
-    resend: {
-      configured: hasRealEnv('RESEND_API_KEY') && hasRealEnv('EMAIL_FROM') && hasRealEnv('ADMIN_NOTIFICATION_EMAIL'),
-      label: 'Resend email',
-      action: 'Dien RESEND_API_KEY, EMAIL_FROM, ADMIN_NOTIFICATION_EMAIL'
-    },
-    stripe: {
-      configured: hasRealEnv('STRIPE_SECRET_KEY') && hasRealEnv('VITE_STRIPE_PUBLISHABLE_KEY') && hasRealEnv('STRIPE_WEBHOOK_SECRET'),
-      label: 'Stripe payments',
-      action: 'Dien VITE_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET'
-    },
-    momo: {
-      configured: isMomoConfigured(),
-      label: 'MoMo payments',
-      action: 'Dien MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, MOMO_SECRET_KEY'
-    },
-    vnpay: {
-      configured: isVnpayConfigured(),
-      label: 'VNPay payments',
-      action: 'Dien VNP_TMN_CODE va VNP_HASH_SECRET'
-    },
-    ghn: {
-      configured: hasRealEnv('GHN_API_TOKEN') && hasRealEnv('GHN_SHOP_ID'),
-      label: 'GHN shipping',
-      action: 'Dien GHN_API_TOKEN va GHN_SHOP_ID'
-    },
-    algolia: {
-      configured: algoliaSync.isAlgoliaConfigured(),
-      label: 'Algolia search',
-      action: 'Dien ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY, VITE_ALGOLIA_SEARCH_KEY'
-    },
-    aiRag: {
-      configured: hasRealEnv('OPENAI_API_KEY') && hasRealEnv('PINECONE_API_KEY'),
-      label: 'AI RAG chatbot',
-      action: 'Dien OPENAI_API_KEY va PINECONE_API_KEY'
-    },
-    sentry: {
-      configured: hasRealEnv('SENTRY_DSN') && hasRealEnv('VITE_SENTRY_DSN'),
-      label: 'Sentry monitoring',
-      action: 'Dien SENTRY_DSN va VITE_SENTRY_DSN'
-    }
-  });
-});
-
-async function buildCheckoutItems(items) {
-  if (!adminDb) {
-    // Dev fallback: trust client-provided data (no stock/price validation)
-    return items.map((item) => ({
-      id: String(item.id),
-      name: item.name || `Product ${item.id}`,
-      price: Number(item.price) || 0,
-      image: item.image || '',
-      quantity: Number(item.quantity) || 1
-    }));
-  }
-  const validated = [];
-  for (const item of items) {
-    const quantity = Number(item.quantity) || 1;
-    if (!item.id || quantity < 1) throw new Error('Sản phẩm không hợp lệ');
-    const snap = await adminDb.collection('products').doc(String(item.id)).get();
-    if (!snap.exists) throw new Error(`Sản phẩm ${item.id} không tồn tại`);
-    const product = snap.data();
-    const stock = Number(product.stock) || 0;
-    if (stock < quantity) {
-      throw new Error(`${product.name || 'Sản phẩm'} không đủ tồn kho`);
-    }
-    validated.push({
-      id: String(item.id),
-      name: product.name,
-      price: Number(product.price) || 0,
-      image: product.image,
-      quantity
-    });
-  }
-  return validated;
-}
-
-// In-memory order fallback for dev mode when Firestore unavailable
-const devOrders = [];
-let devOrderId = 1000;
-
-app.post('/api/orders', 
-  checkoutLimiter, 
-  checkoutHardLimiter, 
-  idempotencyMiddleware({ adminDb }), 
-  sanitizeOrderBody,
-  validate(schemas.OrderBody),
-  auditOrderCreate,
-  async (req, res) => {
-  try {
-    const { order } = req.body;
-    if (!order?.customer?.name || !order?.customer?.phone || !order?.customer?.address) {
-      return res.status(400).json({ error: 'Thông tin giao hàng không hợp lệ' });
-    }
-    if (!order.items || !Array.isArray(order.items) || order.items.length === 0) {
-      return res.status(400).json({ error: 'Đơn hàng chưa có sản phẩm' });
+    for (const cat of catsResult.rows) {
+      const loc = `${baseUrl}/danh-muc/${cat.slug}`;
+      const lastmod = cat.updated_at ? new Date(cat.updated_at).toISOString() : now;
+      xml += `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <priority>0.7</priority>
+  </url>\n`;
     }
 
-    // If Firestore unavailable, use simple fallback (no stock validation)
-    if (!adminDb) {
-      const subtotal = order.items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
-      const shipping = Number(order.shipping) || 0;
-      const total = subtotal + shipping;
-      devOrderId++;
-      const id = String(devOrderId);
-      const saved = {
-        id,
-        ...order,
-        subtotal,
-        shipping,
-        total,
-        status: 'pending',
-        paymentStatus: order.paymentMethod === 'stripe' ? 'unpaid' : 'pending',
-        createdAt: new Date()
-      };
-      devOrders.unshift(saved);
-      console.log('[DEV] Order created:', id, saved.customer?.email);
-      return res.json({ id, total, order: saved });
+    for (const prod of prodsResult.rows) {
+      const loc = `${baseUrl}/san-pham/${prod.slug}`;
+      const lastmod = prod.updated_at ? new Date(prod.updated_at).toISOString() : now;
+      xml += `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <priority>0.6</priority>
+  </url>\n`;
     }
 
-    const validatedItems = await buildCheckoutItems(order.items);
-    const subtotal = validatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    let shipping = Number(order.shipping) || 0;
-    let discount = 0;
-    let appliedCoupon = null;
+    xml += `</urlset>`;
 
-    if (order.coupon) {
-      const code = String(order.coupon).trim().toUpperCase();
-      const couponSnap = await adminDb.collection('coupons').doc(code).get();
-      if (couponSnap.exists) {
-        const coupon = couponSnap.data();
-        const expires = coupon.expiresAt?.toDate ? coupon.expiresAt.toDate() : null;
-        const expired = expires && expires < new Date();
-        const overLimit = coupon.usageLimit > 0 && (coupon.usageCount || 0) >= coupon.usageLimit;
-        const meetsMin = !coupon.minSubtotal || subtotal >= coupon.minSubtotal;
-        if (coupon.active && !expired && !overLimit && meetsMin) {
-          const calc = calculateCouponDiscount(coupon, subtotal);
-          discount = calc.discount;
-          if (calc.freeShipping) shipping = 0;
-          appliedCoupon = code;
-          await couponSnap.ref.update({ usageCount: (coupon.usageCount || 0) + 1 });
-        }
-      }
-    }
-
-    const total = Math.max(0, subtotal - discount) + shipping;
-
-    const isStripeMethod = order.paymentMethod === 'stripe';
-
-    const ref = await adminDb.collection('orders').add({
-      ...order,
-      coupon: appliedCoupon,
-      items: validatedItems,
-      subtotal,
-      discount,
-      shipping,
-      total,
-      status: 'pending',
-      paymentStatus: isStripeMethod ? 'unpaid' : 'pending',
-      inventoryReserved: false,
-      createdAt: new Date()
-    });
-
-    // Reserve stock NGAY cho COD / bank-transfer (vì coi như đơn sẽ ship).
-    // Với Stripe: đợi webhook checkout.session.completed → reserve khi paid
-    // (tránh giữ stock vô ích nếu user không hoàn tất thanh toán).
-    if (!isStripeMethod) {
-      try {
-        const reserveItems = validatedItems.map((it) => ({
-          productId: it.id,
-          variantId: it.variantId || null,
-          quantity: it.quantity,
-          name: it.name
-        }));
-        await reserveInventory(adminDb, reserveItems, {
-          orderId: ref.id,
-          userId: order.customer?.userId || order.userId || null,
-          type: 'sale',
-          note: `Order ${ref.id} (${order.paymentMethod || 'cod'})`
-        });
-        await ref.update({ inventoryReserved: true });
-      } catch (invErr) {
-        // Rollback order doc nếu reserve fail
-        await ref.delete();
-        if (invErr instanceof InsufficientStockError) {
-          return res.status(409).json({
-            error: invErr.message,
-            code: invErr.code,
-            insufficientItems: invErr.insufficientItems
-          });
-        }
-        throw invErr;
-      }
-    }
-
-    const savedOrder = {
-      ...order,
-      id: ref.id,
-      items: validatedItems,
-      subtotal,
-      discount,
-      shipping,
-      total,
-      status: 'pending',
-      paymentStatus: isStripeMethod ? 'unpaid' : 'pending'
-    };
-
-    await sendOrderCreatedEmails(savedOrder);
-
-    res.json({ id: ref.id, subtotal, discount, shipping, total });
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(xml);
   } catch (error) {
-    console.error('Create order error:', error);
-    if (error instanceof InsufficientStockError) {
-      return res.status(409).json({
-        error: error.message,
-        code: error.code,
-        insufficientItems: error.insufficientItems
-      });
+    console.error('[Sitemap] Error:', error.message);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+// List all categories (for frontend dropdowns)
+app.get('/api/categories', async (_req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const result = await pgQuery(
+      'SELECT id, slug, name_vi AS name FROM categories ORDER BY display_order, name_vi'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('[Categories List] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/auth/profile — update current user profile
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { full_name, phone } = req.body || {};
+    const updates = {};
+    if (full_name !== undefined) updates.full_name = full_name;
+    if (phone !== undefined) updates.phone = phone;
+
+    const keys = Object.keys(updates);
+    if (keys.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
     }
+
+    const setClauses = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
+    const values = Object.values(updates);
+    values.push(req.user.userId);
+
+    const result = await pgQuery(
+      `UPDATE users SET ${setClauses} WHERE id = $${values.length} RETURNING id, email, full_name, role, phone`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('[PG PUT /api/auth/profile] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/auth/change-password — change current user password
+app.put('/api/auth/change-password', requireAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { current_password, new_password } = req.body || {};
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'current_password and new_password are required' });
+    }
+    if (new_password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Get current password hash
+    const result = await pgQuery(
+      'SELECT password_hash FROM users WHERE id = $1',
+      [req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify current password
+    const valid = await bcrypt.compare(current_password, result.rows[0].password_hash);
+    if (!valid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash new password and update
+    const newHash = await bcrypt.hash(new_password, 12);
+    await pgQuery(
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      [newHash, req.user.userId]
+    );
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('[PG PUT /api/auth/change-password] Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -874,6 +580,1527 @@ app.post('/api/create-payment-intent',
 });
 
 // =========================
+// PostgreSQL Auth API (Commerce Core)
+// =========================
+
+const bcrypt = require('bcryptjs');
+const { generateToken: jwtGenerate } = require('./middleware/auth');
+
+// POST /api/auth/register — register new user
+app.post('/api/auth/register', authStrictLimiter, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { email, password, full_name } = req.body || {};
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+
+    // Check if email already exists
+    const existing = await pgQuery('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'Email already registered' });
+    }
+
+    // Hash password with bcrypt
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    // Determine role: first user is admin? Check admin emails list
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+    const role = adminEmails.includes(normalizedEmail) ? 'admin' : 'customer';
+
+    const result = await pgQuery(
+      `INSERT INTO users (email, password_hash, full_name, role)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, email, full_name, role, created_at`,
+      [normalizedEmail, passwordHash, full_name || normalizedEmail.split('@')[0], role]
+    );
+
+    const user = result.rows[0];
+
+    // Generate JWT
+    const token = jwtGenerate({
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    });
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('[PG POST /api/auth/register] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/auth/login — authenticate user
+app.post('/api/auth/login', authStrictLimiter, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { email, password } = req.body || {};
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+
+    const result = await pgQuery(
+      'SELECT id, email, password_hash, full_name, role FROM users WHERE email = $1',
+      [normalizedEmail]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const user = result.rows[0];
+
+    // Verify password
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Generate JWT
+    const token = jwtGenerate({
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    });
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('[PG POST /api/auth/login] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/auth/me — get current user info from JWT
+app.get('/api/auth/me', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+
+    // Read and verify JWT from Authorization header
+    const header = req.header('authorization') || '';
+    const tokenStr = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
+
+    if (!tokenStr) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { verifyToken: jwtVerify } = require('./middleware/auth');
+    const decoded = jwtVerify(tokenStr);
+    if (!decoded) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    const result = await pgQuery(
+      'SELECT id, email, full_name, role, created_at FROM users WHERE id = $1',
+      [decoded.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+    res.json({
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      created_at: user.created_at
+    });
+  } catch (error) {
+    console.error('[PG GET /api/auth/me] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/auth/google — authenticate with Google (Firebase ID token)
+app.post('/api/auth/google', authStrictLimiter, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { signToken } = require('./middleware/auth');
+    const admin = require('firebase-admin');
+
+    const { idToken } = req.body || {};
+    if (!idToken) {
+      return res.status(400).json({ error: 'idToken required' });
+    }
+
+    // Verify Firebase ID token
+    let decodedToken;
+    try {
+      decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch (err) {
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    const { email, name, picture, uid } = decodedToken;
+
+    // Check if user exists
+    const existing = await pgQuery(
+      'SELECT id, email, full_name, role FROM users WHERE email = $1',
+      [email]
+    );
+
+    let user;
+    if (existing.rows.length > 0) {
+      user = existing.rows[0];
+      // Update photo if missing
+      if (picture) {
+        await pgQuery(
+          'UPDATE users SET photo_url = $1 WHERE id = $2 AND photo_url IS NULL',
+          [picture, user.id]
+        );
+      }
+    } else {
+      // Create new user
+      const newUser = await pgQuery(
+        `INSERT INTO users (email, full_name, role, photo_url, firebase_uid)
+         VALUES ($1, $2, 'customer', $3, $4)
+         RETURNING id, email, full_name, role`,
+        [email, name || email.split('@')[0], picture || null, uid]
+      );
+      user = newUser.rows[0];
+    }
+
+    // Generate JWT
+    const token = signToken({ userId: user.id, email: user.email, role: user.role });
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        photo_url: picture || null
+      }
+    });
+  } catch (error) {
+    console.error('[PG POST /api/auth/google] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// PostgreSQL Product CRUD (Commerce Core)
+// =========================
+
+// CREATE product (admin only)
+app.post('/api/products', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { name, slug, price, category_id, status, attributes } = req.body || {};
+    
+    if (!name || !slug || !price) {
+      return res.status(400).json({ error: 'name, slug, and price are required' });
+    }
+
+    const result = await pgQuery(
+      `INSERT INTO products (name_vi, slug, base_price, category_id, status, attributes)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, name_vi AS name, slug, base_price AS price, category_id, status, attributes, created_at`,
+      [name, slug, price, category_id || null, status || 'draft', JSON.stringify(attributes || {})]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('[PG POST /api/products] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// LIST products (with search, filter, sort, pagination)
+app.get('/api/products', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { category_id, search, status, limit, offset, sort } = req.query;
+
+    // Base SELECT for data
+    let conditions = [];
+    if (!status) {
+      conditions.push("p.status != 'deleted'");
+    }
+    let selectSql = `FROM products p
+               LEFT JOIN categories c ON c.id = p.category_id` +
+      (conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '');
+    const params = [];
+    let paramIdx = 1;
+
+    if (category_id) {
+      selectSql += ` AND p.category_id = $${paramIdx++}`;
+      params.push(category_id);
+    }
+
+    if (search) {
+      selectSql += ` AND p.name_vi ILIKE $${paramIdx++}`;
+      params.push(`%${search}%`);
+    }
+
+    if (status) {
+      selectSql += ` AND p.status = $${paramIdx++}`;
+      params.push(status);
+    }
+
+    // Determine ORDER BY
+    let orderClause;
+    switch (sort) {
+      case 'price_asc':
+        orderClause = 'ORDER BY p.base_price ASC NULLS LAST';
+        break;
+      case 'price_desc':
+        orderClause = 'ORDER BY p.base_price DESC NULLS LAST';
+        break;
+      case 'name_asc':
+        orderClause = 'ORDER BY p.name_vi ASC';
+        break;
+      default:
+        orderClause = 'ORDER BY p.created_at DESC';
+    }
+
+    // Get total count (same WHERE)
+    const countResult = await pgQuery(
+      `SELECT COUNT(*) AS total ${selectSql}`,
+      params
+    );
+    const total = parseInt(countResult.rows[0].total, 10) || 0;
+
+    // Get data with LIMIT/OFFSET
+    const limitNum = limit ? Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100) : 10;
+    const offsetNum = Math.max(0, parseInt(offset, 10) || 0);
+
+    const dataSql = `SELECT p.id, p.name_vi AS name, p.slug, p.base_price AS price,
+                      p.category_id, c.name_vi AS category_name,
+                      p.status, p.attributes, p.created_at,
+                      (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1) AS image
+               ${selectSql}
+               ${orderClause}
+               LIMIT $${paramIdx++} OFFSET $${paramIdx++}`;
+
+    params.push(limitNum, offsetNum);
+    const dataResult = await pgQuery(dataSql, params);
+
+    // Convert DECIMAL values to numbers (pg driver returns strings)
+    const rows = dataResult.rows.map(r => ({
+      ...r,
+      price: parseFloat(r.price) || 0
+    }));
+
+    res.json({
+      data: rows,
+      total,
+      limit: limitNum,
+      offset: offsetNum
+    });
+  } catch (error) {
+    console.error('[PG GET /api/products] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET single product by ID
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+
+    // Handle :id special routes before generic :id
+    if (id === 'featured' || id === 'categories') {
+      return res.status(404).json({ error: 'Not found via this endpoint' });
+    }
+
+    const result = await pgQuery(
+      `SELECT p.id, p.name_vi AS name, p.slug, p.base_price AS price,
+              p.category_id, c.name_vi AS category_name,
+              p.status, p.attributes, p.created_at, p.updated_at,
+              (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1) AS image
+       FROM products p
+       LEFT JOIN categories c ON c.id = p.category_id
+       WHERE p.id = $1 AND p.status != 'deleted'`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const product = result.rows[0];
+    if (product) product.price = parseFloat(product.price) || 0;
+    res.json(product);
+  } catch (error) {
+    console.error('[PG GET /api/products/:id] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// UPDATE product (partial update, admin only)
+app.put('/api/products/:id', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+    const { name, slug, price, category_id, status, attributes } = req.body || {};
+
+    // Build dynamic SET clause
+    const sets = [];
+    const params = [];
+    let idx = 1;
+
+    if (name !== undefined) { sets.push(`name_vi = $${idx++}`); params.push(name); }
+    if (slug !== undefined) { sets.push(`slug = $${idx++}`); params.push(slug); }
+    if (price !== undefined) { sets.push(`base_price = $${idx++}`); params.push(price); }
+    if (category_id !== undefined) { sets.push(`category_id = $${idx++}`); params.push(category_id); }
+    if (status !== undefined) { sets.push(`status = $${idx++}`); params.push(status); }
+    if (attributes !== undefined) { sets.push(`attributes = $${idx++}`); params.push(JSON.stringify(attributes)); }
+
+    if (sets.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    sets.push(`updated_at = NOW()`);
+    params.push(id);
+
+    const result = await pgQuery(
+      `UPDATE products SET ${sets.join(', ')} WHERE id = $${idx}
+       RETURNING id, name_vi AS name, slug, base_price AS price, category_id, status, attributes, created_at, updated_at`,
+      params
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('[PG PUT /api/products/:id] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE product (soft delete, admin only)
+app.delete('/api/products/:id', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+
+    const result = await pgQuery(
+      `UPDATE products SET status = 'deleted', updated_at = NOW() WHERE id = $1 AND status != 'deleted'
+       RETURNING id`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found or already deleted' });
+    }
+
+    // Clean up Cloudinary images asynchronously (non-blocking)
+    const { deleteImages: cloudDeleteMany } = require('./services/cloudinary');
+    const imgResult = await pgQuery(
+      'SELECT public_id FROM product_images WHERE product_id = $1',
+      [id]
+    );
+    const publicIds = imgResult.rows.map(r => r.public_id).filter(Boolean);
+    if (publicIds.length > 0) {
+      cloudDeleteMany(publicIds).catch(err =>
+        console.warn('[PG DELETE /api/products/:id] Cloudinary cleanup error:', err.message)
+      );
+    }
+    // DB cascade delete via ON DELETE CASCADE
+
+    res.json({ ok: true, id: result.rows[0].id });
+  } catch (error) {
+    console.error('[PG DELETE /api/products/:id] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// PostgreSQL Product Variants CRUD (Commerce Core)
+// =========================
+
+// Helper: generate SKU from product slug
+function generateSKU(slug) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const rand = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `${slug}-${rand}`;
+}
+
+// LIST variants for a product
+app.get('/api/products/:productId/variants', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { productId } = req.params;
+
+    const result = await pgQuery(
+      `SELECT v.id, v.product_id, v.sku, v.price AS price_override,
+              v.stock_quantity AS stock, v.attribute_values,
+              CASE WHEN v.is_active THEN 'active' ELSE 'inactive' END AS status,
+              v.is_default, v.created_at
+       FROM product_variants v
+       WHERE v.product_id = $1
+       ORDER BY v.created_at DESC`,
+      [productId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('[PG GET /api/products/:id/variants] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// CREATE variant for a product (admin only)
+app.post('/api/products/:productId/variants', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { productId } = req.params;
+    const { sku, price_override, stock, attribute_values, status } = req.body || {};
+
+    // Check product exists and get slug for SKU generation
+    const prodResult = await pgQuery(
+      'SELECT id, slug FROM products WHERE id = $1 AND status != $2',
+      [productId, 'deleted']
+    );
+    if (prodResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const product = prodResult.rows[0];
+    const finalSku = sku || generateSKU(product.slug);
+    const isActive = !status || status === 'active';
+
+    const result = await pgQuery(
+      `INSERT INTO product_variants (product_id, sku, price, stock_quantity, attribute_values, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, product_id, sku, price AS price_override,
+                 stock_quantity AS stock, attribute_values,
+                 CASE WHEN is_active THEN 'active' ELSE 'inactive' END AS status,
+                 is_default, created_at`,
+      [productId, finalSku, price_override || null, stock || 0, JSON.stringify(attribute_values || {}), isActive]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('[PG POST /api/products/:id/variants] Error:', error.message);
+    if (error.code === '23505') { // unique violation
+      return res.status(409).json({ error: 'SKU already exists' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// UPDATE variant (admin only)
+app.put('/api/products/:productId/variants/:variantId', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { productId, variantId } = req.params;
+    const { sku, price_override, stock, attribute_values, status } = req.body || {};
+
+    // Build dynamic SET clause
+    const sets = [];
+    const params = [];
+    let idx = 1;
+
+    if (sku !== undefined) { sets.push(`sku = $${idx++}`); params.push(sku); }
+    if (price_override !== undefined) { sets.push(`price = $${idx++}`); params.push(price_override); }
+    if (stock !== undefined) { sets.push(`stock_quantity = $${idx++}`); params.push(stock); }
+    if (attribute_values !== undefined) { sets.push(`attribute_values = $${idx++}`); params.push(JSON.stringify(attribute_values)); }
+    if (status !== undefined) { sets.push(`is_active = $${idx++}`); params.push(status === 'active'); }
+
+    if (sets.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    sets.push(`updated_at = NOW()`);
+    params.push(variantId);
+    params.push(productId);
+
+    const result = await pgQuery(
+      `UPDATE product_variants SET ${sets.join(', ')} WHERE id = $${idx} AND product_id = $${idx + 1}
+       RETURNING id, product_id, sku, price AS price_override,
+                 stock_quantity AS stock, attribute_values,
+                 CASE WHEN is_active THEN 'active' ELSE 'inactive' END AS status,
+                 is_default, created_at`,
+      params
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Variant not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('[PG PUT /api/products/:id/variants/:vid] Error:', error.message);
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'SKU already exists' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE variant (hard delete, admin only)
+app.delete('/api/products/:productId/variants/:variantId', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { productId, variantId } = req.params;
+
+    const result = await pgQuery(
+      'DELETE FROM product_variants WHERE id = $1 AND product_id = $2 RETURNING id',
+      [variantId, productId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Variant not found' });
+    }
+
+    // Clean up variant Cloudinary image (non-blocking)
+    const { deleteImage: cloudDelete } = require('./services/cloudinary');
+    const vImgResult = await pgQuery(
+      'SELECT public_id FROM variant_images WHERE variant_id = $1',
+      [variantId]
+    );
+    if (vImgResult.rows.length > 0 && vImgResult.rows[0].public_id) {
+      cloudDelete(vImgResult.rows[0].public_id).catch(err =>
+        console.warn('[PG DELETE variant] Cloudinary cleanup error:', err.message)
+      );
+    }
+    // DB cascade delete via ON DELETE CASCADE
+
+    res.json({ ok: true, id: result.rows[0].id });
+  } catch (error) {
+    console.error('[PG DELETE /api/products/:id/variants/:vid] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// PostgreSQL Product Image API (Commerce Core — Media System)
+// =========================
+
+const multer = require('multer');
+const mediaUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!allowed.includes(file.mimetype)) {
+      cb(new Error('Chỉ chấp nhận file ảnh JPEG, PNG, WebP (tối đa 5MB)'));
+      return;
+    }
+    cb(null, true);
+  }
+});
+
+// POST /api/products/:id/images — Upload product image (admin only)
+app.post('/api/products/:id/images', requireAuth, requireJwtAdmin, mediaUpload.single('image'), async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { uploadImage: cloudUpload } = require('./services/cloudinary');
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Vui lòng chọn file ảnh' });
+    }
+
+    // Verify product exists
+    const prodResult = await pgQuery(
+      'SELECT id, slug FROM products WHERE id = $1 AND status != $2',
+      [id, 'deleted']
+    );
+    if (prodResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Upload to Cloudinary
+    const result = await cloudUpload(req.file.buffer, {
+      folder: `novashop/products/${id}`,
+    });
+
+    if (result.error) {
+      return res.status(502).json({ error: 'Upload ảnh thất bại: ' + result.error });
+    }
+
+    // Get current max sort_order
+    const sortResult = await pgQuery(
+      'SELECT COALESCE(MAX(sort_order), -1) + 1 AS next_sort FROM product_images WHERE product_id = $1',
+      [id]
+    );
+    const nextSort = parseInt(sortResult.rows[0].next_sort, 10) || 0;
+
+    // Check if this is the first image → set as primary
+    const countResult = await pgQuery(
+      'SELECT COUNT(*) AS cnt FROM product_images WHERE product_id = $1',
+      [id]
+    );
+    const isFirst = parseInt(countResult.rows[0].cnt, 10) === 0;
+
+    // Save to DB
+    const imageResult = await pgQuery(
+      `INSERT INTO product_images (product_id, image_url, public_id, sort_order, is_primary)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, image_url, public_id, sort_order, is_primary, created_at`,
+      [id, result.url, result.public_id, nextSort, isFirst]
+    );
+
+    res.status(201).json(imageResult.rows[0]);
+  } catch (error) {
+    if (error.message && error.message.includes('Chỉ chấp nhận')) {
+      return res.status(400).json({ error: error.message });
+    }
+    console.error('[PG POST /api/products/:id/images] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/products/:id/images — List product images (public)
+app.get('/api/products/:id/images', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+
+    const result = await pgQuery(
+      `SELECT id, image_url, public_id, sort_order, is_primary, created_at
+       FROM product_images
+       WHERE product_id = $1
+       ORDER BY sort_order ASC, created_at ASC`,
+      [id]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('[PG GET /api/products/:id/images] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/products/:id/images/:imageId — Delete product image (admin only)
+app.delete('/api/products/:id/images/:imageId', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { deleteImage: cloudDelete } = require('./services/cloudinary');
+    const { id, imageId } = req.params;
+
+    // Get image info before deleting
+    const imgResult = await pgQuery(
+      'SELECT id, public_id, is_primary FROM product_images WHERE id = $1 AND product_id = $2',
+      [imageId, id]
+    );
+
+    if (imgResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    const image = imgResult.rows[0];
+
+    // Delete from Cloudinary
+    if (image.public_id) {
+      await cloudDelete(image.public_id);
+    }
+
+    // Delete from DB
+    await pgQuery('DELETE FROM product_images WHERE id = $1', [imageId]);
+
+    // If deleted image was primary, assign next image as primary
+    if (image.is_primary) {
+      const nextResult = await pgQuery(
+        `UPDATE product_images SET is_primary = true
+         WHERE product_id = $1 AND id != $2
+         ORDER BY sort_order ASC
+         LIMIT 1
+         RETURNING id`,
+        [id, imageId]
+      );
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[PG DELETE /api/products/:id/images/:imageId] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/products/:id/images/reorder — Reorder images (admin only)
+app.put('/api/products/:id/images/reorder', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+    const { order } = req.body || {}; // [{ id: uuid, sort_order: 0 }, ...]
+
+    if (!Array.isArray(order) || order.length === 0) {
+      return res.status(400).json({ error: 'order array required' });
+    }
+
+    // Update each image's sort_order in a transaction-like batch
+    for (const item of order) {
+      if (!item.id || item.sort_order === undefined) continue;
+      await pgQuery(
+        'UPDATE product_images SET sort_order = $1 WHERE id = $2 AND product_id = $3',
+        [item.sort_order, item.id, id]
+      );
+    }
+
+    // Set primary: image with sort_order 0 becomes primary
+    await pgQuery(
+      `UPDATE product_images SET is_primary = false WHERE product_id = $1`,
+      [id]
+    );
+    await pgQuery(
+      `UPDATE product_images SET is_primary = true
+       WHERE product_id = $1 AND sort_order = (SELECT MIN(sort_order) FROM product_images WHERE product_id = $1)
+       LIMIT 1`,
+      [id]
+    );
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[PG PUT /api/products/:id/images/reorder] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/variants/:id/image — Upload variant image (admin only)
+app.post('/api/variants/:id/image', requireAuth, requireJwtAdmin, mediaUpload.single('image'), async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { uploadImage: cloudUpload } = require('./services/cloudinary');
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Vui lòng chọn file ảnh' });
+    }
+
+    // Verify variant exists
+    const variantResult = await pgQuery(
+      'SELECT id FROM product_variants WHERE id = $1 AND is_active = true',
+      [id]
+    );
+    if (variantResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Variant not found' });
+    }
+
+    const result = await cloudUpload(req.file.buffer, {
+      folder: `novashop/variants/${id}`,
+    });
+
+    if (result.error) {
+      return res.status(502).json({ error: 'Upload ảnh thất bại: ' + result.error });
+    }
+
+    // Delete old variant image if exists (only one per variant)
+    const oldResult = await pgQuery(
+      'SELECT id, public_id FROM variant_images WHERE variant_id = $1',
+      [id]
+    );
+    if (oldResult.rows.length > 0) {
+      const { deleteImage: cloudDelete } = require('./services/cloudinary');
+      await cloudDelete(oldResult.rows[0].public_id);
+      await pgQuery('DELETE FROM variant_images WHERE id = $1', [oldResult.rows[0].id]);
+    }
+
+    // Save to DB
+    const imgResult = await pgQuery(
+      `INSERT INTO variant_images (variant_id, image_url, public_id)
+       VALUES ($1, $2, $3)
+       RETURNING id, image_url, public_id, created_at`,
+      [id, result.url, result.public_id]
+    );
+
+    res.status(201).json(imgResult.rows[0]);
+  } catch (error) {
+    if (error.message && error.message.includes('Chỉ chấp nhận')) {
+      return res.status(400).json({ error: error.message });
+    }
+    console.error('[PG POST /api/variants/:id/image] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/variants/:id/image — Delete variant image (admin only)
+app.delete('/api/variants/:id/image', requireAuth, requireJwtAdmin, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { deleteImage: cloudDelete } = require('./services/cloudinary');
+    const { id } = req.params;
+
+    const imgResult = await pgQuery(
+      'SELECT id, public_id FROM variant_images WHERE variant_id = $1',
+      [id]
+    );
+
+    if (imgResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Variant image not found' });
+    }
+
+    if (imgResult.rows[0].public_id) {
+      await cloudDelete(imgResult.rows[0].public_id);
+    }
+
+    await pgQuery('DELETE FROM variant_images WHERE id = $1', [imgResult.rows[0].id]);
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[PG DELETE /api/variants/:id/image] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// PostgreSQL Cart API (Commerce Core)
+// =========================
+
+// Helper: generate order code
+function generateOrderCode() {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `ORD-${ts}${rand}`;
+}
+
+// Optional auth middleware — attaches req.user if valid JWT present, noop otherwise
+function optionalAuth(req, res, next) {
+  const header = req.header('authorization') || '';
+  const tokenStr = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
+  if (tokenStr) {
+    try {
+      const { verifyToken } = require('./middleware/auth');
+      req.user = verifyToken(tokenStr);
+    } catch (e) {
+      // Silently ignore invalid tokens — optional auth shouldn't block
+    }
+  }
+  next();
+}
+
+// GET /api/cart — get cart by session_id or authenticated user
+app.get('/api/cart', optionalAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { session_id } = req.query;
+
+    if (!session_id && !req.user) {
+      return res.status(400).json({ error: 'session_id or authentication required' });
+    }
+
+    // Find existing cart — by user_id if authenticated, otherwise by session_id
+    let cartResult;
+    if (req.user?.userId) {
+      cartResult = await pgQuery(
+        'SELECT id, user_id, session_id, coupon_code, notes FROM carts WHERE user_id = $1',
+        [req.user.userId]
+      );
+      // If not found by user_id, fallback to session_id
+      if (cartResult.rows.length === 0 && session_id) {
+        cartResult = await pgQuery(
+          'SELECT id, user_id, session_id, coupon_code, notes FROM carts WHERE session_id = $1',
+          [session_id]
+        );
+      }
+    } else {
+      cartResult = await pgQuery(
+        'SELECT id, user_id, session_id, coupon_code, notes FROM carts WHERE session_id = $1',
+        [session_id]
+      );
+    }
+
+    if (cartResult.rows.length === 0) {
+      return res.json({ items: [], subtotal: 0, item_count: 0 });
+    }
+
+    const cart = cartResult.rows[0];
+
+    // Get cart items with product + variant info
+    const itemsResult = await pgQuery(
+      `SELECT ci.id, ci.product_id, ci.variant_id, ci.quantity, ci.unit_price AS price,
+              ci.product_name, ci.product_slug, ci.product_image, ci.variant_label
+       FROM cart_items ci
+       WHERE ci.cart_id = $1
+       ORDER BY ci.created_at`,
+      [cart.id]
+    );
+
+    const items = itemsResult.rows.map(item => ({
+      id: item.id,
+      product_id: item.product_id,
+      variant_id: item.variant_id,
+      product_name: item.product_name,
+      product_slug: item.product_slug,
+      product_image: item.product_image,
+      variant_label: item.variant_label,
+      quantity: item.quantity,
+      price: parseFloat(item.price) || 0
+    }));
+
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    res.json({
+      id: cart.id,
+      session_id: cart.session_id,
+      user_id: cart.user_id,
+      coupon_code: cart.coupon_code,
+      items,
+      subtotal,
+      item_count: itemCount
+    });
+  } catch (error) {
+    console.error('[PG GET /api/cart] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/cart/add — add item to cart
+app.post('/api/cart/add', optionalAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { session_id, product_id, variant_id, quantity } = req.body || {};
+
+    if (!session_id) {
+      return res.status(400).json({ error: 'session_id required' });
+    }
+    if (!product_id) {
+      return res.status(400).json({ error: 'product_id required' });
+    }
+
+    const qty = Math.max(1, parseInt(quantity, 10) || 1);      // Get product info + price + image
+    let unitPrice, productName, productSlug, variantLabel, productImage;
+
+    const prodResult = await pgQuery(
+      'SELECT p.id, p.name_vi, p.slug, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1) AS image FROM products p WHERE p.id = $1 AND p.status != $2',
+      [product_id, 'deleted']
+    );
+    if (prodResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    productName = prodResult.rows[0].name_vi;
+    productSlug = prodResult.rows[0].slug;
+
+    if (variant_id) {
+      const vResult = await pgQuery(
+        `SELECT v.price, v.attribute_values
+         FROM product_variants v
+         WHERE v.id = $1 AND v.product_id = $2`,
+        [variant_id, product_id]
+      );
+      if (vResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Variant not found' });
+      }
+      unitPrice = vResult.rows[0].price !== null
+        ? parseFloat(vResult.rows[0].price)
+        : null;
+      const attrs = vResult.rows[0].attribute_values || {};
+      variantLabel = Object.values(attrs).filter(Boolean).join(' - ');
+      // Fallback to product base price if variant has no price override
+      if (unitPrice === null || unitPrice === 0) {
+        unitPrice = parseFloat(prodResult.rows[0].base_price) || 0;
+      }
+    } else {
+      const pResult = await pgQuery(
+        'SELECT base_price FROM products WHERE id = $1',
+        [product_id]
+      );
+      unitPrice = parseFloat(pResult.rows[0].base_price) || 0;
+    }
+
+    unitPrice = unitPrice || 0;
+
+    // Find or create cart — try user_id first if authenticated
+    let cartId;
+    let existingCart;
+    
+    if (req.user?.userId) {
+      existingCart = await pgQuery(
+        'SELECT id FROM carts WHERE user_id = $1',
+        [req.user.userId]
+      );
+    }
+    
+    if (!existingCart || existingCart.rows.length === 0) {
+      existingCart = await pgQuery(
+        'SELECT id FROM carts WHERE session_id = $1',
+        [session_id]
+      );
+    }
+
+    if (existingCart.rows.length === 0) {
+      // Create new cart with user_id if authenticated
+      if (req.user?.userId) {
+        const newCart = await pgQuery(
+          'INSERT INTO carts (session_id, user_id) VALUES ($1, $2) RETURNING id',
+          [session_id, req.user.userId]
+        );
+        cartId = newCart.rows[0].id;
+      } else {
+        const newCart = await pgQuery(
+          'INSERT INTO carts (session_id) VALUES ($1) RETURNING id',
+          [session_id]
+        );
+        cartId = newCart.rows[0].id;
+      }
+    } else {
+      cartId = existingCart.rows[0].id;
+      // Link to authenticated user if not already linked
+      if (req.user?.userId) {
+        await pgQuery(
+          'UPDATE carts SET user_id = $1 WHERE id = $2 AND user_id IS NULL',
+          [req.user.userId, cartId]
+        );
+      }
+    }
+
+    // Check if same product+variant already in cart
+    const existingItem = await pgQuery(
+      `SELECT id, quantity FROM cart_items
+       WHERE cart_id = $1 AND product_id = $2
+       AND (variant_id = $3 OR (variant_id IS NULL AND $3 IS NULL))`,
+      [cartId, product_id, variant_id || null]
+    );
+
+    if (existingItem.rows.length > 0) {
+      const newQty = existingItem.rows[0].quantity + qty;
+      await pgQuery(
+        'UPDATE cart_items SET quantity = $1 WHERE id = $2',
+        [newQty, existingItem.rows[0].id]
+      );
+    } else {
+      await pgQuery(
+        `INSERT INTO cart_items (cart_id, product_id, variant_id, product_name, product_slug, product_image, variant_label, unit_price, quantity)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [cartId, product_id, variant_id || null, productName, productSlug, prodResult.rows[0].image || '', variantLabel || null, unitPrice, qty]
+      );
+    }
+
+    // Update cart timestamp
+    await pgQuery('UPDATE carts SET updated_at = CURRENT_TIMESTAMP WHERE id = $1', [cartId]);
+
+    res.json({ ok: true, cart_id: cartId });
+  } catch (error) {
+    console.error('[PG POST /api/cart/add] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/cart/item/:id — update quantity
+app.put('/api/cart/item/:id', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+    const { quantity } = req.body || {};
+
+    const qty = parseInt(quantity, 10);
+    if (isNaN(qty) || qty < 0) {
+      return res.status(400).json({ error: 'Valid quantity required' });
+    }
+
+    if (qty === 0) {
+      const del = await pgQuery('DELETE FROM cart_items WHERE id = $1 RETURNING cart_id', [id]);
+      if (del.rows.length === 0) return res.status(404).json({ error: 'Cart item not found' });
+      await pgQuery('UPDATE carts SET updated_at = CURRENT_TIMESTAMP WHERE id = $1', [del.rows[0].cart_id]);
+    } else {
+      const result = await pgQuery(
+        'UPDATE cart_items SET quantity = $1 WHERE id = $2 RETURNING cart_id',
+        [qty, id]
+      );
+      if (result.rows.length === 0) return res.status(404).json({ error: 'Cart item not found' });
+      await pgQuery('UPDATE carts SET updated_at = CURRENT_TIMESTAMP WHERE id = $1', [result.rows[0].cart_id]);
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[PG PUT /api/cart/item/:id] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/cart/item/:id — remove item
+app.delete('/api/cart/item/:id', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+
+    const result = await pgQuery(
+      'DELETE FROM cart_items WHERE id = $1 RETURNING cart_id',
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Cart item not found' });
+    }
+    await pgQuery('UPDATE carts SET updated_at = CURRENT_TIMESTAMP WHERE id = $1', [result.rows[0].cart_id]);
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[PG DELETE /api/cart/item/:id] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/cart — clear entire cart by session_id
+app.delete('/api/cart', async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { session_id } = req.query;
+
+    if (!session_id) {
+      return res.status(400).json({ error: 'session_id required' });
+    }
+
+    const cartResult = await pgQuery(
+      'SELECT id FROM carts WHERE session_id = $1',
+      [session_id]
+    );
+
+    if (cartResult.rows.length > 0) {
+      const cartId = cartResult.rows[0].id;
+      await pgQuery('DELETE FROM cart_items WHERE cart_id = $1', [cartId]);
+      await pgQuery('DELETE FROM carts WHERE id = $1', [cartId]);
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[PG DELETE /api/cart] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// PostgreSQL Checkout API (Commerce Core)
+// =========================
+
+// POST /api/checkout — convert cart to order (requires auth)
+app.post('/api/checkout', requireAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const {
+      session_id,
+      customer_name,
+      customer_phone,
+      customer_email,
+      shipping_address,
+      payment_method,
+      notes
+    } = req.body || {};
+
+    if (!session_id) {
+      return res.status(400).json({ error: 'session_id required' });
+    }
+    if (!customer_name || !customer_phone || !shipping_address) {
+      return res.status(400).json({ error: 'Customer info required (name, phone, shipping_address)' });
+    }
+
+    // Get cart — prefer user_id match, fallback to session_id
+    let cartResult;
+    if (req.user?.userId) {
+      cartResult = await pgQuery(
+        'SELECT id, user_id FROM carts WHERE user_id = $1',
+        [req.user.userId]
+      );
+    }
+    if (!cartResult || cartResult.rows.length === 0) {
+      cartResult = await pgQuery(
+        'SELECT id, user_id FROM carts WHERE session_id = $1',
+        [session_id]
+      );
+    }
+    if (cartResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Cart not found' });
+    }
+
+    const cartId = cartResult.rows[0].id;
+    const userId = req.user?.userId || cartResult.rows[0].user_id;
+
+    // Get cart items
+    const itemsResult = await pgQuery(
+      `SELECT ci.product_id, ci.variant_id, ci.quantity, ci.unit_price,
+              ci.product_name, ci.product_slug, ci.product_image, ci.variant_label
+       FROM cart_items ci
+       WHERE ci.cart_id = $1
+       ORDER BY ci.created_at`,
+      [cartId]
+    );
+
+    if (itemsResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    // Validate stock for variant items
+    for (const item of itemsResult.rows) {
+      if (item.variant_id) {
+        const vResult = await pgQuery(
+          'SELECT stock_quantity FROM product_variants WHERE id = $1',
+          [item.variant_id]
+        );
+        if (vResult.rows.length === 0 || parseInt(vResult.rows[0].stock_quantity, 10) < item.quantity) {
+          return res.status(409).json({
+            error: `Sản phẩm "${item.product_name}" không đủ tồn kho`,
+            insufficient_items: [{
+              product_id: item.product_id,
+              variant_id: item.variant_id,
+              name: item.product_name,
+              available: vResult.rows.length > 0 ? parseInt(vResult.rows[0].stock_quantity, 10) : 0,
+              requested: item.quantity
+            }]
+          });
+        }
+      }
+    }
+
+    // Calculate totals
+    const subtotal = itemsResult.rows.reduce(
+      (sum, item) => sum + parseFloat(item.unit_price) * item.quantity, 0
+    );
+    const shippingFee = 0; // Default: calculated separately
+    const total = subtotal + shippingFee;
+
+    // Create order
+    const orderCode = generateOrderCode();
+    const orderResult = await pgQuery(
+      `INSERT INTO orders (order_code, user_id, customer_name, customer_phone, customer_email,
+                           shipping_address, subtotal, shipping_fee, total, payment_method,
+                           order_status, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       RETURNING id, created_at`,
+      [
+        orderCode,
+        userId || null,
+        customer_name,
+        customer_phone,
+        customer_email || null,
+        JSON.stringify(typeof shipping_address === 'string' ? JSON.parse(shipping_address) : shipping_address),
+        subtotal,
+        shippingFee,
+        total,
+        payment_method || 'cod',
+        'pending',
+        notes || null
+      ]
+    );
+
+    const orderId = orderResult.rows[0].id;
+
+    // Create order_items (snapshot all data)
+    for (const item of itemsResult.rows) {
+      const itemSubtotal = parseFloat(item.unit_price) * item.quantity;
+
+      await pgQuery(
+        `INSERT INTO order_items (order_id, product_id, variant_id, product_name, product_slug,
+                                  product_image, variant_label, unit_price, quantity, subtotal)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          orderId,
+          item.product_id,
+          item.variant_id || null,
+          item.product_name,
+          item.product_slug,
+          item.product_image,
+          item.variant_label,
+          item.unit_price,
+          item.quantity,
+          itemSubtotal
+        ]
+      );
+
+      // Decrement variant stock
+      if (item.variant_id) {
+        await pgQuery(
+          'UPDATE product_variants SET stock_quantity = stock_quantity - $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND stock_quantity >= $1',
+          [item.quantity, item.variant_id]
+        );
+      }
+    }
+
+    // Clear cart
+    await pgQuery('DELETE FROM cart_items WHERE cart_id = $1', [cartId]);
+    await pgQuery('DELETE FROM carts WHERE id = $1', [cartId]);
+
+    res.json({
+      id: orderId,
+      order_code: orderCode,
+      total,
+      subtotal,
+      item_count: itemsResult.rows.reduce((s, i) => s + i.quantity, 0),
+      status: 'pending'
+    });
+  } catch (error) {
+    console.error('[PG POST /api/checkout] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
+// PostgreSQL Orders API (Commerce Core)
+// =========================
+
+// GET /api/orders/pg — list authenticated user's PG orders (auto-filtered)
+app.get('/api/orders/pg', requireAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { limit, offset } = req.query;
+    const userId = req.user.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const limitNum = Math.min(50, parseInt(limit, 10) || 20);
+    const offsetNum = Math.max(0, parseInt(offset, 10) || 0);
+
+    const ordersResult = await pgQuery(
+      `SELECT id, order_code, user_id, customer_name, customer_phone, customer_email,
+              shipping_address, subtotal, shipping_fee, discount, total,
+              payment_method, payment_status, order_status, created_at
+       FROM orders
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [userId, limitNum, offsetNum]
+    );
+    const countResult = await pgQuery(
+      'SELECT COUNT(*) AS total FROM orders WHERE user_id = $1',
+      [userId]
+    );
+
+    const orders = await Promise.all(ordersResult.rows.map(async (order) => {
+      const itemsResult = await pgQuery(
+        `SELECT id, product_id, variant_id, product_name, product_slug, product_image,
+                variant_label, unit_price, quantity, subtotal
+         FROM order_items
+         WHERE order_id = $1
+         ORDER BY id`,
+        [order.id]
+      );
+
+      return {
+        id: order.id,
+        order_code: order.order_code,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_email: order.customer_email,
+        subtotal: parseFloat(order.subtotal) || 0,
+        shipping_fee: parseFloat(order.shipping_fee) || 0,
+        discount: parseFloat(order.discount) || 0,
+        total: parseFloat(order.total) || 0,
+        payment_method: order.payment_method,
+        payment_status: order.payment_status,
+        status: order.order_status,
+        created_at: order.created_at,
+        items: itemsResult.rows.map(item => ({
+          id: item.id,
+          product_id: item.product_id,
+          variant_id: item.variant_id,
+          product_name: item.product_name,
+          product_slug: item.product_slug,
+          product_image: item.product_image,
+          variant_label: item.variant_label,
+          unit_price: parseFloat(item.unit_price) || 0,
+          quantity: item.quantity,
+          subtotal: parseFloat(item.subtotal) || 0
+        }))
+      };
+    }));
+
+    res.json({
+      data: orders,
+      total: parseInt(countResult.rows[0].total, 10) || 0
+    });
+  } catch (error) {
+    console.error('[PG GET /api/orders/pg] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/orders/pg/:id — order detail (requires auth)
+app.get('/api/orders/pg/:id', requireAuth, async (req, res) => {
+  try {
+    const { query: pgQuery } = require('./db/postgres');
+    const { id } = req.params;
+
+    const orderResult = await pgQuery(
+      `SELECT id, order_code, user_id, customer_name, customer_phone, customer_email,
+              shipping_address, subtotal, shipping_fee, discount, total,
+              payment_method, payment_status, order_status, tracking_number,
+              notes, paid_at, shipped_at, delivered_at, created_at, updated_at
+       FROM orders WHERE id = $1 AND user_id = $2`,
+      [id, req.user.userId]
+    );
+
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const order = orderResult.rows[0];
+
+    const itemsResult = await pgQuery(
+      `SELECT id, product_id, variant_id, product_name, product_slug, product_image,
+              variant_label, unit_price, quantity, subtotal
+       FROM order_items WHERE order_id = $1
+       ORDER BY id`,
+      [id]
+    );
+
+    res.json({
+      id: order.id,
+      order_code: order.order_code,
+      user_id: order.user_id,
+      customer_name: order.customer_name,
+      customer_phone: order.customer_phone,
+      customer_email: order.customer_email,
+      shipping_address: order.shipping_address,
+      subtotal: parseFloat(order.subtotal) || 0,
+      shipping_fee: parseFloat(order.shipping_fee) || 0,
+      discount: parseFloat(order.discount) || 0,
+      total: parseFloat(order.total) || 0,
+      payment_method: order.payment_method,
+      payment_status: order.payment_status,
+      status: order.order_status,
+      tracking_number: order.tracking_number,
+      notes: order.notes,
+      paid_at: order.paid_at,
+      shipped_at: order.shipped_at,
+      delivered_at: order.delivered_at,
+      created_at: order.created_at,
+      updated_at: order.updated_at,
+      items: itemsResult.rows.map(item => ({
+        id: item.id,
+        product_id: item.product_id,
+        variant_id: item.variant_id,
+        product_name: item.product_name,
+        product_slug: item.product_slug,
+        product_image: item.product_image,
+        variant_label: item.variant_label,
+        unit_price: parseFloat(item.unit_price) || 0,
+        quantity: item.quantity,
+        subtotal: parseFloat(item.subtotal) || 0
+      }))
+    });
+  } catch (error) {
+    console.error('[PG GET /api/orders/pg/:id] Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================
 // Products API
 // =========================
 app.get('/api/products', async (_req, res) => {
@@ -891,6 +2118,16 @@ app.get('/api/products', async (_req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Middleware helpers for legacy Firestore routes
+const requireAdmin = requireJwtAdmin;
+const requireFirestore = (req, res, next) => {
+  if (!adminDb) {
+    return res.status(503).json({ error: 'Firestore not available' });
+  }
+  next();
+};
+const adminLimiter = adminStrictLimiter;
 
 app.post('/api/products', 
   adminStrictLimiter, 
@@ -2305,12 +3542,6 @@ app.delete('/api/context/:userId/:sessionId', publicReadLimiter, async (req, res
 // Agent System API
 app.use('/api/agents', agentRoutes);
 
-// MongoDB API routes
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/orders', orderRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/admin', adminRoutes);
-
 // Sentry (P11) — initialize on first load
 const { initSentry, captureException } = require('./utils/sentry');
 initSentry();
@@ -2835,8 +4066,6 @@ app.use('/api', (_req, res) => {
 });
 
 async function startServer() {
-  await connectDatabase();
-  
   // Khởi tạo Agent System (orchestrator)
   try {
     const orchestrator = require('./services/agent-orchestrator-init');
@@ -2846,9 +4075,43 @@ async function startServer() {
     logger.warn('[AgentSystem] Could not initialize agent system:', err.message);
   }
   
-  app.listen(PORT, () => {
+  const PORT = process.env.PORT || 3001;
+  const server = app.listen(PORT, () => {
     logger.info(`TRỌNG ĐỊNH STORE API server running on http://localhost:${PORT}`);
   });
+
+  // Graceful shutdown handler
+  const gracefulShutdown = async (signal) => {
+    logger.info(`${signal} received. Starting graceful shutdown...`);
+    
+    // Stop accepting new connections
+    server.close(async () => {
+      logger.info('HTTP server closed');
+      
+      try {
+        // Shutdown database connections
+        const { shutdown: shutdownPostgres } = require('./db/postgres');
+        await shutdownPostgres();
+        logger.info('Database connections closed');
+        
+        logger.info('Graceful shutdown completed');
+        process.exit(0);
+      } catch (error) {
+        logger.error('Error during graceful shutdown', { error: error.message });
+        process.exit(1);
+      }
+    });
+
+    // Force shutdown after 15 seconds
+    setTimeout(() => {
+      logger.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, 15000);
+  };
+
+  // Register shutdown handlers
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   // Start event bus subscription (microservices)
   try {

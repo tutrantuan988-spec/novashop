@@ -1,0 +1,15 @@
+C:\Users\TUAN:1
+[6F2C:6F44][2026-01-06T10:33:56]i001: Burn v3.14.1.8722, Windows v10.0 (Build 26200: Service Pack 0), path: C:\Windows\Temp\{73561868-8081-494B-9816-94A789AA2F63}\.cr\VC_redist.x64.exe
+ ^
+
+SyntaxError: Invalid or unexpected token
+    at wrapSafe (node:internal/modules/cjs/loader:1743:18)
+    at Module._compile (node:internal/modules/cjs/loader:1786:20)
+    at Object..js (node:internal/modules/cjs/loader:1943:10)
+    at Module.load (node:internal/modules/cjs/loader:1533:32)
+    at Module._load (node:internal/modules/cjs/loader:1335:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.14.1

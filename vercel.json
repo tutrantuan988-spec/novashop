@@ -16,6 +16,14 @@
       "dest": "https://your-backend.up.railway.app/api/$1"
     },
     {
+      "src": "/(.+)\\.(js|css|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|webp|avif)",
+      "dest": "/$1.$2"
+    },
+    {
+      "src": "/(.+)\\.(json|xml|txt)",
+      "dest": "/$1.$2"
+    },
+    {
       "src": "/(.+)",
       "dest": "/index.html"
     }
@@ -30,7 +38,7 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         }
       ]
     },
@@ -57,5 +65,9 @@
       "source": "/api/:path*",
       "destination": "https://your-backend.up.railway.app/api/:path*"
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "@vite_api_url",
+    "VITE_CLERK_PUBLISHABLE_KEY": "@vite_clerk_publishable_key"
+  }
 }

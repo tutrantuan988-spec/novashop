@@ -1,17 +1,26 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, ArrowRight, PackageCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useProducts } from '../context/ProductsContext';
 import { useToast } from '../context/ToastContext';
 import { formatVND } from '../utils/format';
 import SITE from '../config/site-config';
 
 function WishlistPage() {
-  const { items: wishlistItems, removeItem } = useWishlist();
+  const { ids: wishlistIds, removeWishlist } = useWishlist();
+  const { items: products } = useProducts();
   const { addToCart } = useCart();
   const toast = useToast();
   const [mounted, setMounted] = useState(false);
+
+  // Resolve full product objects from wishlist IDs
+  const wishlistProducts = useMemo(() => {
+    return products.filter((p) =>
+      wishlistIds.some((id) => String(id) === String(p.id))
+    );
+  }, [products, wishlistIds]);
 
   useEffect(() => {
     document.title = `Yêu thích - ${SITE.name}`;
@@ -24,7 +33,7 @@ function WishlistPage() {
   };
 
   const handleRemove = (product) => {
-    removeItem(product.id);
+    removeWishlist(product.id);
     toast.success(`Đã xoá ${product.name} khỏi yêu thích`);
   };
 
@@ -37,10 +46,10 @@ function WishlistPage() {
           <span className="section-kicker"><Heart size={16} aria-hidden fill="currentColor" /> Yêu thích</span>
           <h1>Sản phẩm đã lưu</h1>
         </div>
-        <span style={{ fontSize: 14, color: 'var(--muted)' }}>{wishlistItems.length} sản phẩm</span>
+        <span style={{ fontSize: 14, color: 'var(--muted)' }}>{wishlistProducts.length} sản phẩm</span>
       </div>
 
-      {wishlistItems.length === 0 ? (
+      {wishlistProducts.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 24px', background: 'var(--surface)', borderRadius: 16 }}>
           <Heart size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
           <p style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 8 }}>Chưa có sản phẩm yêu thích</p>
@@ -57,7 +66,7 @@ function WishlistPage() {
             gap: 20
           }}
         >
-          {wishlistItems.map((product) => (
+          {wishlistProducts.map((product) => (
             <article
               key={product.id}
               style={{

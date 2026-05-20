@@ -9,7 +9,7 @@ const QUICK_COMMANDS = [
   'Tìm sản phẩm giá rẻ nhất',
 ];
 
-const SYSTEM_CONTEXT = `Bạn là AI trợ lý điều hướng giao diện cho cửa hàng thú cưng "Trọng Định Store".
+const SYSTEM_CONTEXT = `Bạn là AI trợ lý điều hướng giao diện cho cửa hàng trực tuyến "NovaShop".
 Trang web bán thức ăn, đồ chơi và phụ kiện cho chó mèo.
 Các tính năng chính: tìm sản phẩm, thêm vào giỏ hàng, xem chi tiết sản phẩm, thanh toán.
 Hãy thực hiện các thao tác trên trang web theo yêu cầu của người dùng bằng tiếng Việt.`;

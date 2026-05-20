@@ -1,6 +1,5 @@
-const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'TRỌNG ĐỊNH STORE';
-let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'trongdinhstore.vn';
-// Strip protocol if user accidentally includes it in domain env
+const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'NovaShop';
+let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'novashop.vn';
 SHOP_DOMAIN = SHOP_DOMAIN.replace(/^https?:\/\//, '');
 const SHOP_URL = `https://${SHOP_DOMAIN}`;
 
@@ -16,7 +15,8 @@ const SITE = {
   youtube: import.meta.env.VITE_SHOP_YOUTUBE || '#',
   zalo: import.meta.env.VITE_SHOP_ZALO || '#',
   tiktok: import.meta.env.VITE_SHOP_TIKTOK || '#',
-  description: import.meta.env.VITE_SHOP_DESCRIPTION || `${SHOP_NAME} — Thức ăn chính hãng cho thú cưng, giao nhanh toàn quốc.`
+  description: import.meta.env.VITE_SHOP_DESCRIPTION || `${SHOP_NAME} — Nền tảng thương mại đa ngành, mua sắm không giới hạn.`,
+  slogan: import.meta.env.VITE_SHOP_SLOGAN || 'Mua sắm không giới hạn'
 };
 
 export default SITE;

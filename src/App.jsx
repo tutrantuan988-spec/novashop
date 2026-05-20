@@ -16,9 +16,6 @@ import AIChatWidget from './components/AIChatWidget';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 
-const DogFoodPage = lazy(() => import('./pages/DogFoodPage'));
-const CatFoodPage = lazy(() => import('./pages/CatFoodPage'));
-const PetAccessoriesPage = lazy(() => import('./pages/PetAccessoriesPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
@@ -39,8 +36,15 @@ const AddressesPage = lazy(() => import('./pages/account/AddressesPage'));
 const ReturnRequestPage = lazy(() => import('./pages/ReturnRequestPage'));
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+const AddProductPage = lazy(() => import('./pages/AddProductPage'));
 const DanhGiaPage = lazy(() => import('./pages/DanhGiaPage'));
+const ProductListPage = lazy(() => import('./pages/ProductListPage'));
 const AgentDashboardPage = lazy(() => import('./pages/AgentDashboardPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+const CategoryListPage = lazy(() => import('./pages/CategoryListPage'));
+const BrandPage = lazy(() => import('./pages/BrandPage'));
+const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 
 const Loading = () => (
   <div className="page-loading" role="status" aria-live="polite">
@@ -64,10 +68,10 @@ export default function App() {
                   <Suspense fallback={<Loading />}>
                     <Routes>
                       <Route path="/" element={<HomePage />} />
+                      <Route path="/gio-hang" element={<CartPage />} />
                       <Route path="/tim-kiem" element={<SearchPage />} />
-                      <Route path="/dog-food" element={<DogFoodPage />} />
-                      <Route path="/cat-food" element={<CatFoodPage />} />
-                      <Route path="/pet-accessories" element={<PetAccessoriesPage />} />
+                      <Route path="/them-san-pham" element={<AddProductPage />} />
+                      <Route path="/quan-ly-san-pham" element={<ProductListPage />} />
                       <Route path="/san-pham/:slug" element={<ProductDetailPage />} />
                       <Route path="/chinh-sach/:slug" element={<PolicyPage />} />
                       <Route path="/about" element={<AboutPage />} />
@@ -158,7 +162,10 @@ export default function App() {
                           </ProtectedRoute>
                         )}
                       />
-                      <Route path="/danh-muc" element={<Navigate to="/dog-food" replace />} />
+                      <Route path="/danh-muc" element={<CategoryListPage />} />
+                      <Route path="/danh-muc/:slug" element={<CategoryPage />} />
+                      <Route path="/thuong-hieu/:slug" element={<BrandPage />} />
+                      <Route path="/don-hang/:id" element={<OrderConfirmationPage />} />
                       <Route path="/khuyen-mai" element={<Navigate to="/#flash-sale" replace />} />
                       <Route path="/danh-gia" element={<DanhGiaPage />} />
                       <Route path="/ho-tro" element={<Navigate to="/contact" replace />} />

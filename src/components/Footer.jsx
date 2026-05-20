@@ -12,9 +12,9 @@ function Footer() {
         <div>
           <div className="footer-brand">
             <span><ShoppingBag size={20} aria-hidden /></span>
-            <strong>TRỌNG Định STORE</strong>
+            <strong>{SITE.name}</strong>
           </div>
-          <p>Trọng Định Store – Mua sắm online thông minh với hàng nghìn sản phẩm chính hãng, giao nhanh 24h.</p>
+          <p>{SITE.name} – Nền tảng thương mại đa ngành, mang đến trải nghiệm mua sắm không giới hạn với hàng nghìn sản phẩm chính hãng.</p>
           <div className="footer-social" aria-label="Mạng xã hội">
             <a href={SITE.facebook} aria-label="Facebook" target="_blank" rel="noopener noreferrer"><span aria-hidden>f</span></a>
             <a href={SITE.zalo} aria-label="Zalo" target="_blank" rel="noopener noreferrer" className="social-zalo"><span aria-hidden>zl</span></a>
@@ -27,6 +27,7 @@ function Footer() {
         <div>
           <h3>{t.footer.support}</h3>
           <ul>
+            <li><a href="/danh-muc">Danh mục sản phẩm</a></li>
             <li><a href="/chinh-sach/doi-tra">{t.footer.returns}</a></li>
             <li><a href="/chinh-sach/van-chuyen">{t.footer.shipping}</a></li>
             <li><a href="/chinh-sach/dieu-khoan">{t.footer.terms}</a></li>
@@ -37,10 +38,10 @@ function Footer() {
         <div>
           <h3>{t.footer.about} {SITE.name}</h3>
           <ul>
-            <li><a href="/#luxury">{t.footer.intro}</a></li>
+            <li><a href="/about">Giới thiệu</a></li>
             <li><a href="/chinh-sach/bao-mat">{t.footer.privacy}</a></li>
-            <li><a href="/#reviews">{t.footer.reviews}</a></li>
-            <li><a href="/chinh-sach/lien-he">{t.footer.contact}</a></li>
+            <li><a href="/danh-gia">{t.footer.reviews}</a></li>
+            <li><a href="/contact">{t.footer.contact}</a></li>
           </ul>
         </div>
 
@@ -54,13 +55,8 @@ function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <span>© 2026 Trọng Định Store. Mọi quyền được bảo lưu.</span>
+        <span>© 2026 {SITE.name}. Mọi quyền được bảo lưu.</span>
         <span>{t.footer.design} {SITE.name}</span>
-        <span>
-          <a href="https://www.testmuai.com/?utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" className="footer-partner">
-            testmuai.com
-          </a>
-        </span>
       </div>
     </footer>
   );

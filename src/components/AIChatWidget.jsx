@@ -22,7 +22,7 @@ function AIChatWidget() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Xin chào! Tôi là trợ lý AI của NovaShop. Tôi có thể giúp gì cho bạn về thức ăn thú cưng?' }
+    { role: 'assistant', content: 'Xin chào! Tôi là trợ lý AI của NovaShop. Tôi có thể giúp gì cho bạn?' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);

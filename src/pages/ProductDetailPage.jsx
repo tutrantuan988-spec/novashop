@@ -1,7 +1,7 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck } from 'lucide-react';
-import { useProducts } from '../context/ProductsContext';
+import { ArrowLeft, CheckCircle2, Heart, Minus, Plus, Share2, Shield, ShoppingCart, Star, Truck, Loader } from 'lucide-react';
+import { fetchProductBySlug, fetchRelatedProducts } from '../services/apiV2';
 import { useCart } from '../context/CartContext';
 import SITE from '../config/site-config';
 import ProductCard from '../components/ProductCard';
@@ -9,43 +9,220 @@ import ProductReviews from '../components/ProductReviews';
 import SEO from '../components/SEO';
 import { formatVND } from '../utils/format';
 
+function extractAttributes(product) {
+  const map = {};
+  const pga = product._pg?.attributes;
+  if (Array.isArray(pga)) {
+    pga.forEach(a => {
+      if (a.attribute_name_vi && a.value_text && !['badge','brand'].includes(a.attribute_slug)) {
+        map[a.attribute_name_vi] = a.value_text;
+      }
+    });
+  } else if (pga && typeof pga === 'object') {
+    Object.values(pga).forEach(a => {
+      if (a.attribute_name_vi && a.value_text && !['badge','brand'].includes(a.attribute_slug)) {
+        map[a.attribute_name_vi] = a.value_text;
+      }
+    });
+  }
+  return map;
+}
+
+const badgeColors = {
+  'bán chạy': '#22c55e',
+  'giảm giá': '#ef4444',
+  'mới': '#3b82f6',
+  'hot': '#f97316',
+  'sale': '#ef4444',
+  'new': '#3b82f6',
+  'trending': '#8b5cf6',
+};
+
 function ProductDetailPage() {
   const { slug } = useParams();
-  const { items } = useProducts();
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  const product = useMemo(() => items.find((p) => p.slug === slug), [items, slug]);
+
+  const [product, setProduct] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const [activeImage, setActiveImage] = useState(0);
+  const [pgImages, setPgImages] = useState([]);
+  const [pgImagesLoading, setPgImagesLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
 
+  // Derive current stock from selected variant or total stock
+  const currentStock = useMemo(() => {
+    if (selectedVariant) return selectedVariant.stock;
+    if (product?.variants?.length > 0) {
+      return product.variants.reduce((sum, v) => sum + v.stock, 0);
+    }
+    return product?.stock ?? 0;
+  }, [product, selectedVariant]);
+
+  // Stock status helpers
+  const stockStatus = useMemo(() => {
+    if (currentStock <= 0) return { label: 'Hết hàng', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' };
+    if (currentStock <= 10) return { label: `Sắp hết — còn ${currentStock}`, color: '#f97316', bg: 'rgba(249,115,22,0.1)' };
+    return { label: `Còn ${currentStock} sản phẩm`, color: '#22c55e', bg: 'rgba(34,197,94,0.1)' };
+  }, [currentStock]);
+
+  // Current price from selected variant
+  const currentPrice = useMemo(() => {
+    if (selectedVariant) return selectedVariant.price || product?.price;
+    return product?.price;
+  }, [product, selectedVariant]);
+
+  const currentOldPrice = useMemo(() => {
+    if (selectedVariant) {
+      const sp = selectedVariant.salePrice;
+      if (sp > (selectedVariant.price || product?.price)) return sp;
+    }
+    return product?.oldPrice;
+  }, [product, selectedVariant]);
+
+  const handleSelectVariant = useCallback((variant) => {
+    setSelectedVariant(variant);
+    setQuantity(1);
+    // Update image if variant has one
+    if (variant.image && activeImage === 0) {
+      // variant image is available but we keep main gallery
+    }
+  }, [activeImage]);
+
+  const renderVariantGroup = useCallback((attrName, label) => {
+    const seen = new Set();
+    const items = product?.variants?.filter(v => {
+      const attr = v.attributes?.find(a => a.attribute_slug === attrName);
+      if (!attr || seen.has(attr.value_text)) return false;
+      seen.add(attr.value_text);
+      return true;
+    });
+    if (!items || items.length <= 1) return null;
+    return (
+      <div className="variant-group">
+        <h4>{label}</h4>
+        <div className="variant-options">
+          {items.map(v => {
+            const attr = v.attributes?.find(a => a.attribute_slug === attrName);
+            if (!attr) return null;
+            const isSelected = selectedVariant?.id === v.id;
+            return (
+              <button
+                key={v.id}
+                className={`variant-btn ${isSelected ? 'active' : ''}`}
+                onClick={() => handleSelectVariant(v)}
+                disabled={v.stock <= 0}
+              >
+                {attr.value_text}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }, [product, selectedVariant, handleSelectVariant]);
+
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(false);
     setActiveImage(0);
     setQuantity(1);
-    setSelectedColor(product?.colors?.[0] ?? null);
-    setSelectedSize(product?.sizes?.[0] ?? null);
-    if (product) {
-      document.title = `${product.name} - ${SITE.name}`;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Track recently viewed
-      try {
-        const key = 'trongdinhstore:recentlyViewed';
-        const raw = window.localStorage.getItem(key);
-        const list = raw ? JSON.parse(raw) : [];
-        const next = [{ id: product.id, slug: product.slug, name: product.name, image: product.image, price: product.price }, ...list.filter((p) => p.id !== product.id)].slice(0, 8);
-        window.localStorage.setItem(key, JSON.stringify(next));
-      } catch {}
-    }
-  }, [product]);
+    setSelectedVariant(null);
 
-  const related = useMemo(() => {
-    if (!product) return [];
-    return items.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
-  }, [items, product]);
+    fetchProductBySlug(slug)
+      .then((result) => {
+        if (cancelled) return;
+        if (result) {
+          setProduct(result);
+          // Auto-select the first variant (default or first available)
+          if (result.variants?.length > 0) {
+            const defaultV = result.variants.find((v) => v.isDefault) || result.variants[0];
+            setSelectedVariant(defaultV);
+          }
+          setSelectedColor(result.colors?.[0] ?? null);
+          setSelectedSize(result.sizes?.[0] ?? null);
+          document.title = `${result.name} - ${SITE.name}`;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  if (!product) {
+          // Fetch PG product images for the gallery
+          setPgImagesLoading(true);
+          fetch(`/api/products/${result.id}/images`)
+            .then(r => r.json())
+            .then(data => {
+              if (Array.isArray(data) && data.length > 0) {
+                setPgImages(data);
+                // Track recently viewed with actual PG image
+                try {
+                  const key = 'trongdinhstore:recentlyViewed';
+                  const raw = window.localStorage.getItem(key);
+                  const list = raw ? JSON.parse(raw) : [];
+                  const firstImage = data[0]?.image_url || result.image;
+                  const next = [{ id: result.id, slug: result.slug, name: result.name, image: firstImage, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
+                  window.localStorage.setItem(key, JSON.stringify(next));
+                } catch {}
+              } else {
+                // Track recently viewed with fallback image
+                try {
+                  const key = 'trongdinhstore:recentlyViewed';
+                  const raw = window.localStorage.getItem(key);
+                  const list = raw ? JSON.parse(raw) : [];
+                  const next = [{ id: result.id, slug: result.slug, name: result.name, image: result.image, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
+                  window.localStorage.setItem(key, JSON.stringify(next));
+                } catch {}
+              }
+              setPgImagesLoading(false);
+            })
+            .catch(() => setPgImagesLoading(false));
+
+          // Track recently viewed with fallback image
+          try {
+            const key = 'trongdinhstore:recentlyViewed';
+            const raw = window.localStorage.getItem(key);
+            const list = raw ? JSON.parse(raw) : [];
+            const next = [{ id: result.id, slug: result.slug, name: result.name, image: result.image, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
+            window.localStorage.setItem(key, JSON.stringify(next));
+          } catch {}
+
+          // Fetch related products — use the product's category based slug
+          fetchRelatedProducts(result.id, 3).then((r) => {
+            if (!cancelled) setRelated(r.length > 0 ? r : []);
+          }).catch(() => {});
+
+          setLoading(false);
+        } else {
+          if (!cancelled) {
+            setError(true);
+            setLoading(false);
+          }
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <section className="section" style={{ textAlign: 'center', padding: '80px 24px' }}>
+        <Loader size={36} className="spin" style={{ opacity: 0.3, marginBottom: 16 }} />
+        <p style={{ color: 'var(--muted)' }}>Đang tải sản phẩm...</p>
+      </section>
+    );
+  }
+
+  if (error || !product) {
     return (
       <section className="section detail-missing">
         <h1>Sản phẩm không tồn tại</h1>
@@ -55,19 +232,26 @@ function ProductDetailPage() {
     );
   }
 
+  const galleryImages = useMemo(() => {
+    if (pgImages.length > 0) return pgImages.map(img => img.image_url);
+    if (product.gallery?.length > 0) return product.gallery;
+    if (product.image) return [product.image];
+    return [];
+  }, [pgImages, product]);
+
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description,
-    image: product.gallery || [product.image],
+    image: galleryImages.length > 0 ? galleryImages : [product.image],
     sku: String(product.id),
     brand: { '@type': 'Brand', name: SITE.name },
     offers: {
       '@type': 'Offer',
       priceCurrency: 'VND',
-      price: product.price,
-      availability: (product.stock ?? 1) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
+      price: currentPrice,
+      availability: currentStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
     },
     aggregateRating: product.rating ? {
       '@type': 'AggregateRating',
@@ -115,17 +299,56 @@ function ProductDetailPage() {
         </div>
 
         <div className="detail-info">
-          <span className="section-kicker">{product.category}</span>
+          {product.category && (
+            <Link to={`/danh-muc/${product._pg?.category_slug || ''}`} className="section-kicker" style={{ textDecoration: 'none' }}>
+              {product.category}
+            </Link>
+          )}
+          {product.brand && <span className="detail-brand" style={{ display: 'block', fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>Thương hiệu: <strong>{product.brand}</strong></span>}
           <h1>{product.name}</h1>
           <div className="detail-meta">
             <span className="rating"><Star size={16} fill="currentColor" aria-hidden /> {product.rating} ({product.reviewCount} đánh giá)</span>
-            <span className="stock">Còn {product.stock} sản phẩm</span>
+            <span
+              className="stock"
+              style={{
+                color: stockStatus.color,
+                background: stockStatus.bg,
+                padding: '2px 10px',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 700
+              }}
+            >
+              {stockStatus.label}
+            </span>
           </div>
 
           <div className="detail-price">
-            <strong>{formatVND(product.price)}</strong>
-            {product.oldPrice ? <span>{formatVND(product.oldPrice)}</span> : null}
+            <strong>{formatVND(currentPrice)}</strong>
+            {currentOldPrice ? <span>{formatVND(currentOldPrice)}</span> : null}
           </div>
+
+          {product.badge && (
+            <span className="product-badge" style={{ background: badgeColors[product.badge.toLowerCase()] || '#ff7a1a' }}>
+              {product.badge}
+            </span>
+          )}
+
+          {product._pg?.attributes && (
+            <div className="product-attributes">
+              <h4>Thông tin sản phẩm</h4>
+              <table>
+                <tbody>
+                  {Object.entries(extractAttributes(product)).map(([key, val]) => (
+                    <tr key={key}>
+                      <td>{key}</td>
+                      <td>{val}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           <p className="detail-description">{product.description}</p>
 
@@ -146,6 +369,13 @@ function ProductDetailPage() {
                   />
                 ))}
               </div>
+            </div>
+          )}
+
+          {product.variants && product.variants.length > 1 && (
+            <div className="variant-section">
+              {renderVariantGroup('size', 'Kích thước')}
+              {renderVariantGroup('color', 'Màu sắc')}
             </div>
           )}
 
@@ -174,13 +404,23 @@ function ProductDetailPage() {
             <div className="quantity quantity-lg">
               <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Giảm"><Minus size={16} /></button>
               <span aria-live="polite">{quantity}</span>
-              <button type="button" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} aria-label="Tăng"><Plus size={16} /></button>
+              <button type="button" onClick={() => setQuantity(Math.min(currentStock, quantity + 1))} aria-label="Tăng"><Plus size={16} /></button>
             </div>
           </div>
 
           <div className="detail-actions">
-            <button type="button" className="primary-button" onClick={() => addToCart(product, quantity)}>
-              <ShoppingCart size={18} aria-hidden /> Thêm vào giỏ
+            <button
+              type="button"
+              className="primary-button"
+              disabled={currentStock <= 0}
+              onClick={() => addToCart(product, quantity, selectedVariant)}
+              style={{
+                opacity: currentStock <= 0 ? 0.5 : 1,
+                cursor: currentStock <= 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <ShoppingCart size={18} aria-hidden />
+              {currentStock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
             </button>
             <button type="button" className="secondary-button" aria-label="Yêu thích"><Heart size={18} /></button>
             <button type="button" className="secondary-button" aria-label="Chia sẻ"><Share2 size={18} /></button>

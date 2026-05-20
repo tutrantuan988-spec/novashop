@@ -194,3 +194,211 @@ Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
 [2m19:18:05[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mInvalid Sentry Dsn: your_key_here
 [2m19:18:06[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m[Meta Pixel] - Invalid PixelID: null.
 [2m19:18:06[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mClerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[2m16:09:58[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m[Meta Pixel] - Invalid PixelID: null.
+[2m16:09:59[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mClerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[2m16:10:11[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mTypeError: Cannot read properties of undefined (reading 'charAt')
+    at http://localhost:5173/src/pages/DanhGiaPage.jsx:215:27
+    at Array.map (<anonymous>)
+    at DanhGiaPage (http://localhost:5173/src/pages/DanhGiaPage.jsx:207:27)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:12868:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:4213:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5569:16)
+    at updateSimpleMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5432:11)
+    at updateMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5407:294)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:6130:26)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:851:66)
+
+The above error occurred in the <DanhGiaPage> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+
+[2m16:10:11[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[ErrorBoundary] TypeError: Cannot read properties of undefined (reading 'charAt')
+    at http://localhost:5173/src/pages/DanhGiaPage.jsx:215:27
+    at Array.map (<anonymous>)
+    at DanhGiaPage (http://localhost:5173/src/pages/DanhGiaPage.jsx:207:27)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:12868:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:4213:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5569:16)
+    at updateSimpleMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5432:11)
+    at updateMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5407:294)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:6130:26)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:851:66) {"componentStack":"\n    at DanhGiaPage (http://localhost:5173/src/pages/DanhGiaPage.jsx:207:27)\n    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:4061:26)\n    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:4694:19)\n    at Suspense (<anonymous>)\n    at main (<anonymous>)\n    at div (<anonymous>)\n    at CartProvider (http://localhost:5173/src/context/CartContext.jsx:21:32)\n    at WishlistProvider (http://localhost:5173/src/context/WishlistContext.jsx:22:36)\n    at V2ProductsProvider (http://localhost:5173/src/context/ProductsContext.jsx:165:31)\n    at ProductsProvider (http://localhost:5173/src/context/ProductsContext.jsx:264:36)\n    at ClerkAuthProvider (http://localhost:5173/src/context/AuthContext.jsx:148:30)\n    at AuthProvider (http://localhost:5173/src/context/AuthContext.jsx:196:32)\n    at ToastProvider (http://localhost:5173/src/context/ToastContext.jsx:9:33)\n    at ErrorBoundary (http://localhost:5173/src/components/ErrorBoundary.jsx:9:3)\n    at App (<anonymous>)\n    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:4646:29)\n    at BrowserRouter (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:7071:26)\n    at QueryClientProvider (http://localhost:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=8fa7213c:2549:30)\n    at ThemeProvider (http://localhost:5173/src/context/ThemeContext.jsx:8:26)\n    at I18nProvider (http://localhost:5173/src/context/I18nContext.jsx:9:25)\n    at AppShell (<anonymous>)\n    at __experimental_CheckoutProvider (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:1832:42)\n    at SWRConfig$1 (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:983:10)\n    at SWRConfigCompat (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:1823:28)\n    at OrganizationProvider (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:1836:31)\n    at ClerkContextProvider (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:6856:10)\n    at ClerkProviderBase (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:6924:10)\n    at Hoc (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:4230:3)"}
+[2m16:10:13[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mTypeError: Cannot read properties of undefined (reading 'charAt')
+    at http://localhost:5173/src/pages/DanhGiaPage.jsx:215:27
+    at Array.map (<anonymous>)
+    at DanhGiaPage (http://localhost:5173/src/pages/DanhGiaPage.jsx:207:27)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:12868:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:4213:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5569:16)
+    at updateSimpleMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5432:11)
+    at updateMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5407:294)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:6130:26)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:851:66)
+
+The above error occurred in the <DanhGiaPage> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+
+[2m16:10:13[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[ErrorBoundary] TypeError: Cannot read properties of undefined (reading 'charAt')
+    at http://localhost:5173/src/pages/DanhGiaPage.jsx:215:27
+    at Array.map (<anonymous>)
+    at DanhGiaPage (http://localhost:5173/src/pages/DanhGiaPage.jsx:207:27)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:12868:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:4213:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5569:16)
+    at updateSimpleMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5432:11)
+    at updateMemoComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:5407:294)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:6130:26)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=8fa7213c:851:66) {"componentStack":"\n    at DanhGiaPage (http://localhost:5173/src/pages/DanhGiaPage.jsx:207:27)\n    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:4061:26)\n    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:4694:19)\n    at Suspense (<anonymous>)\n    at main (<anonymous>)\n    at div (<anonymous>)\n    at CartProvider (http://localhost:5173/src/context/CartContext.jsx:21:32)\n    at WishlistProvider (http://localhost:5173/src/context/WishlistContext.jsx:22:36)\n    at V2ProductsProvider (http://localhost:5173/src/context/ProductsContext.jsx:165:31)\n    at ProductsProvider (http://localhost:5173/src/context/ProductsContext.jsx:264:36)\n    at ClerkAuthProvider (http://localhost:5173/src/context/AuthContext.jsx:148:30)\n    at AuthProvider (http://localhost:5173/src/context/AuthContext.jsx:196:32)\n    at ToastProvider (http://localhost:5173/src/context/ToastContext.jsx:9:33)\n    at ErrorBoundary (http://localhost:5173/src/components/ErrorBoundary.jsx:9:3)\n    at App (<anonymous>)\n    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:4646:29)\n    at BrowserRouter (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8fa7213c:7071:26)\n    at QueryClientProvider (http://localhost:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=8fa7213c:2549:30)\n    at ThemeProvider (http://localhost:5173/src/context/ThemeContext.jsx:8:26)\n    at I18nProvider (http://localhost:5173/src/context/I18nContext.jsx:9:25)\n    at AppShell (<anonymous>)\n    at __experimental_CheckoutProvider (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:1832:42)\n    at SWRConfig$1 (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:983:10)\n    at SWRConfigCompat (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:1823:28)\n    at OrganizationProvider (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:1836:31)\n    at ClerkContextProvider (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:6856:10)\n    at ClerkProviderBase (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:6924:10)\n    at Hoc (http://localhost:5173/node_modules/.vite/deps/@clerk_clerk-react.js?v=8fa7213c:4230:3)"}
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[2m16:10:13[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mClerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m
+[2m16:23:45[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mClerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_FACEBOOK_PIXEL_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GTM_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_ZALO_OA_ID% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_OPENAI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_GEMINI_API_KEY% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_LLM_BASE_URL% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_DISABLE_AI_COPILOT% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m[1m(!) %VITE_SHOP_ZALO% is not defined in env variables found in /index.html. Is the variable mistyped?[22m[39m
+[33m
+Unable to parse HTML; parse5 error code disallowed-content-in-noscript-in-head
+ at C:/Users/TUAN TU/OneDrive/Desktop/Website/index.html:81:15
+79 |        })();
+80 |      </script>
+81 |  ...<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=Pag...
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+82 |  
+83 |      <!-- Google Tag Manager (noscript) -->[39m

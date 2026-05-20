@@ -70,7 +70,7 @@ function ContactPage() {
       a: 'Miễn phí vận chuyển cho đơn hàng từ 300,000đ trở lên.'
     },
     {
-      q: 'Làm sao để tôi biết thức ăn phù hợp với thú cưng?',
+      q: 'Làm sao để tôi chọn sản phẩm phù hợp?',
       a: 'Bạn có thể chat với chúng tôi hoặc gọi hotline để được tư vấn miễn phí.'
     }
   ];

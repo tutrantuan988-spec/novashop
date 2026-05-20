@@ -178,3 +178,16 @@
 [2m19:26:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/Header.jsx[22m
 [2m19:31:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m
 [2m19:36:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m14:50:53[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m14:50:53[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+[2m14:50:53[22m [36m[1m[vite][22m[39m server restarted.
+[2m14:50:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] scanning dependencies...
+[2m14:56:40[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m14:56:40[22m [36m[1m[vite][22m[39m server restarted.
+[2m14:57:08[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m14:57:08[22m [36m[1m[vite][22m[39m server restarted.
+[2m14:58:26[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m14:58:26[22m [36m[1m[vite][22m[39m server restarted.
+[2m16:42:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/DogFoodPage.jsx[22m
+[2m16:42:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/context/ProductsContext.jsx, /src/pages/HomePage.jsx, /src/pages/CategoryPage.jsx, /src/components/FlashSale.jsx, /src/components/search/SearchBar.jsx[22m
+[2m16:42:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/context/ProductsContext.jsx, /src/pages/HomePage.jsx, /src/pages/CategoryPage.jsx, /src/pages/DanhGiaPage.jsx[22m

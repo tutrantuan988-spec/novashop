@@ -1,11 +1,12 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ArrowRight, Crown, Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, ShoppingCart, Sun, User, X } from 'lucide-react';
+import { ArrowRight, Crown, Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, ShoppingCart, Sun, User, X, ChevronDown } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useI18n } from '../context/I18nContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import { fetchCategoryTree } from '../services/apiV2';
 import NotificationBell from './ui/NotificationBell';
 import SearchBar from './search/SearchBar';
 import SITE from '../config/site-config';
@@ -18,6 +19,16 @@ function Header() {
   const { lang, toggleLang, t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [catDropdown, setCatDropdown] = useState(false);
+
+  useEffect(() => {
+    fetchCategoryTree().then((tree) => {
+      const top = (tree || []).filter((c) => c.is_active !== false && c.show_in_menu !== false);
+      setCategories(top);
+    }).catch(() => {});
+  }, []);
+
   const navLabels = t?.nav || {
     products: 'Sản phẩm',
     luxury: 'Danh mục',
@@ -213,7 +224,59 @@ function Header() {
       <div className="header-row2">
         <nav className={isMenuOpen ? 'nav nav-open' : 'nav'} aria-label="Điều hướng chính">
           <NavLink to="/" end onClick={() => setIsMenuOpen(false)}>{navLabels.products}</NavLink>
-          <NavLink to="/danh-muc" onClick={() => setIsMenuOpen(false)}>{navLabels.luxury}</NavLink>
+          <div
+            className="nav-dropdown-wrapper"
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setCatDropdown(true)}
+            onMouseLeave={() => setCatDropdown(false)}
+          >
+            <NavLink
+              to="/danh-muc"
+              onClick={() => setIsMenuOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+            >
+              {navLabels.luxury} <ChevronDown size={14} style={{ opacity: 0.6 }} />
+            </NavLink>
+            {catDropdown && categories.length > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  minWidth: 220,
+                  background: 'var(--surface)',
+                  border: '1.5px solid var(--border)',
+                  borderRadius: 12,
+                  padding: 8,
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                  zIndex: 200
+                }}
+              >
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/danh-muc/${cat.slug}`}
+                    onClick={() => { setIsMenuOpen(false); setCatDropdown(false); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 14px',
+                      borderRadius: 8,
+                      color: 'var(--text)',
+                      textDecoration: 'none',
+                      fontSize: 14,
+                      fontWeight: 500
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
           <NavLink to="/khuyen-mai" onClick={() => setIsMenuOpen(false)}>{navLabels.deals}</NavLink>
           <NavLink to="/danh-gia" onClick={() => setIsMenuOpen(false)}>{navLabels.reviews}</NavLink>
           <NavLink to="/ho-tro" onClick={() => setIsMenuOpen(false)}>{navLabels.concierge}</NavLink>

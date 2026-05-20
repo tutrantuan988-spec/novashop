@@ -1,26 +1,20 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, ArrowRight, ShieldCheck, Truck, LockKeyhole, Search, Sparkles, X, Gem, Headphones, PackageCheck, BadgeCheck, Star, SlidersHorizontal, MessageCircle, Wallet, RotateCcw, ChevronRight } from 'lucide-react';
+import { Zap, ArrowRight, ShieldCheck, Truck, LockKeyhole, Sparkles, Gem, Headphones, PackageCheck, BadgeCheck, MessageCircle, Wallet, RotateCcw, ChevronRight, PlusCircle, List, ShoppingBag } from 'lucide-react';
+import { fetchCategoryTree, fetchProducts } from '../services/apiV2';
 import AnimatedHeroCard from '../components/AnimatedHeroCard';
 import PolicyModal from '../components/PolicyModal';
-import { useProducts } from '../context/ProductsContext';
-import { categories, reviews } from '../data/products';
-import ProductCard from '../components/ProductCard';
 import RecentlyViewed from '../components/RecentlyViewed';
 import { SkeletonGrid } from '../components/Skeleton';
-import FlashSale from '../components/FlashSale';
 import Newsletter from '../components/Newsletter';
 import MotionWrapper from '../components/MotionWrapper';
 import { formatVND } from '../utils/format';
 import SITE from '../config/site-config';
 
-const SORT_OPTIONS = [
-  { value: 'featured', label: 'Nổi bật' },
-  { value: 'newest', label: 'Mới nhất' },
-  { value: 'price-asc', label: 'Giá: thấp → cao' },
-  { value: 'price-desc', label: 'Giá: cao → thấp' },
-  { value: 'rating', label: 'Đánh giá cao' },
-  { value: 'popular', label: 'Bán chạy' }
+const homeReviews = [
+  { id: 'r1', name: 'Lan Anh', role: 'Khách hàng thân thiết', rating: 5, content: 'Sản phẩm chất lượng tuyệt vời, giao hàng siêu nhanh. Sẽ ủng hộ shop dài dài!' },
+  { id: 'r2', name: 'Hoàng Minh', role: 'Đã mua 3 lần', rating: 4, content: 'Giá cả hợp lý, đóng gói cẩn thận. Shop tư vấn rất nhiệt tình.' },
+  { id: 'r3', name: 'Thanh Thảo', role: 'Mua online lần đầu', rating: 5, content: 'Lần đầu mua hàng online nhưng rất yên tâm vì được kiểm tra hàng trước khi nhận.' },
 ];
 
 const BRAND_PILLS = [
@@ -33,8 +27,8 @@ const BRAND_PILLS = [
 
 const BENEFIT_CARDS = [
   { id: 'shipping', icon: Truck, title: 'Giao nhanh toàn quốc', summary: 'Nội thành trong ngày, tỉnh thành 2-4 ngày' },
-  { id: 'authentic', icon: BadgeCheck, title: 'Cam kết chính hãng', summary: 'Thức ăn nhập khẩu, có nguồn gốc rõ ràng' },
-  { id: 'support-card', icon: Headphones, title: 'Tư vấn dinh dưỡng', summary: 'Tư vấn nhanh qua chat, hotline và Zalo' },
+  { id: 'authentic', icon: BadgeCheck, title: 'Cam kết chính hãng', summary: 'Sản phẩm có nguồn gốc rõ ràng, đảm bảo chất lượng' },
+  { id: 'support-card', icon: Headphones, title: 'Tư vấn tận tình', summary: 'Đội ngũ hỗ trợ qua chat, hotline và Zalo' },
   { id: 'packaging', icon: PackageCheck, title: 'Đóng gói cẩn thận', summary: 'Bảo quản tốt, kiểm tra hàng trước khi thanh toán COD' }
 ];
 
@@ -154,114 +148,72 @@ const POLICIES = {
 };
 
 function HomePage() {
-  const { items, loading } = useProducts();
-  const [activeCategory, setActiveCategory] = useState('Tất cả');
-  const [query, setQuery] = useState('');
-  const [sort, setSort] = useState('featured');
-  const [minRating, setMinRating] = useState(0);
-  const [priceMax, setPriceMax] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [activePolicy, setActivePolicy] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [latestProducts, setLatestProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(null);
+  const [productsError, setProductsError] = useState(null);
+  const [industryProducts, setIndustryProducts] = useState({});
 
   useEffect(() => {
-    document.title = `${SITE.name} - Thức ăn chính hãng cho thú cưng`;
+    document.title = `${SITE.name} — Mua sắm không giới hạn`;
   }, []);
 
-  const priceCeiling = useMemo(() => {
-    if (!items.length) return 0;
-    return Math.max(...items.map((p) => Number(p.price) || 0));
-  }, [items]);
+  useEffect(() => {
+    setCategoriesLoading(true);
+    setCategoriesError(null);
+    fetchCategoryTree()
+      .then((tree) => {
+        setCategories(Array.isArray(tree) ? tree.filter((c) => c.is_active !== false) : []);
+      })
+      .catch((err) => {
+        setCategoriesError(err.message || 'Lỗi tải danh mục');
+        setCategories([]);
+      })
+      .finally(() => setCategoriesLoading(false));
+  }, []);
 
   useEffect(() => {
-    if (priceMax === null && priceCeiling > 0) {
-      setPriceMax(priceCeiling);
-    }
-  }, [priceCeiling, priceMax]);
+    setProductsLoading(true);
+    setProductsError(null);
+    fetchProducts({ limit: 8, sort_by: 'created_at', sort_order: 'desc' })
+      .then((products) => {
+        setLatestProducts(products || []);
+      })
+      .catch((err) => {
+        setProductsError(err.message || 'Lỗi tải sản phẩm');
+        setLatestProducts([]);
+      })
+      .finally(() => setProductsLoading(false));
+  }, []);
 
-  const filteredProducts = useMemo(() => {
-    const lowerQuery = query.trim().toLowerCase();
-    const cap = priceMax ?? priceCeiling;
-
-    let list = items.filter((product) => {
-      const matchesCategory = activeCategory === 'Tất cả' || product.category === activeCategory;
-      const text = [product.name, product.description, product.category, ...(product.colors || []), ...(product.sizes || [])]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      const matchesQuery = !lowerQuery || text.includes(lowerQuery);
-      const matchesRating = !minRating || (Number(product.rating) || 0) >= minRating;
-      const matchesPrice = !cap || (Number(product.price) || 0) <= cap;
-      return matchesCategory && matchesQuery && matchesRating && matchesPrice;
+  const industrySlugs = ['thoi-trang', 'dien-tu', 'do-gia-dung', 'suc-khoe-lam-dep', 'the-thao', 'sach', 'me-be', 'thuc-pham'];
+  useEffect(() => {
+    industrySlugs.forEach((slug) => {
+      fetchProducts({ category_slug: slug, limit: 4, sort_by: 'created_at', sort_order: 'desc' })
+        .then((products) => {
+          if (products?.length > 0) {
+            setIndustryProducts((prev) => ({ ...prev, [slug]: products }));
+          }
+        })
+        .catch(() => {});
     });
-
-    list = [...list];
-    switch (sort) {
-      case 'newest':
-        list.sort((a, b) => Number(b.id) - Number(a.id));
-        break;
-      case 'price-asc':
-        list.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
-        break;
-      case 'price-desc':
-        list.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
-        break;
-      case 'rating':
-        list.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
-        break;
-      case 'popular':
-        list.sort((a, b) => (Number(b.reviewCount) || 0) - (Number(a.reviewCount) || 0));
-        break;
-      default:
-        break;
-    }
-    return list;
-  }, [items, activeCategory, query, sort, minRating, priceMax, priceCeiling]);
-
-  const activeFilterCount = (activeCategory !== 'Tất cả' ? 1 : 0)
-    + (query ? 1 : 0)
-    + (minRating > 0 ? 1 : 0)
-    + (priceMax !== null && priceMax < priceCeiling ? 1 : 0);
-
-  const resetFilters = () => {
-    setActiveCategory('Tất cả');
-    setQuery('');
-    setSort('featured');
-    setMinRating(0);
-    setPriceMax(priceCeiling);
-  };
-
-  const luxuryCollections = [
-    {
-      title: 'Thức Ăn Cho Chó',
-      label: 'DINH DƯỠNG CHO BÉ CÚN',
-      image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=900&q=80',
-      slug: '/dog-food'
-    },
-    {
-      title: 'Thức Ăn Cho Mèo',
-      label: 'CHĂM SÓC BÉ MÈO',
-      image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=900&q=80',
-      slug: '/cat-food'
-    },
-    {
-      title: 'Phụ Kiện Thú Cưng',
-      label: 'ĐỒ CHƠI & VẬT DỤNG',
-      image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
-      slug: '/pet-accessories'
-    }
-  ];
+  }, []);
 
   return (
     <>
       <PolicyModal policy={activePolicy} onClose={() => setActivePolicy(null)} />
+
       <section className="hero premium-hero" id="home">
         <div className="hero-content">
-          <div className="eyebrow"><Zap size={18} aria-hidden /> Thức ăn chính hãng • Giao toàn quốc</div>
-          <h1>Thức ăn chính hãng cho thú cưng.</h1>
-          <p>Chuyên Royal Canin, Pedigree, Whiskas, Me-O và nhiều thương hiệu uy tín. COD toàn quốc, freeship từ 300K.</p>
+          <div className="eyebrow"><Zap size={18} aria-hidden /> {SITE.name} — {SITE.slogan}</div>
+          <h1>{SITE.name} — {SITE.slogan}.</h1>
+          <p>Đa dạng ngành hàng: Thời trang · Điện tử · Gia dụng · Thể thao · Sách · Mẹ & Bé · Thực phẩm · Và hơn thế nữa. COD toàn quốc, freeship từ 300K.</p>
           <div className="hero-actions">
-            <a className="primary-button" href="#products">Mua sắm ngay <ArrowRight size={18} aria-hidden /></a>
-            <a className="secondary-button" href="#luxury">Xem danh mục</a>
+            <Link className="primary-button" to="/danh-muc">Khám phá sản phẩm <ArrowRight size={18} aria-hidden /></Link>
+            <a className="secondary-button" href="#categories">Xem danh mục</a>
           </div>
           <div className="hero-trust">
             <span><ShieldCheck size={16} aria-hidden /> 100% chính hãng</span>
@@ -272,6 +224,7 @@ function HomePage() {
         <AnimatedHeroCard />
       </section>
 
+      {/* Brand Strip */}
       <section className="brand-strip" aria-label="Các cam kết nổi bật">
         {BRAND_PILLS.map((pill) => (
           <button
@@ -286,187 +239,215 @@ function HomePage() {
         ))}
       </section>
 
+      {/* Benefit Cards */}
       <MotionWrapper>
         <section className="benefits" id="benefits" aria-label="Lợi ích khi mua sắm">
-        {BENEFIT_CARDS.map((card) => {
-          const CardIcon = card.icon;
-          return (
-            <button
-              key={card.id}
-              type="button"
-              className="benefit-card"
-              onClick={() => setActivePolicy(POLICIES[card.id])}
-              aria-haspopup="dialog"
-            >
-              <CardIcon aria-hidden />
-              <div>
-                <strong>{card.title}</strong>
-                <span>{card.summary}</span>
-              </div>
-              <ChevronRight size={18} className="benefit-card-chevron" aria-hidden />
-            </button>
-          );
-        })}
-      </section>
+          {BENEFIT_CARDS.map((card) => {
+            const CardIcon = card.icon;
+            return (
+              <button
+                key={card.id}
+                type="button"
+                className="benefit-card"
+                onClick={() => setActivePolicy(POLICIES[card.id])}
+                aria-haspopup="dialog"
+              >
+                <CardIcon aria-hidden />
+                <div>
+                  <strong>{card.title}</strong>
+                  <span>{card.summary}</span>
+                </div>
+                <ChevronRight size={18} className="benefit-card-chevron" aria-hidden />
+              </button>
+            );
+          })}
+        </section>
       </MotionWrapper>
 
       <RecentlyViewed />
 
-      <section className="section luxury-section" id="luxury" aria-labelledby="luxury-heading">
+      {/* SECTION 2 — CATEGORY GRID (dynamic from API) */}
+      <section className="section" id="categories" aria-labelledby="categories-heading">
         <div className="section-heading centered">
           <div>
-            <span className="section-kicker"><Gem size={16} aria-hidden /> Danh mục Việt Nam</span>
-            <h2 id="luxury-heading">Khám phá danh mục nổi bật</h2>
+            <span className="section-kicker"><Gem size={16} aria-hidden /> Danh mục sản phẩm</span>
+            <h2 id="categories-heading">Khám phá danh mục</h2>
           </div>
         </div>
-        <div className="luxury-grid">
-          {luxuryCollections.map((collection) => (
-            <Link
-              to={collection.slug}
-              className="luxury-card"
-              key={collection.title}
-              style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-            >
-              <img src={collection.image} alt={collection.title} loading="lazy" decoding="async" />
-              <div>
-                <span>{collection.label}</span>
-                <h3>{collection.title}</h3>
-                <span className="luxury-link">Khám phá ngay <ArrowRight size={16} aria-hidden /></span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="section" id="products" aria-labelledby="products-heading">
-        <div className="section-heading">
-          <div>
-            <span className="section-kicker"><Sparkles size={16} aria-hidden /> Sản phẩm nổi bật</span>
-            <h2 id="products-heading">Những món đáng sở hữu hôm nay</h2>
+        {categoriesError ? (
+          <div style={{ textAlign: 'center', padding: '32px', color: 'var(--error-color, #e74c3c)' }}>
+            <p style={{ fontWeight: 600, marginBottom: 8 }}>Không thể tải danh mục</p>
+            <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>Vui lòng thử lại sau</p>
           </div>
-          <div className="search-box">
-            <Search size={18} aria-hidden />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Tìm theo tên, mô tả, màu, size..."
-              aria-label="Tìm sản phẩm"
-              type="search"
-            />
-            {query && (
-              <button type="button" className="search-clear" onClick={() => setQuery('')} aria-label="Xoá tìm kiếm">
-                <X size={16} />
-              </button>
-            )}
+        ) : categoriesLoading ? (
+          <div style={{ textAlign: 'center', padding: '32px' }}>
+            <span>Đang tải danh mục...</span>
           </div>
-        </div>
-
-        <div className="categories" role="tablist" aria-label="Danh mục sản phẩm">
-          {categories.map((category) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeCategory === category}
-              className={activeCategory === category ? 'active' : ''}
-              onClick={() => setActiveCategory(category)}
-              key={category}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
-        <div className="filter-bar">
-          <button
-            type="button"
-            className={`filter-toggle ${showFilters ? 'open' : ''}`}
-            onClick={() => setShowFilters((s) => !s)}
-            aria-expanded={showFilters}
-          >
-            <SlidersHorizontal size={16} aria-hidden /> Bộ lọc
-            {activeFilterCount > 0 && <span className="filter-badge">{activeFilterCount}</span>}
-          </button>
-
-          <div className="sort-select">
-            <label htmlFor="sort">Sắp xếp:</label>
-            <select id="sort" value={sort} onChange={(event) => setSort(event.target.value)}>
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <span className="result-count">{filteredProducts.length} sản phẩm</span>
-
-          {activeFilterCount > 0 && (
-            <button type="button" className="filter-reset" onClick={resetFilters}>
-              <X size={14} aria-hidden /> Xoá bộ lọc
-            </button>
-          )}
-        </div>
-
-        {showFilters && (
-          <div className="filter-panel">
-            <div className="filter-group">
-              <label>
-                <span>Giá tối đa: <strong>{formatVND(priceMax ?? priceCeiling)}</strong></span>
-                <input
-                  type="range"
-                  min={0}
-                  max={priceCeiling || 100}
-                  step={Math.max(10000, Math.round((priceCeiling || 100) / 50))}
-                  value={priceMax ?? priceCeiling}
-                  onChange={(event) => setPriceMax(Number(event.target.value))}
-                />
-              </label>
-            </div>
-            <div className="filter-group">
-              <span>Đánh giá tối thiểu</span>
-              <div className="rating-pills">
-                {[0, 3, 4, 4.5].map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={minRating === value ? 'rating-pill active' : 'rating-pill'}
-                    onClick={() => setMinRating(value)}
-                  >
-                    {value === 0 ? 'Tất cả' : (
-                      <>
-                        <Star size={12} fill="currentColor" aria-hidden /> {value}+
-                      </>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <SkeletonGrid count={8} />
-        ) : filteredProducts.length === 0 ? (
-          <div className="empty-result" style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <PackageCheck size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
-            <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 8 }}>Sản phẩm đang được cập nhật</p>
-            <p style={{ color: 'var(--muted)', marginBottom: 16 }}>Liên hệ Zalo <strong>0369712958</strong> để đặt hàng trực tiếp</p>
-            <a href="https://zalo.me/0369712958" target="_blank" rel="noopener noreferrer" className="primary-button" style={{ display: 'inline-flex', gap: 8 }}>
-              <MessageCircle size={18} /> Chat Zalo đặt hàng
-            </a>
+        ) : categories.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px', opacity: 0.6 }}>
+            Chưa có danh mục nào
           </div>
         ) : (
-          <div className="product-grid">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="luxury-grid category-api-grid">
+            {categories.map((cat) => (
+              <Link
+                to={`/danh-muc/${cat.slug}`}
+                className="luxury-card category-card"
+                key={cat.id}
+                style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+              >
+                <div className="category-card-icon-wrapper">
+                  <ShoppingBag size={28} />
+                </div>
+                <div>
+                  <h3>{cat.name}</h3>
+                  <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>{cat.description || ''}</p>
+                  <span className="luxury-link">Xem sản phẩm <ArrowRight size={16} aria-hidden /></span>
+                </div>
+              </Link>
             ))}
           </div>
         )}
       </section>
 
-      <MotionWrapper>
-        <FlashSale />
-      </MotionWrapper>
+      {/* SECTION 3 — LATEST PRODUCTS (dynamic from API) */}
+      <section className="section" id="latest-products" aria-labelledby="latest-heading">
+        <div className="section-heading">
+          <div>
+            <span className="section-kicker"><Sparkles size={16} aria-hidden /> Sản phẩm mới nhất</span>
+            <h2 id="latest-heading">Hàng mới về</h2>
+          </div>
+          <Link to="/danh-muc" className="secondary-button" style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+            Xem tất cả <ArrowRight size={16} aria-hidden />
+          </Link>
+        </div>
 
-      {reviews.length > 0 && (
+        {productsError ? (
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--error-color, #e74c3c)' }}>
+            <p style={{ fontWeight: 600, marginBottom: 8 }}>Không thể tải sản phẩm</p>
+            <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>Vui lòng thử lại sau</p>
+          </div>
+        ) : productsLoading ? (
+          <SkeletonGrid count={6} />
+        ) : latestProducts.length === 0 ? (
+          <div className="empty-result" style={{ textAlign: 'center', padding: '48px 24px' }}>
+            <PackageCheck size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+            <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 8 }}>Chưa có sản phẩm nào</p>
+            <p style={{ color: 'var(--muted)', marginBottom: 16 }}>Sản phẩm đang được cập nhật</p>
+            <Link to="/them-san-pham" className="primary-button" style={{ display: 'inline-flex', gap: 8 }}>
+              <PlusCircle size={18} /> Thêm sản phẩm đầu tiên
+            </Link>
+          </div>
+        ) : (
+          <div className="latest-product-grid">              {latestProducts.map((product) => {
+              const productSlug = product.slug || product.id;
+              return (
+                <Link
+                  key={product.id}
+                  to={`/san-pham/${productSlug}`}
+                  className="latest-product-card"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div className="latest-product-icon" style={{ overflow: 'hidden' }}>
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 10 }}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <PackageCheck size={32} />
+                    )}
+                  </div>
+                  <div className="latest-product-info">
+                    <h4>{product.name}</h4>
+                    <span className="latest-product-category">{product.category || product.brand || ''}</span>
+                    <strong className="latest-product-price">{formatVND(product.price)}</strong>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* SECTION 4 — INDUSTRY PRODUCT SECTIONS */}
+      {Object.keys(industryProducts).length > 0 && categories.length > 0 && (
+        industrySlugs.map((slug) => {
+          const products = industryProducts[slug];
+          if (!products || products.length === 0) return null;
+          const cat = categories.find((c) => c.slug === slug);
+          if (!cat) return null;
+          return (
+            <section key={slug} className="section industry-section" aria-labelledby={`industry-${slug}`}>
+              <div className="section-heading">
+                <div>
+                  <span className="section-kicker">Ngành hàng</span>
+                  <h2 id={`industry-${slug}`}>{cat.name}</h2>
+                  <p style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>{cat.description || ''}</p>
+                </div>
+                <Link to={`/danh-muc/${slug}`} className="secondary-button" style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                  Xem tất cả <ArrowRight size={16} aria-hidden />
+                </Link>
+              </div>
+              <div className="latest-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
+                {products.map((product) => {
+                  const productSlug = product.slug || product.id;
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/san-pham/${productSlug}`}
+                      className="latest-product-card"
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      <div className="latest-product-icon" style={{ overflow: 'hidden', width: 64, height: 64 }}>
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 10 }} loading="lazy" />
+                        ) : (
+                          <PackageCheck size={28} />
+                        )}
+                      </div>
+                      <div className="latest-product-info">
+                        <h4>{product.name}</h4>
+                        <strong className="latest-product-price">{formatVND(product.price)}</strong>
+                        {product.oldPrice > product.price && (
+                          <span style={{ textDecoration: 'line-through', color: 'var(--muted)', fontSize: 12, marginLeft: 6 }}>{formatVND(product.oldPrice)}</span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })
+      )}
+
+      {/* SECTION 5 — QUICK LINKS (static, generic) */}
+      <section className="section" id="quick-links" aria-labelledby="quick-heading">
+        <div className="section-heading centered">
+          <div>
+            <span className="section-kicker"><Zap size={16} aria-hidden /> Tiện ích</span>
+            <h2 id="quick-heading">Công cụ quản lý</h2>
+          </div>
+        </div>
+        <div className="quick-links-grid">
+          <Link to="/them-san-pham" className="quick-link-card">
+            <PlusCircle size={28} aria-hidden />
+            <strong>Thêm sản phẩm mới</strong>
+            <span>Tạo sản phẩm với form động theo danh mục</span>
+          </Link>
+          <Link to="/quan-ly-san-pham" className="quick-link-card">
+            <List size={28} aria-hidden />
+            <strong>Quản lý sản phẩm</strong>
+            <span>Xem, lọc, sửa và xóa sản phẩm</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      {homeReviews.length > 0 && (
         <section className="section reviews" id="reviews" aria-labelledby="reviews-heading">
           <div className="section-heading">
             <div>
@@ -475,7 +456,7 @@ function HomePage() {
             </div>
           </div>
           <div className="review-grid">
-            {reviews.slice(0, 3).map((review) => (
+            {homeReviews.slice(0, 3).map((review) => (
               <article key={review.id}>
                 <div aria-label={`${review.rating} sao`}>{'★'.repeat(review.rating)}</div>
                 <p>"{review.content}"</p>
@@ -489,11 +470,12 @@ function HomePage() {
 
       <Newsletter />
 
+      {/* FAQ */}
       <section className="section faq-section" aria-labelledby="faq-heading">
         <div className="section-heading centered">
           <div>
             <span className="section-kicker">Câu hỏi thường gặp</span>
-            <h2 id="faq-heading">Mua sắm thông minh cho thú cưng</h2>
+            <h2 id="faq-heading">Mua sắm thông minh tại {SITE.name}</h2>
           </div>
         </div>
         <div className="faq-grid">
@@ -502,6 +484,131 @@ function HomePage() {
           <article><h3>Có giao nhanh trong ngày không?</h3><p>Có tại một số khu vực nội thành. Hệ thống sẽ gợi ý khung giờ giao nhanh khi bạn thanh toán.</p></article>
         </div>
       </section>
+
+      {/* Inline styles for new sections */}
+      <style>{`
+        .category-api-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+        }
+        .category-card {
+          background: var(--card-bg, #fff);
+          border-radius: 12px;
+          overflow: hidden;
+          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 32px 24px;
+          gap: 12px;
+        }
+        .category-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .category-card-icon-wrapper {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          background: var(--accent-bg, #f0f0ff);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--accent, #6c5ce7);
+        }
+        .category-card h3 {
+          margin: 0;
+          font-size: 1.15rem;
+        }
+        .latest-product-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 16px;
+        }
+        .latest-product-card {
+          background: var(--card-bg, #fff);
+          border-radius: 12px;
+          padding: 20px;
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .latest-product-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .latest-product-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 10px;
+          background: var(--accent-bg, #f0f0ff);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-weight: 700;
+          font-size: 1.2rem;
+          color: var(--accent, #6c5ce7);
+        }
+        .latest-product-info {
+          flex: 1;
+          min-width: 0;
+        }
+        .latest-product-info h4 {
+          margin: 0 0 4px;
+          font-size: 0.95rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .latest-product-category {
+          font-size: 0.8rem;
+          color: var(--muted, #888);
+          display: block;
+          margin-bottom: 4px;
+        }
+        .latest-product-price {
+          font-size: 1rem;
+          color: var(--price-color, #e74c3c);
+        }
+        .quick-links-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 16px;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .quick-link-card {
+          background: var(--card-bg, #fff);
+          border-radius: 12px;
+          padding: 28px 24px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 8px;
+          text-decoration: none;
+          color: inherit;
+          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .quick-link-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .quick-link-card strong {
+          font-size: 1.05rem;
+        }
+        .quick-link-card span {
+          font-size: 0.85rem;
+          color: var(--muted, #888);
+        }
+      `}</style>
     </>
   );
 }

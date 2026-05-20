@@ -1,4 +1,24 @@
-# TRỌNG ĐỊNH STORE - https://trongdinhstore.vn
+# NovaShop - https://yourdomain.com
+# Robots.txt for production
+
 User-agent: *
 Allow: /
-Sitemap: https://trongdinhstore.vn/sitemap.xml
+Allow: /danh-muc/
+Allow: /san-pham/
+Allow: /thuong-hieu/
+Allow: /chinh-sach/
+Allow: /about
+Allow: /contact
+
+# Disallow admin and account areas
+Disallow: /admin/
+Disallow: /tai-khoan/
+Disallow: /them-san-pham
+Disallow: /quan-ly-san-pham
+Disallow: /api/
+
+# Disallow search results (prevent duplicate content)
+Disallow: /tim-kiem?*
+
+# Sitemap
+Sitemap: https://yourdomain.com/sitemap.xml

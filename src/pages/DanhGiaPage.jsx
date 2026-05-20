@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { Star, ThumbsUp } from 'lucide-react';
-import { reviews } from '../data/products';
 
 const EXTRA_REVIEWS = [
   { id: 'r4', name: 'Minh Anh', role: 'Nuôi 2 bé Corgi', rating: 5, content: 'Royal Canin mua ở đây chất lượng không kém gì mua ở pet shop lớn mà giá tốt hơn nhiều. Ship nhanh, đóng gói cẩn thận.' },
@@ -11,7 +10,13 @@ const EXTRA_REVIEWS = [
   { id: 'r9', name: 'Bảo Châu', role: 'Mèo Ragdoll', rating: 5, content: 'Royal Canin Indoor cho mèo trong nhà cực phù hợp, kiểm soát cân tốt. Shop tư vấn rất chuyên nghiệp!' },
 ];
 
-const ALL_REVIEWS = [...reviews, ...EXTRA_REVIEWS];
+const BASE_REVIEWS = [
+  { id: 'r1', name: 'Lan Anh', role: 'Khách hàng thân thiết', rating: 5, content: 'Sản phẩm chất lượng tuyệt vời, giao hàng siêu nhanh. Sẽ ủng hộ shop dài dài!' },
+  { id: 'r2', name: 'Hoàng Minh', role: 'Đã mua 3 lần', rating: 4, content: 'Giá cả hợp lý, đóng gói cẩn thận. Shop tư vấn rất nhiệt tình.' },
+  { id: 'r3', name: 'Thanh Thảo', role: 'Mua online lần đầu', rating: 5, content: 'Lần đầu mua hàng online nhưng rất yên tâm vì được kiểm tra hàng trước khi nhận.' },
+];
+
+const ALL_REVIEWS = [...BASE_REVIEWS, ...EXTRA_REVIEWS];
 
 const AVG = (ALL_REVIEWS.reduce((s, r) => s + r.rating, 0) / ALL_REVIEWS.length).toFixed(1);
 const DIST = [5, 4, 3, 2, 1].map((star) => ({
@@ -35,7 +40,7 @@ function DanhGiaPage() {
       <div className="danh-muc-hero">
         <span className="section-kicker"><Star size={14} style={{ color: '#f59e0b' }} /> Đánh giá</span>
         <h1>Khách hàng nói gì?</h1>
-        <p>Trải nghiệm thực tế từ những người nuôi thú cưng</p>
+        <p>Trải nghiệm thực tế từ khách hàng đã mua sắm</p>
       </div>
 
       <div className="dgp-inner">

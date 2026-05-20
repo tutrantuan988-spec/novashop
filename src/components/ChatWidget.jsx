@@ -5,7 +5,7 @@ import { isBackendConfigured } from '../services/api';
 const STORAGE_KEY = 'trongdinhstore:chatMessages_v2';
 const BACKEND_OK = isBackendConfigured();
 
-const WELCOME = { role: 'assistant', content: 'Xin chào! Mình là **Nova** 🐾 — trợ lý AI của Trọng Định Store.\n\nMình có thể giúp bạn **tư vấn thức ăn**, **so sánh sản phẩm**, hoặc giải đáp mọi câu hỏi về thú cưng. Bạn cần hỏi gì nào?' };
+const WELCOME = { role: 'assistant', content: 'Xin chào! Mình là **Nova** — trợ lý AI của NovaShop.\n\nMình có thể giúp bạn **tư vấn sản phẩm**, **so sánh giá**, hoặc giải đáp mọi câu hỏi. Bạn cần hỏi gì nào?' };
 
 const QUICK_QUESTIONS = [
   '🐕 Thức ăn cho chó nào tốt?',
@@ -186,7 +186,7 @@ function ChatWidget() {
                 <strong>Nova <Zap size={13} className="nova-zap" /></strong>
                 <span className="chat-status">
                   <span className="chat-online-dot" />
-                  AI thú cưng · 24/7
+                  AI trợ lý · 24/7
                 </span>
               </div>
             </div>
@@ -254,7 +254,7 @@ function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-                placeholder="Hỏi Nova về thú cưng..."
+                placeholder="Hỏi Nova về sản phẩm..."
                 aria-label="Tin nhắn cho Nova"
                 disabled={loading}
               />

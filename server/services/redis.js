@@ -109,20 +109,29 @@ async function initRedis() {
     }
   }
 
-  // Ưu tiên 2: Local Redis (ioredis)
-  const redisUrl = process.env.REDIS_URL || process.env.REDIS_HOST;
+  // Ưu tiên 2: REDIS_URL (ioredis — hỗ trợ cả local và Upstash via TLS)
+  const redisUrl = process.env.REDIS_URL;
   if (redisUrl) {
     try {
       const Redis = require('ioredis');
-      const host = process.env.REDIS_HOST || 'localhost';
-      const port = parseInt(process.env.REDIS_PORT || '6379', 10);
-      redisClient = new Redis(redisUrl || { host, port, maxRetriesPerRequest: 3 });
-      redisClient.on('connect', () => logger.info('✅ Kết nối local Redis thành công'));
-      redisClient.on('error', (err) => logger.warn('⚠️ Redis error:', err.message));
+      const isUpstash = redisUrl.includes('upstash.io') || redisUrl.startsWith('rediss://');
+      const redisClientConfig = typeof redisUrl === 'string' && redisUrl.startsWith('rediss')
+        ? { url: redisUrl, maxRetriesPerRequest: 3, tls: {} }
+        : typeof redisUrl === 'string'
+          ? { url: redisUrl, maxRetriesPerRequest: 3 }
+          : { host: process.env.REDIS_HOST || 'localhost', port: parseInt(process.env.REDIS_PORT || '6379', 10), maxRetriesPerRequest: 3 };
+
+      redisClient = new Redis(redisClientConfig);
+      redisClient.on('ready', () => logger.info(`✅ Redis connected (${isUpstash ? 'Upstash' : 'local'})`));
+      redisClient.on('error', (err) => {
+        if (!err.message.includes('maxRetries') && !err.message.includes('ECONNRESET')) {
+          logger.warn('⚠️ Redis error:', err.message);
+        }
+      });
       await redisClient.ping();
       return redisClient;
     } catch (err) {
-      logger.warn('⚠️ Không kết nối được local Redis:', err.message);
+      logger.warn('⚠️ Không kết nối được Redis:', err.message);
       redisClient = null;
     }
   }

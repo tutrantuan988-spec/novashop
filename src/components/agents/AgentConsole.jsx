@@ -45,7 +45,7 @@ export default function AgentConsole() {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [contentForm, setContentForm] = useState({ productName: '', productCategory: 'thuc an cho', productBrand: '' });
+  const [contentForm, setContentForm] = useState({ productName: '', productCategory: 'thoi-trang', productBrand: '' });
   const [contentResult, setContentResult] = useState(null);
   const [seoResult, setSeoResult] = useState(null);
   const [seoProduct, setSeoProduct] = useState({ name: '', category: '', brand: '' });
@@ -400,7 +400,7 @@ export default function AgentConsole() {
           onChange={e => setContentForm(f => ({ ...f, productCategory: e.target.value }))}
           style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14 }}
         >
-          <option value="thuc an cho">Thuc an cho</option>
+          <option value="thoi-trang">Thời trang</option>
           <option value="thuc an meo">Thuc an meo</option>
           <option value="phu kien">Phu kien</option>
         </select>
