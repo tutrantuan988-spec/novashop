@@ -1,11 +1,15 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, ShoppingCart, Trash2, X } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Trash2, X, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { formatVND } from '../utils/format';
 
+const FREE_SHIP_THRESHOLD = 300000;
+
 function CartDrawer() {
   const { items, subtotal, isOpen, closeCart, updateQuantity, removeItem } = useCart();
+  const remaining = Math.max(0, FREE_SHIP_THRESHOLD - subtotal);
+  const progress = Math.min(100, (subtotal / FREE_SHIP_THRESHOLD) * 100);
 
   return (
     <>
@@ -26,6 +30,23 @@ function CartDrawer() {
           </div>
         ) : (
           <>
+            {remaining > 0 && (
+              <div className="free-ship-progress">
+                <div className="free-ship-message">
+                  <Truck size={14} />
+                  <span>Mua thêm <strong>{formatVND(remaining)}</strong> để được <strong>freeship</strong></span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            )}
+            {remaining <= 0 && (
+              <div className="free-ship-achieved">
+                <Truck size={14} />
+                <span>🎉 Đơn hàng của bạn được <strong>freeship</strong>!</span>
+              </div>
+            )}
             <div className="cart-items">
               {items.map((item) => (
                 <div className="cart-item" key={item.id}>
@@ -48,7 +69,7 @@ function CartDrawer() {
               ))}
             </div>
             <div className="cart-footer">
-              <div><span>Tạm tính</span><strong>{formatVND(subtotal)}</strong></div>
+              <div className="cart-subtotal"><span>Tạm tính</span><strong>{formatVND(subtotal)}</strong></div>
               <Link to="/thanh-toan" className="checkout-btn" onClick={closeCart}>Tiến hành thanh toán</Link>
             </div>
           </>
