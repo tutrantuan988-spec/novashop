@@ -8,6 +8,7 @@ import SITE from '../config/site-config';
 import ProductCard from '../components/ProductCard';
 import ProductReviews from '../components/ProductReviews';
 import SocialProof from '../components/SocialProof';
+import StockNotification from '../components/StockNotification';
 import SEO from '../components/SEO';
 import { formatVND } from '../utils/format';
 
@@ -454,6 +455,10 @@ function ProductDetailPage() {
               <span style={{ fontSize: 14, fontWeight: 700, color: '#0068ff' }}>Zalo</span>
             </button>
           </div>
+
+          {currentStock <= 0 && (
+            <StockNotification productId={product.id} productName={product.name} />
+          )}
 
           <ul className="detail-policy">
             <li><Truck size={16} aria-hidden /> Giao nhanh 24-48h toàn quốc</li>

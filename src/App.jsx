@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import { ProductsProvider } from './context/ProductsContext';
 import { ToastProvider } from './context/ToastContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { ComparisonProvider } from './context/ComparisonContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -45,6 +46,8 @@ const CategoryListPage = lazy(() => import('./pages/CategoryListPage'));
 const BrandPage = lazy(() => import('./pages/BrandPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
+const FlashSalePage = lazy(() => import('./pages/FlashSalePage'));
+const ComparisonPage = lazy(() => import('./pages/ComparisonPage'));
 
 const Loading = () => (
   <div className="page-loading" role="status" aria-live="polite">
@@ -60,6 +63,7 @@ export default function App() {
         <AuthProvider>
           <ProductsProvider>
             <WishlistProvider>
+              <ComparisonProvider>
               <CartProvider>
               <div className="site-shell">
                 <Header />
@@ -78,6 +82,9 @@ export default function App() {
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/blog" element={<BlogPage />} />
                       <Route path="/blog/:slug" element={<BlogPage />} />
+                      <Route path="/flash-sale" element={<FlashSalePage />} />
+                      <Route path="/khuyen-mai" element={<FlashSalePage />} />
+                      <Route path="/so-sanh" element={<ComparisonPage />} />
                       <Route path="/track-order" element={<GuestOrderTrackingPage />} />
                       <Route path="/tai-khoan/dia-chi" element={(
                         <ProtectedRoute>
@@ -177,6 +184,7 @@ export default function App() {
                 <ScrollToTop />
               </div>
               </CartProvider>
+              </ComparisonProvider>
             </WishlistProvider>
           </ProductsProvider>
         </AuthProvider>
