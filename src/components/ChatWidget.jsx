@@ -141,10 +141,10 @@ function ChatWidget() {
 
     try {
       const base = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
-      const res = await fetch(`${base}/api/chat`, {
+      const res = await fetch(`${base}/api/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages })
+        body: JSON.stringify({ message: text, history: newMessages.map(m => ({ role: m.role, content: m.content })) })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Lỗi server');

@@ -160,35 +160,18 @@ function ProductDetailPage() {
             .then(data => {
               if (Array.isArray(data) && data.length > 0) {
                 setPgImages(data);
-                // Track recently viewed with actual PG image
-                try {
-                  const key = 'trongdinhstore:recentlyViewed';
-                  const raw = window.localStorage.getItem(key);
-                  const list = raw ? JSON.parse(raw) : [];
-                  const firstImage = data[0]?.image_url || result.image;
-                  const next = [{ id: result.id, slug: result.slug, name: result.name, image: firstImage, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
-                  window.localStorage.setItem(key, JSON.stringify(next));
-                } catch {}
-              } else {
-                // Track recently viewed with fallback image
-                try {
-                  const key = 'trongdinhstore:recentlyViewed';
-                  const raw = window.localStorage.getItem(key);
-                  const list = raw ? JSON.parse(raw) : [];
-                  const next = [{ id: result.id, slug: result.slug, name: result.name, image: result.image, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
-                  window.localStorage.setItem(key, JSON.stringify(next));
-                } catch {}
               }
               setPgImagesLoading(false);
             })
             .catch(() => setPgImagesLoading(false));
 
-          // Track recently viewed with fallback image
+          // Track recently viewed (once per product load)
           try {
             const key = 'trongdinhstore:recentlyViewed';
             const raw = window.localStorage.getItem(key);
             const list = raw ? JSON.parse(raw) : [];
-            const next = [{ id: result.id, slug: result.slug, name: result.name, image: result.image, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
+            const firstImage = result.image;
+            const next = [{ id: result.id, slug: result.slug, name: result.name, image: firstImage, price: result.price }, ...list.filter((p) => p.id !== result.id)].slice(0, 8);
             window.localStorage.setItem(key, JSON.stringify(next));
           } catch {}
 
