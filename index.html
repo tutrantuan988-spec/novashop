@@ -2,26 +2,33 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#ff7a1a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="%VITE_SHOP_NAME%" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="%VITE_SHOP_DESCRIPTION%" />
-    <meta name="keywords" content="%VITE_SHOP_NAME%, mua sắm, thương mại điện tử" />
+    <meta name="keywords" content="%VITE_SHOP_NAME%, mua sắm, thương mại điện tử, đồ thú cưng" />
     <meta name="author" content="%VITE_SHOP_NAME%" />
     <meta name="robots" content="index, follow" />
 
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://%VITE_SHOP_DOMAIN%" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="%VITE_SHOP_NAME%" />
     <meta property="og:description" content="%VITE_SHOP_DESCRIPTION%" />
-    <meta property="og:image" content="/icon.svg" />
+    <meta property="og:image" content="https://%VITE_SHOP_DOMAIN%/og-image.svg" />
     <meta property="og:url" content="https://%VITE_SHOP_DOMAIN%" />
     <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="%VITE_SHOP_NAME%" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="%VITE_SHOP_NAME%" />
     <meta name="twitter:description" content="%VITE_SHOP_DESCRIPTION%" />
+    <meta name="twitter:image" content="https://%VITE_SHOP_DOMAIN%/og-image.png" />
 
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
@@ -30,7 +37,7 @@
 
     <title>%VITE_SHOP_NAME%</title>
 
-    <!-- Google Tag Manager (chỉ load khi có GTM_ID) -->
+    <!-- Google Tag Manager -->
     <script>
       (function() {
         var gtmId = '%VITE_GTM_ID%';
@@ -43,13 +50,13 @@
       })();
     </script>
 
-    <!-- Google Analytics 4 (fallback nếu không có GTM, chỉ load khi có GA_ID) -->
+    <!-- Google Analytics 4 -->
     <script>
       (function() {
         var gaId = '%VITE_GA_ID%';
         if (!gaId || gaId === 'G-XXXXXXXXXX') return;
-        // Nếu đã có GTM thì không cần load GA riêng
-        if ('%VITE_GTM_ID%' && '%VITE_GTM_ID%' !== 'GTM-XXXXXXX' && '%VITE_GTM_ID%' !== 'G-XXXXXXXXXX') return;
+        var gtmId = '%VITE_GTM_ID%';
+        if (gtmId && gtmId !== 'GTM-XXXXXXX' && gtmId !== 'G-XXXXXXXXXX') return;
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -61,7 +68,7 @@
       })();
     </script>
 
-    <!-- Facebook Pixel (chỉ load khi có PIXEL_ID) -->
+    <!-- Facebook Pixel -->
     <script>
       (function() {
         var pixelId = '%VITE_FACEBOOK_PIXEL_ID%';
@@ -79,7 +86,7 @@
       })();
     </script>
 
-    <!-- Tawk.to Live Chat (chỉ load khi có TAWKTO_ID) -->
+    <!-- Tawk.to Live Chat -->
     <script>
       (function() {
         var tawkId = '%VITE_TAWKTO_ID%';
@@ -94,104 +101,73 @@
       })();
     </script>
 
-    <!-- Zalo Official Account Chat Widget (chỉ hiển thị khi có ZALO_OA_ID) -->
-    <!-- Lấy iframe code từ: https://oa.zalo.me/ → Cài đặt → Widget Chat -->
+    <!-- Zalo OA Chat Widget -->
     <div id="zalo-chat-widget" style="display:none"></div>
     <script>
       (function() {
         var zaloId = '%VITE_ZALO_OA_ID%';
         if (!zaloId || zaloId === '0000000000000000000') return;
-        
-        // Tạo iframe Zalo OA chat
         var iframe = document.createElement('iframe');
         iframe.src = 'https://oa.zalo.me/' + zaloId + '/chat?type=widget&theme=green&size=large&position=bottom-right';
         iframe.style.cssText = 'position:fixed;bottom:100px;right:20px;width:350px;height:500px;border:none;z-index:9999;display:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden';
         iframe.id = 'zalo-oa-iframe';
         iframe.title = 'Chat với Zalo OA';
         iframe.allow = 'clipboard-read; clipboard-write';
-        
-        // Tạo nút toggle chat
         var btn = document.createElement('div');
         btn.style.cssText = 'position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:#0068ff;cursor:pointer;z-index:9998;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,104,255,0.35);transition:transform 0.2s';
         btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.88.54 3.64 1.48 5.13L2 22l5.13-1.48C8.36 21.46 10.12 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>';
         btn.id = 'zalo-oa-btn';
         btn.title = 'Chat với chúng tôi qua Zalo';
-        
-        // Hover effect
         btn.onmouseenter = function() { this.style.transform = 'scale(1.1)'; };
         btn.onmouseleave = function() { this.style.transform = 'scale(1)'; };
-        
-        // Toggle chat on click
         var isOpen = false;
         btn.onclick = function() {
           isOpen = !isOpen;
           iframe.style.display = isOpen ? 'block' : 'none';
           btn.style.transform = isOpen ? 'rotate(45deg)' : 'scale(1)';
         };
-        
         document.body.appendChild(btn);
         document.body.appendChild(iframe);
       })();
     </script>
 
-    <!-- PageAgent AI Copilot (chỉ load khi có LLM config) -->
-    <script>
-      (function() {
-        // Chỉ load PageAgent khi có LLM config từ env
-        var hasLLM = ('%VITE_OPENAI_API_KEY%' && '%VITE_OPENAI_API_KEY%' !== 'sk-xxx') ||
-                     ('%VITE_GEMINI_API_KEY%' && '%VITE_GEMINI_API_KEY%' !== 'AIza...') ||
-                     ('%VITE_LLM_BASE_URL%' && '%VITE_LLM_BASE_URL%' !== '');
-        // Nếu tắt AI hoặc không có LLM config → không load PageAgent
-        if ('%VITE_DISABLE_AI_COPILOT%' === 'true' || !hasLLM) return;
-        
-        var s = document.createElement('script');
-        s.defer = true;
-        s.src = 'https://cdn.jsdelivr.net/npm/page-agent@1.8.2/dist/iife/page-agent.demo.js?autoInit=false';
-        s.crossOrigin = 'anonymous';
-        document.head.appendChild(s);
-      })();
+    <!-- Schema.org: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "%VITE_SHOP_NAME%",
+      "url": "https://%VITE_SHOP_DOMAIN%",
+      "logo": "https://%VITE_SHOP_DOMAIN%/icon.svg",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "%VITE_SHOP_PHONE%",
+        "contactType": "customer service",
+        "areaServed": "VN",
+        "availableLanguage": "Vietnamese"
+      },
+      "sameAs": ["%VITE_SHOP_FACEBOOK%","%VITE_SHOP_TIKTOK%"]
+    }
     </script>
 
+    <!-- Schema.org: LocalBusiness -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "%VITE_SHOP_NAME%",
-        "url": "https://%VITE_SHOP_DOMAIN%",
-        "logo": "/icon.svg",
-        "sameAs": [
-          "%VITE_SHOP_FACEBOOK%",
-          "%VITE_SHOP_INSTAGRAM%",
-          "%VITE_SHOP_ZALO%",
-          "%VITE_SHOP_TIKTOK%",
-          "%VITE_SHOP_YOUTUBE%"
-        ],
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "%VITE_SHOP_PHONE%",
-          "contactType": "customer service",
-          "areaServed": "VN",
-          "availableLanguage": "Vietnamese"
-        }
-      }
-    </script>
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "%VITE_SHOP_NAME%",
-        "description": "%VITE_SHOP_DESCRIPTION%",
-        "url": "https://%VITE_SHOP_DOMAIN%",
-        "telephone": "0369712958",
-        "email": "tutrantuan988@gmail.com",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "VN"
-        },
-        "priceRange": "₫₫",
-        "openingHours": "Mo-Su 08:00-21:00"
-      }
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "%VITE_SHOP_NAME%",
+      "description": "%VITE_SHOP_DESCRIPTION%",
+      "url": "https://%VITE_SHOP_DOMAIN%",
+      "telephone": "%VITE_SHOP_PHONE%",
+      "email": "%VITE_SHOP_EMAIL%",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "%VITE_SHOP_ADDRESS%",
+        "addressCountry": "VN"
+      },
+      "priceRange": "₫₫",
+      "openingHours": "Mo-Su 08:00-21:00"
+    }
     </script>
   </head>
   <body>
