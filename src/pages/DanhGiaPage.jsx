@@ -2,12 +2,12 @@ import { memo } from 'react';
 import { Star, ThumbsUp } from 'lucide-react';
 
 const EXTRA_REVIEWS = [
-  { id: 'r4', name: 'Minh Anh', role: 'Nuôi 2 bé Corgi', rating: 5, content: 'Royal Canin mua ở đây chất lượng không kém gì mua ở pet shop lớn mà giá tốt hơn nhiều. Ship nhanh, đóng gói cẩn thận.' },
-  { id: 'r5', name: 'Thu Hương', role: 'Mèo Maine Coon', rating: 5, content: 'Lần đầu mua Whiskas Adult ở đây. Mèo ăn rất thích, lông bóng mượt hơn hẳn. Sẽ ủng hộ dài dài!' },
-  { id: 'r6', name: 'Quốc Bảo', role: 'Chó Poodle 3 tuổi', rating: 4, content: 'Pedigree DentaStix hiệu quả thật sự, răng chó trắng hơn, ít hôi miệng. Giao đúng hẹn, tư vấn nhiệt tình.' },
-  { id: 'r7', name: 'Linh Chi', role: 'Mèo Anh lông ngắn', rating: 5, content: 'Nekko Creamy là mèo nhà mình mê nhất. Đặt hôm nay nhận ngay hôm sau. Shop rất uy tín!' },
-  { id: 'r8', name: 'Trọng Nghĩa', role: 'Nuôi Golden Retriever', rating: 5, content: 'SmartHeart Adult giá hợp lý, chó ăn ngon, phân không quá nặng mùi. Hài lòng 100%.' },
-  { id: 'r9', name: 'Bảo Châu', role: 'Mèo Ragdoll', rating: 5, content: 'Royal Canin Indoor cho mèo trong nhà cực phù hợp, kiểm soát cân tốt. Shop tư vấn rất chuyên nghiệp!' },
+  { id: 'r4', name: 'Minh Anh', role: 'Đã mua áo khoác', rating: 5, content: 'Áo khoác mua ở đây chất lượng không kém gì ngoài mall mà giá tốt hơn nhiều. Ship nhanh, đóng gói cẩn thận.' },
+  { id: 'r5', name: 'Thu Hương', role: 'Mê công nghệ', rating: 5, content: 'Lần đầu mua tai nghe Bluetooth ở đây. Âm thanh cực tốt, pin trâu. Sẽ ủng hộ dài dài!' },
+  { id: 'r6', name: 'Quốc Bảo', role: 'Đã mua đồ gia dụng', rating: 4, content: 'Bộ nồi inox mua về dùng rất thích, inox sáng bóng, nấu ăn ngon. Giao đúng hẹn, tư vấn nhiệt tình.' },
+  { id: 'r7', name: 'Linh Chi', role: 'Mê sách', rating: 5, content: 'Sách ở đây giá tốt, đóng gói cẩn thận không móp góc. Đặt hôm nay nhận ngay hôm sau. Shop rất uy tín!' },
+  { id: 'r8', name: 'Trọng Nghĩa', role: 'Đam mê thể thao', rating: 5, content: 'Giày chạy bộ giá hợp lý, mang êm chân, đúng size. Hài lòng 100%.' },
+  { id: 'r9', name: 'Bảo Châu', role: 'Thích làm đẹp', rating: 5, content: 'Nước hoa chính hãng, mùi thơm lâu. Shop tư vấn rất chuyên nghiệp, chọn đúng mùi mình thích!' },
 ];
 
 const BASE_REVIEWS = [

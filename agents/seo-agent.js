@@ -15,17 +15,17 @@ const { Agent, PERMISSION_SCOPES } = require('./agent-framework');
 
 // Từ khóa SEO cho tiếng Việt
 const VIETNAMESE_KEYWORDS = {
-  petFood: [
-    'thức ăn chó', 'thức ăn mèo', 'hạt chó', 'hạt mèo', 'pate cho chó',
-    'royal canin', 'pedigree', 'whiskas', 'me-o', 'thức ăn thú cưng',
-    'cửa hàng thú cưng', 'phụ kiện chó mèo', 'đồ cho chó', 'đồ cho mèo'
+  general: [
+    'thời trang nam', 'thời trang nữ', 'đồ điện tử', 'đồ gia dụng', 'mỹ phẩm',
+    'samsung', 'xiaomi', 'nike', 'adidas', 'mua sắm online',
+    'sàn thương mại điện tử', 'phụ kiện thời trang', 'đồ công nghệ', 'gia dụng thông minh'
   ],
   longTail: [
-    'thức ăn cho chó con giá rẻ',
-    'hạt royal canin cho mèo có tốt không',
-    'mua pate whiskas chính hãng online',
-    'cửa hàng thú cưng uy tín hà nội',
-    'thức ăn cho chó senior không hạt'
+    'mua áo khoác nam giá rẻ',
+    'điện thoại samsung có tốt không',
+    'mua tai nghe bluetooth chính hãng online',
+    'sàn thương mại điện tử uy tín hà nội',
+    'nồi chiên không dầu loại nào tốt'
   ]
 };
 
@@ -37,7 +37,7 @@ class SEOAgent extends Agent {
       responsibilities: [
         'Tối ưu meta title, description cho product pages',
         'Tạo và kiểm tra Schema.org structured data',
-        'Nghiên cứu từ khóa tiếng Việt cho thú cưng',
+        'Nghiên cứu từ khóa tiếng Việt cho đa danh mục',
         'Tối ưu sitemap.xml và robots.txt',
         'SEO audit tự động hàng tuần',
         'Đề xuất internal linking strategy'
@@ -117,7 +117,7 @@ class SEOAgent extends Agent {
 
     if (pageType === 'product') {
       return {
-        title: `${name} | ${shopName} — ${category || 'Thức ăn thú cưng'} chính hãng`,
+        title: `${name} | ${shopName} — ${category || 'Sản phẩm'} chính hãng`,
         description: `Mua ${name} chính hãng tại ${shopName}. ${brand ? `Thương hiệu ${brand} — ` : ''}Giao nhanh toàn quốc, freeship từ 300K. Cam kết 100% chính hãng.`,
         ogTitle: `${name} — Giá tốt tại ${shopName}`,
         ogDescription: `${name} chính hãng, giá ưu đãi. Giao hàng toàn quốc.`,
@@ -128,16 +128,16 @@ class SEOAgent extends Agent {
     if (pageType === 'category') {
       return {
         title: `${category || 'Danh mục'} | ${shopName}`,
-        description: `Mua sắm ${category || 'sản phẩm'} thú cưng tại ${shopName}. Đa dạng thương hiệu nổi tiếng: Royal Canin, Pedigree, Whiskas, Me-O. Giao nhanh 24h.`,
+        description: `Mua sắm ${category || 'sản phẩm'} tại ${shopName}. Đa dạng thương hiệu nổi tiếng: Samsung, Xiaomi, Nike, Adidas. Giao nhanh 24h.`,
         ogTitle: `${category || 'Danh mục sản phẩm'} | ${shopName}`
       };
     }
 
     // Homepage
     return {
-      title: `${shopName} — Thức ăn chính hãng cho chó mèo, giao nhanh toàn quốc`,
-      description: `Cửa hàng thú cưng uy tín — Royal Canin, Pedigree, Whiskas, Me-O chính hãng. Miễn phí giao hàng từ 300K. Giao nhanh trong 24h tại Hà Nội.`,
-      ogTitle: `${shopName} | Thức ăn thú cưng chính hãng`,
+      title: `${shopName} — Sản phẩm chính hãng đa danh mục, giao nhanh toàn quốc`,
+      description: `Sàn thương mại điện tử uy tín — Samsung, Xiaomi, Nike, Adidas chính hãng. Miễn phí giao hàng từ 300K. Giao nhanh trong 24h tại Hà Nội.`,
+      ogTitle: `${shopName} | Sản phẩm chính hãng đa danh mục`,
       ogDescription: 'Mua sắm thông minh - Giao nhanh tận nhà'
     };
   }
@@ -153,11 +153,11 @@ class SEOAgent extends Agent {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name,
-      description: description || `${name} tại TRỌNG ĐỊNH STORE — ${category || 'thức ăn thú cưng'} chính hãng`,
+      description: description || `${name} tại TRỌNG ĐỊNH STORE — ${category || 'sản phẩm'} chính hãng`,
       image: image || 'https://trong-dinh-store.netlify.app/icon.svg',
       brand: {
         '@type': 'Brand',
-        name: brand || 'Royal Canin'
+        name: brand || 'Samsung'
       },
       offers: {
         '@type': 'Offer',
@@ -181,22 +181,22 @@ class SEOAgent extends Agent {
     const longTail = [];
 
     // Từ khóa chính
-    if (category.includes('chó') || name.includes('dog') || name.includes('pedigree')) {
-      primary.push('thức ăn chó', 'hạt cho chó', name);
-      longTail.push(`mua ${name} chính hãng`, `${name} giá rẻ`, 'mua hạt chó online');
+    if (category.includes('thời trang') || name.includes('áo') || name.includes('nike')) {
+      primary.push('thời trang', 'áo khoác', name);
+      longTail.push(`mua ${name} chính hãng`, `${name} giá rẻ`, 'mua thời trang online');
     }
-    if (category.includes('mèo') || name.includes('cat') || name.includes('whiskas')) {
-      primary.push('thức ăn mèo', 'pate cho mèo', name);
-      longTail.push(`mua ${name} cho mèo`, `${name} giá bao nhiêu`, 'thức ăn cho mèo con');
+    if (category.includes('điện tử') || name.includes('samsung') || name.includes('xiaomi')) {
+      primary.push('đồ điện tử', 'công nghệ', name);
+      longTail.push(`mua ${name} chính hãng`, `${name} giá bao nhiêu`, 'đồ công nghệ giá tốt');
     }
 
     // Fallback
     if (primary.length === 0) {
-      primary.push(name, 'thức ăn thú cưng', 'phụ kiện chó mèo');
-      secondary.push(...VIETNAMESE_KEYWORDS.petFood);
+      primary.push(name, 'sản phẩm chính hãng', 'mua sắm online');
+      secondary.push(...VIETNAMESE_KEYWORDS.general);
     }
 
-    secondary.push('giao nhanh 24h', 'freeship 300K', 'hàng chính hãng', 'cửa hàng thú cưng hà nội');
+    secondary.push('giao nhanh 24h', 'freeship 300K', 'hàng chính hãng', 'sàn thương mại điện tử hà nội');
 
     return {
       primary: [...new Set(primary)].slice(0, 5),

@@ -149,6 +149,10 @@ function PgAuthProvider({ children }) {
     const firebaseUser = await signInWithGoogle();
     if (!firebaseUser) return null; // redirect flow
 
+    if (!firebaseUser.idToken) {
+      throw new Error('Không lấy được Google idToken, vui lòng thử lại.');
+    }
+
     const result = await loginWithGoogleApi(firebaseUser.idToken);
     setAuthToken(result.token);
     const userObj = {
@@ -171,10 +175,14 @@ function PgAuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const openAuthModal = useCallback(() => {
-    if (window.location.pathname !== '/sign-in') {
-      window.location.href = '/sign-in';
-    }
+    setIsModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setIsModalOpen(false);
   }, []);
 
   const value = useMemo(
@@ -183,16 +191,16 @@ function PgAuthProvider({ children }) {
       isAuthenticated: !!user,
       isAdmin: user?.role === 'admin' || isAdminEmail(user?.email),
       authLoading,
-      isModalOpen: false,
+      isModalOpen,
       openAuthModal,
-      closeAuthModal: () => {},
+      closeAuthModal,
       register,
       login,
       loginWithGoogle,
       logout,
       authMode: 'pg'
     }),
-    [user, authLoading, register, login, loginWithGoogle, logout, openAuthModal]
+    [user, authLoading, isModalOpen, openAuthModal, closeAuthModal, register, login, loginWithGoogle, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

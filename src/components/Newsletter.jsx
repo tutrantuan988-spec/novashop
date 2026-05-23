@@ -23,7 +23,7 @@ function Newsletter() {
     <section
       className="section newsletter-section"
       style={{
-        background: 'linear-gradient(135deg, #14213d 0%, #1e3a5f 100%)',
+        background: 'linear-gradient(135deg, #E05353 0%, #F48080 100%)',
         borderRadius: 24,
         margin: '40px 24px',
         padding: '60px 40px',
@@ -40,7 +40,7 @@ function Newsletter() {
           width: 180,
           height: 180,
           borderRadius: '50%',
-          background: 'rgba(255,255,255,0.04)'
+          background: 'rgba(255,255,255,0.08)'
         }}
       />
       <div
@@ -51,7 +51,7 @@ function Newsletter() {
           width: 240,
           height: 240,
           borderRadius: '50%',
-          background: 'rgba(255,255,255,0.03)'
+          background: 'rgba(255,255,255,0.06)'
         }}
       />
 
@@ -61,7 +61,7 @@ function Newsletter() {
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -73,7 +73,7 @@ function Newsletter() {
         <h2 style={{ color: '#fff', fontSize: '1.75rem', marginBottom: 10 }}>
           Nhận ưu đãi độc quyền
         </h2>
-        <p style={{ color: 'rgba(255,255,255,0.75)', marginBottom: 28, fontSize: 15 }}>
+        <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 28, fontSize: 15 }}>
           Đăng ký email để nhận mã giảm giá 10% cho đơn hàng đầu tiên và cập nhật khuyến mãi mới nhất.
         </p>
 
@@ -84,7 +84,7 @@ function Newsletter() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
-              color: '#4ade80',
+              color: '#fff',
               fontWeight: 700,
               fontSize: '1.1rem'
             }}
@@ -114,8 +114,8 @@ function Newsletter() {
                 minWidth: 220,
                 padding: '12px 18px',
                 borderRadius: 12,
-                border: '1.5px solid rgba(255,255,255,0.2)',
-                background: 'rgba(255,255,255,0.08)',
+                border: '1.5px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.15)',
                 color: '#fff',
                 fontSize: 15,
                 outline: 'none'
@@ -127,8 +127,8 @@ function Newsletter() {
                 padding: '12px 24px',
                 borderRadius: 12,
                 border: 'none',
-                background: '#f97316',
-                color: '#fff',
+                background: '#fff',
+                color: '#E05353',
                 fontWeight: 700,
                 fontSize: 15,
                 cursor: 'pointer',
@@ -137,15 +137,15 @@ function Newsletter() {
                 gap: 8,
                 transition: 'background 0.2s'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#ea580c'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#f97316'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#FCEEEF'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
             >
               <Send size={16} /> Đăng ký
             </button>
           </form>
         )}
 
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 16 }}>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 16 }}>
           Không spam. Có thể huỷ đăng ký bất cứ lúc nào.
         </p>
       </div>

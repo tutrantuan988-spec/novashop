@@ -22,6 +22,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const logger = require('./utils/logger');
+const { connectDatabase } = require('./models');
+const productController = require('./controllers/productController');
 
 // Import new security middleware
 const { correlationId } = require('./middleware/correlationId');
@@ -176,6 +178,10 @@ const allowedOrigins = [
   'http://127.0.0.1:5173'
 ].filter(Boolean);
 
+connectDatabase().catch((err) => {
+  console.warn('[MongoDB] Connection not established:', err?.message || err);
+});
+
 app.use(cors({
   origin(origin, callback) {
     if (!IS_PRODUCTION || !origin || allowedOrigins.includes(origin)) {
@@ -234,7 +240,7 @@ app.get('/sitemap.xml', async (_req, res) => {
     const now = new Date().toISOString();
 
     const [catsResult, prodsResult] = await Promise.all([
-      pgQuery(`SELECT slug, updated_at FROM categories WHERE is_active = true AND show_in_homepage = true ORDER BY display_order`),
+      pgQuery(`SELECT slug, updated_at FROM categories WHERE status = 'active' ORDER BY display_order`),
       pgQuery(`SELECT slug, updated_at FROM products WHERE status = 'active' ORDER BY created_at DESC LIMIT 5000`)
     ]);
 
@@ -282,6 +288,10 @@ app.get('/sitemap.xml', async (_req, res) => {
     res.status(500).send('Error generating sitemap');
   }
 });
+
+app.get('/api/products/featured', productController.getFeaturedProducts);
+
+app.get('/api/categories/tree', productController.getCategoryTree);
 
 // List all categories (for frontend dropdowns)
 app.get('/api/categories', async (_req, res) => {
@@ -838,33 +848,40 @@ app.post('/api/products', requireAuth, requireJwtAdmin, async (req, res) => {
 app.get('/api/products', async (req, res) => {
   try {
     const { query: pgQuery } = require('./db/postgres');
-    const { category_id, search, status, limit, offset, sort } = req.query;
+    const { category_id, category_slug, search, status, limit, offset, sort } = req.query;
 
     // Base SELECT for data
-    let conditions = [];
-    if (!status) {
-      conditions.push("p.status != 'deleted'");
-    }
-    let selectSql = `FROM products p
-               LEFT JOIN categories c ON c.id = p.category_id` +
-      (conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '');
+    const conditions = [];
     const params = [];
     let paramIdx = 1;
 
+    if (!status) {
+      conditions.push("p.status != 'deleted'");
+    }
+
     if (category_id) {
-      selectSql += ` AND p.category_id = $${paramIdx++}`;
+      conditions.push(`p.category_id = $${paramIdx++}`);
       params.push(category_id);
     }
 
+    if (category_slug) {
+      conditions.push(`c.slug = $${paramIdx++}`);
+      params.push(category_slug);
+    }
+
     if (search) {
-      selectSql += ` AND p.name_vi ILIKE $${paramIdx++}`;
+      conditions.push(`p.name_vi ILIKE $${paramIdx++}`);
       params.push(`%${search}%`);
     }
 
     if (status) {
-      selectSql += ` AND p.status = $${paramIdx++}`;
+      conditions.push(`p.status = $${paramIdx++}`);
       params.push(status);
     }
+
+    let selectSql = `FROM products p
+               LEFT JOIN categories c ON c.id = p.category_id` +
+      (conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '');
 
     // Determine ORDER BY
     let orderClause;
@@ -893,10 +910,13 @@ app.get('/api/products', async (req, res) => {
     const limitNum = limit ? Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100) : 10;
     const offsetNum = Math.max(0, parseInt(offset, 10) || 0);
 
-    const dataSql = `SELECT p.id, p.name_vi AS name, p.slug, p.base_price AS price,
+    const dataSql = `SELECT p.id, p.name_vi, p.name_en, p.slug,
+                      p.base_price, p.sale_price,
+                      p.description_vi, p.description_en,
+                      p.primary_image_url, p.images,
                       p.category_id, c.name_vi AS category_name,
                       p.status, p.attributes, p.created_at,
-                      (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1) AS image
+                      COALESCE((SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1), p.primary_image_url) AS image
                ${selectSql}
                ${orderClause}
                LIMIT $${paramIdx++} OFFSET $${paramIdx++}`;
@@ -907,7 +927,9 @@ app.get('/api/products', async (req, res) => {
     // Convert DECIMAL values to numbers (pg driver returns strings)
     const rows = dataResult.rows.map(r => ({
       ...r,
-      price: parseFloat(r.price) || 0
+      base_price: parseFloat(r.base_price) || 0,
+      sale_price: parseFloat(r.sale_price) || 0,
+      price: parseFloat(r.base_price) || 0
     }));
 
     res.json({
@@ -922,7 +944,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// GET single product by ID
+// GET single product by ID or slug
 app.get('/api/products/:id', async (req, res) => {
   try {
     const { query: pgQuery } = require('./db/postgres');
@@ -933,24 +955,28 @@ app.get('/api/products/:id', async (req, res) => {
       return res.status(404).json({ error: 'Not found via this endpoint' });
     }
 
+    const idOrSlug = id;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+
     const result = await pgQuery(
-      `SELECT p.id, p.name_vi AS name, p.slug, p.base_price AS price,
+      `SELECT p.id, p.name_vi, p.name_en, p.slug,
+              p.base_price, p.sale_price,
+              p.description_vi, p.description_en,
+              p.primary_image_url, p.images,
               p.category_id, c.name_vi AS category_name,
               p.status, p.attributes, p.created_at, p.updated_at,
-              (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1) AS image
+              COALESCE((SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1), p.primary_image_url) AS image
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
-       WHERE p.id = $1 AND p.status != 'deleted'`,
-      [id]
+       WHERE ${isUuid ? 'p.id' : 'p.slug'} = $1 AND p.status != 'deleted'`,
+      [idOrSlug]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    const product = result.rows[0];
-    if (product) product.price = parseFloat(product.price) || 0;
-    res.json(product);
+    res.json({ data: result.rows[0] });
   } catch (error) {
     console.error('[PG GET /api/products/:id] Error:', error.message);
     res.status(500).json({ error: error.message });
@@ -2120,7 +2146,7 @@ app.get('/api/products', async (_req, res) => {
 });
 
 // Middleware helpers for legacy Firestore routes
-const requireAdmin = requireJwtAdmin;
+const requireAdmin = [requireAuth, requireJwtAdmin];
 const requireFirestore = (req, res, next) => {
   if (!adminDb) {
     return res.status(503).json({ error: 'Firestore not available' });
@@ -2981,6 +3007,7 @@ const { issueStripeRefund } = require('./utils/refundService');
 
 // User tạo return request
 app.post('/api/returns', 
+  requireAuth,
   checkoutLimiter, 
   sanitizeReturnBody,
   validate(schemas.ReturnRequestBody),
@@ -2991,6 +3018,12 @@ app.post('/api/returns',
     if (!returnRequest?.orderId || !returnRequest?.userId) {
       return res.status(400).json({ error: 'Thiếu orderId hoặc userId' });
     }
+    
+    // Database-level check: regular users can only request returns for their own user ID
+    if (req.user.role !== 'admin' && String(returnRequest.userId) !== String(req.user.userId)) {
+      return res.status(403).json({ error: 'Bạn chỉ được tạo yêu cầu đổi/trả cho chính tài khoản của mình' });
+    }
+
     if (!Array.isArray(returnRequest.items) || returnRequest.items.length === 0) {
       return res.status(400).json({ error: 'Phải có ít nhất 1 sản phẩm trả' });
     }
@@ -3001,6 +3034,11 @@ app.post('/api/returns',
     const orderSnap = await adminDb.collection('orders').doc(String(returnRequest.orderId)).get();
     if (!orderSnap.exists) return res.status(404).json({ error: 'Đơn hàng không tồn tại' });
     const order = orderSnap.data();
+
+    // Enforce that a regular user can only return items from their own order
+    if (req.user.role !== 'admin' && String(order.userId) !== String(req.user.userId)) {
+      return res.status(403).json({ error: 'Bạn không có quyền yêu cầu đổi/trả cho đơn hàng này' });
+    }
 
     // Validate: đơn phải đã giao + trong 7 ngày
     if (order.status !== 'delivered' && order.status !== 'completed') {
@@ -3049,15 +3087,22 @@ app.post('/api/returns',
 });
 
 // List returns (admin: all, user: own)
-app.get('/api/returns', async (req, res) => {
+app.get('/api/returns', requireAuth, async (req, res) => {
   try {
     if (!adminDb) return res.json([]);
-    const adminEmail = req.header('x-admin-email');
-    const userId = req.query.userId;
     let query = adminDb.collection('return_requests').orderBy('createdAt', 'desc');
-    if (userId && !isAdminEmail(adminEmail)) {
-      query = query.where('userId', '==', String(userId));
+    
+    // Database-level check: if not admin, strictly enforce filtering by their own userId
+    if (req.user.role !== 'admin') {
+      query = query.where('userId', '==', String(req.user.userId));
+    } else {
+      // If admin, they can optionally filter by a specific userId
+      const userId = req.query.userId;
+      if (userId) {
+        query = query.where('userId', '==', String(userId));
+      }
     }
+    
     const snap = await query.limit(100).get();
     res.json(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   } catch (error) {
@@ -3300,8 +3345,8 @@ app.post('/api/payments/momo/ipn', express.json(), async (req, res) => {
 // =========================
 // AI Chat (Claude) API
 // =========================
-const NOVASHOP_SYSTEM_PROMPT = `Bạn là Nova — trợ lý AI của TRỌNG ĐỊNH STORE, chuyên gia tư vấn dinh dưỡng và chăm sóc thú cưng.
-Tính cách: thân thiện, am hiểu sâu, tự tin trả lời mọi câu hỏi về thú cưng và sản phẩm shop.
+const NOVASHOP_SYSTEM_PROMPT = `Bạn là Nova — trợ lý AI của TRỌNG ĐỊNH STORE, chuyên gia tư vấn mua sắm đa danh mục.
+Tính cách: thân thiện, am hiểu sâu, tự tin trả lời mọi câu hỏi về sản phẩm và mua sắm.
 Ngôn ngữ: tiếng Việt tự nhiên, gần gũi. Dùng markdown (bold, bullet) khi cần, KHÔNG dùng heading ##.
 Độ dài: 80–200 từ. Trả lời đầy đủ, không cắt ngắn khi chưa cần thiết.
 
@@ -3312,48 +3357,53 @@ Chỉ gợi ý số điện thoại 0369712958 hoặc email tutrantuan988@gmail.
 KHÔNG đưa số điện thoại ngay từ đầu hay khi chỉ hỏi thông thường.
 
 ━━━ THÔNG TIN SHOP ━━━
-Tên: TRỌNG ĐỊNH STORE
-Slogan: Yêu thương thú cưng — Chất lượng đảm bảo
-Website: trongdinhstore.vn
+Tên: LIFESTYLE STORE
+Slogan: Mua sắm thông minh — Chất lượng đảm bảo
+Website: lifestyle.vn
 Hotline/Zalo: 0369712958 (8h–22h hàng ngày)
 Email: tutrantuan988@gmail.com
 TikTok: @nclonf
 
 ━━━ CATALOG SẢN PHẨM ĐẦY ĐỦ ━━━
 
-[THỨC ĂN CHÓ]
-• Royal Canin Medium Adult 4kg — 890.000đ (sale từ 1.050.000đ) ⭐4.8
-  Chuyên cho chó giống vừa 11–25kg, hỗ trợ tiêu hóa và khớp, giảm còn từ 1.050.000đ
-• Royal Canin Mini Puppy 2kg — 520.000đ ⭐4.9
-  Chó con giống nhỏ <10kg từ 2–10 tháng, tăng cường miễn dịch, DHA não bộ
-• Pedigree Adult Beef & Vegetables 1.5kg — 185.000đ ⭐4.6
-  Chó trưởng thành, canxi + vitamin, bổ sung rau củ, phổ biến nhất phân khúc bình dân
-• Pedigree Puppy Chicken 480g — 68.000đ ⭐4.5
-  Chó con 2–12 tháng, vị gà, hỗ trợ phát triển não, giá rẻ nhất cho puppy
-• SmartHeart Adult Beef 3kg — 245.000đ ⭐4.4
-  Nhập khẩu Thái Lan, vị thịt bò, mọi giống chó trưởng thành, tốt/rẻ
-• Pedigree DentaStix 7 que — 55.000đ ⭐4.7
-  Snack gặm sạch răng, giảm mảng bám, vị thịt bò, chó từ 10kg
+[THỜI TRANG]
+• Áo khoác nam Premium — 890.000đ (sale từ 1.050.000đ) ⭐4.8
+  Chất liệu polyester cao cấp, chống nước, phù hợp mùa thu đông, giảm còn từ 1.050.000đ
+• Giày sneaker Urban Classic — 520.000đ ⭐4.9
+  Đế cao su non êm ái, thiết kế tối giản, phối mọi trang phục
+• Quần jeans Slim Fit — 185.000đ ⭐4.6
+  Co giãn 4 chiều, form chuẩn, phổ biến nhất phân khúc bình dân
+• Áo thun cotton Basic — 68.000đ ⭐4.5
+  100% cotton, thấm hút mồ hôi, giá rẻ nhất cho mặc hàng ngày
+• Túi xách nữ Canvas — 245.000đ ⭐4.4
+  Thiết kế Hàn Quốc, nhiều ngăn tiện lợi, tốt/rẻ nhất phân khúc
+• Ví da nam Genuine — 55.000đ ⭐4.7
+  Da bò thật, chống RFID, nhiều ngăn đựng thẻ
 
-[THỨC ĂN MÈO]
-• Whiskas Adult Tuna 1.2kg — 155.000đ ⭐4.7
-  Mèo trưởng thành >1 năm, vị cá ngừ, giảm búi lông, bán chạy nhất shop
-• Me-O Adult Seafood 1.3kg — 125.000đ ⭐4.5
-  Nhập Thái Lan, hải sản, tăng canxi + taurine, giá tốt nhất trong phân khúc
-• Royal Canin Indoor 27 2kg — 580.000đ ⭐4.9
-  Mèo trong nhà 1–7 tuổi, giảm mùi phân, kiểm soát cân nặng, cao cấp nhất
-• Fancy Feast Grilled Chicken 85g — 25.000đ/hộp ⭐4.8
-  Pate thịt gà Mỹ, bổ sung nước, mèo biếng ăn rất thích
-• Catsrang Adult Fish 1.5kg — 195.000đ ⭐4.6
-  Nhập Hàn Quốc, omega-3, lông bóng mượt
-• Nekko Creamy Chicken 4 gói — 35.000đ ⭐4.7
-  Súp kem vị gà, snack thưởng, mèo từ 3 tháng, cực kỳ phổ biến
+[ĐIỆN TỬ]
+• Tai nghe Bluetooth Pro — 155.000đ ⭐4.7
+  Chống ồn chủ động, pin 30h, bán chạy nhất shop
+• Sạc dự phòng 20000mAh — 125.000đ ⭐4.5
+  Sạc nhanh PD 65W, 3 cổng output, giá tốt nhất trong phân khúc
+• Loa Bluetooth Mini — 580.000đ ⭐4.9
+  Âm thanh Hi-Fi, chống nước IPX7, cao cấp nhất
+• Ốp lưng iPhone 15 Pro — 25.000đ ⭐4.8
+  Silicone mềm, chống va đập, nhiều màu sắc
+• Chuột không dây Ergonomic — 195.000đ ⭐4.6
+  Kết nối Bluetooth + USB, pin 6 tháng
+• Bàn phím cơ Mechanical — 35.000đ/hộp ⭐4.7
+  Switch xanh, LED RGB, cực kỳ phổ biến
 
-[PHỤ KIỆN]
-• Vòng cổ da cao cấp — 125.000đ | Dây dắt chó size M — 95.000đ
-• Bát inox chống trượt — 75.000đ | Đồ chơi bóng cao su — 48.000đ
-• Nhà cây mèo 3 tầng — 680.000đ | Khay vệ sinh mèo — 145.000đ
-• Lồng vận chuyển thú cưng — 350.000đ | Bàn chải lông chó mèo — 65.000đ
+[GIA DỤNG]
+• Nồi chiên không dầu 5L — 125.000đ | Máy xay sinh tố đa năng — 95.000đ
+• Bình giữ nhiệt 500ml — 75.000đ | Đèn ngủ LED cảm ứng — 48.000đ
+• Robot hút bụi thông minh — 680.000đ | Kệ để đồ đa năng — 145.000đ
+• Máy lọc không khí mini — 350.000đ | Bộ chăn ga gối cotton — 65.000đ
+
+[CHĂM SÓC CÁ NHÂN]
+• Serum vitamin C — 89.000đ | Kem chống nắng SPF50+ — 120.000đ
+• Dầu gội thảo dược — 75.000đ | Son môi matte — 45.000đ
+• Nước hoa unisex 50ml — 350.000đ | Sữa rửa mặt tạo bọt — 65.000đ
 
 ━━━ CHÍNH SÁCH ━━━
 **Vận chuyển:**
@@ -3380,42 +3430,51 @@ TikTok: @nclonf
 - Quay video đóng gói toàn bộ đơn hàng, lưu 30 ngày
 - Đóng gói chống ẩm, chống va đập, seal niêm phong
 
-━━━ KIẾN THỨC CHĂM SÓC THÚ CƯNG ━━━
-**Dinh dưỡng chó:**
-- Puppy <6 tháng: ăn 3–4 bữa/ngày, thức ăn puppy giàu DHA+protein
-- Adult 1–7 tuổi: 2 bữa/ngày, khẩu phần 2–3% cân nặng/ngày
-- Senior >7 tuổi: giảm protein, tăng chất xơ, bổ sung glucosamine
-- Chó nhỏ: cần kibble size nhỏ, không dùng thức ăn chó lớn
-- Tuyệt đối KHÔNG cho ăn: hành tây, tỏi, chocolate, nho, xylitol, avocado, macadamia
+━━━ HƯỚNG DẪN MUA SẮM ━━━
+**Chọn thời trang:**
+- Áo khoác: chọn theo mùa, chất liệu chống nước cho mùa mưa, giữ nhiệt cho mùa đông
+- Giày dép: đo chân buổi chiều (chân nở to nhất), chừa 0.5-1cm mũi giày
+- Quần jeans: form slim fit phù hợp đa số, stretch cotton thoải mái hơn
+- Phụ kiện: phối màu tương phản hoặc tone-sur-tone, tránh quá 3 màu
 
-**Dinh dưỡng mèo:**
-- Mèo là carnivore hoàn toàn — cần taurine (thiếu → mù, suy tim)
-- Uống ít nước tự nhiên → nên mix pate/wet food để bổ sung nước
-- Mèo indoor: ít vận động → ăn ít hơn 10–15%, kiểm soát cân nặng
-- Hairball: bổ sung chất xơ, chải lông thường xuyên, dùng thức ăn anti-hairball
-- Tuyệt đối KHÔNG cho ăn: hành, tỏi, sữa bò (lactose), chocolate, rượu bia, xương sống nhỏ
+**Chọn đồ điện tử:**
+- Tai nghe: ưu tiên chống ồn chủ động (ANC) nếu hay di chuyển, pin tối thiểu 20h
+- Sạc dự phòng: chọn dung lượng thực ≥ 10000mAh, hỗ trợ sạc nhanh PD/QC
+- Loa Bluetooth: công suất ≥ 10W cho phòng vừa, IPX7 nếu dùng ngoài trời
+- So sánh Samsung vs Apple: Samsung đa dạng giá, Apple tối ưu ecosystem
 
-**Chọn thức ăn theo nhu cầu:**
-- Chó/mèo biếng ăn: dùng pate kết hợp, thêm topping nước luộc gà (không muối)
-- Dị ứng da: chọn thức ăn protein đơn (1 loại thịt), tránh ngũ cốc
-- Thừa cân: giảm 20% khẩu phần, thêm rau luộc, tăng vận động
-- Chó/mèo con: KHÔNG dùng thức ăn người lớn, thiếu DHA ảnh hưởng não
+**Chọn đồ gia dụng:**
+- Nồi chiên không dầu: dung tích 4-5L cho gia đình 4 người, công suất ≥ 1500W
+- Robot hút bụi: ưu tiên có bản đồ laser, lực hút ≥ 2000Pa
+- Máy lọc không khí: chọn có màng HEPA H13, diện tích phù hợp phòng
 
-━━━ SO SÁNH SẢN PHẨM NỔI BẬT ━━━
-Royal Canin vs Pedigree (cho chó):
-- Royal Canin: nhập khẩu Pháp, formula theo giống+tuổi, giá cao nhưng chất lượng tốt nhất
-- Pedigree: phổ thông, giá thấp, phù hợp ngân sách, chất lượng khá tốt cho chó không kén ăn
+**Chọn mỹ phẩm & chăm sóc cá nhân:**
+- Serum vitamin C: nồng độ 10-15% cho người mới, dùng buổi sáng kèm chống nắng
+- Kem chống nắng: SPF50+ PA++++, kết cấu mỏng nhẹ, thoa lại sau 2h
+- Nước hoa: EDT nhẹ nhàng dùng hàng ngày, EDP đậm持久 cho sự kiện
 
-Whiskas vs Me-O vs Royal Canin (cho mèo):
-- Royal Canin Indoor: tốt nhất cho mèo nhà, kiểm soát cân và mùi, giá cao
-- Whiskas: cân bằng giữa chất lượng và giá, được mèo ưa thích
-- Me-O: giá rẻ nhất, nhập Thái, phù hợp mèo ăn tạp, ngân sách eo hẹp
+━━━ SO SÁNH THƯƠNG HIỆU NỔI BẬT ━━━
+Samsung vs Apple (điện thoại):
+- Samsung: đa dạng phân khúc, màn AMOLED đẹp, giá từ bình dân đến cao cấp
+- Apple: ecosystem khép kín, hiệu năng ổn định, giữ giá tốt, giá cao
+
+Nike vs Adidas (giày thể thao):
+- Nike: thiết kế thời trang, công nghệ Air đệm êm, giá cao hơn
+- Adidas: Boost đệm phản hồi tốt, giá dễ tiếp cận hơn, phù hợp chạy bộ
+
+Xiaomi vs Samsung (đồ điện tử):
+- Xiaomi: giá tốt nhất, tính năng đầy đủ, phù hợp ngân sách
+- Samsung: thương hiệu lâu năm, chất lượng ổn định, hậu mãi tốt
+
+Philips vs Panasonic (gia dụng):
+- Philips: thiết kế hiện đại, công nghệ tiên tiến, giá cao
+- Panasonic: bền bỉ, tiết kiệm điện, giá trung bình
 
 ━━━ HƯỚNG DẪN TƯ VẤN THÔNG MINH ━━━
-1. Khách hỏi thức ăn → hỏi thêm: loài, tuổi, cân nặng, vấn đề sức khỏe → tư vấn sản phẩm phù hợp CỤ THỂ với giá
-2. Khách phân vân → so sánh cost/ngày (ví dụ: Royal Canin 4kg chỉ tốn ~7.400đ/ngày cho chó 10kg)
+1. Khách hỏi sản phẩm → hỏi thêm: nhu cầu, ngân sách, thương hiệu yêu thích → tư vấn sản phẩm phù hợp CỤ THỂ với giá
+2. Khách phân vân → so sánh chi phí sử dụng (ví dụ: Áo khoác 890K mặc được 3 mùa = ~300đ/ngày)
 3. Khách hỏi sản phẩm cụ thể → cho ngay thông tin giá, rating, ưu điểm, link trang sản phẩm
-4. Khách hỏi kiến thức thú cưng → trả lời đầy đủ như chuyên gia, không cần đẩy về hotline
+4. Khách hỏi kiến thức mua sắm → trả lời đầy đủ như chuyên gia, không cần đẩy về hotline
 5. Vấn đề đơn hàng/khiếu nại/kỹ thuật → MỚI gợi ý liên hệ trực tiếp
 6. Cuối câu trả lời → gợi ý 1 sản phẩm liên quan hoặc câu hỏi follow-up tự nhiên
 7. KHÔNG bao giờ nói "mình không rõ" với thông tin có sẵn trong catalog trên
@@ -3901,10 +3960,10 @@ app.post('/api/chat-rag', chatRagLimiter, async (req, res) => {
     if (!process.env.OPENAI_API_KEY || !process.env.PINECONE_API_KEY) {
       // Fallback: simple rule-based response
       const responses = [
-        'Xin chào! Tôi có thể giúp gì cho bạn về sản phẩm thú cưng?',
-        'Bạn đang tìm kiếm thức ăn cho chó hay mèo?',
-        'Chúng tôi có nhiều thương hiệu như Royal Canin, Pedigree, Whiskas, Me-O.',
-        'Bạn có thể hỏi về giá, thành phần, hoặc cách chọn thức ăn phù hợp.',
+        'Xin chào! Tôi có thể giúp gì cho bạn về sản phẩm?',
+        'Bạn đang tìm kiếm thời trang, đồ điện tử hay đồ gia dụng?',
+        'Chúng tôi có nhiều thương hiệu như Nike, Adidas, Samsung, Xiaomi.',
+        'Bạn có thể hỏi về giá, chất liệu, hoặc cách chọn sản phẩm phù hợp.',
         'Gọi hotline 0369712958 để được tư vấn trực tiếp.'
       ];
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
@@ -3931,7 +3990,7 @@ app.post('/api/chat-rag', chatRagLimiter, async (req, res) => {
       .join('\n\n');
 
     // Build system prompt with context
-    const systemPrompt = `Bạn là trợ lý AI cho NovaShop - cửa hàng thức ăn thú cưng.
+    const systemPrompt = `Bạn là trợ lý AI cho NovaShop - sàn thương mại điện tử đa danh mục.
 Sử dụng thông tin sau đây để trả lời câu hỏi của khách hàng:
 
 ${context}

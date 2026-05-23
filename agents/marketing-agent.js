@@ -150,7 +150,7 @@ class MarketingAgent extends Agent {
       startTime: now.toISOString(),
       endTime: endTime.toISOString(),
       duration: `${promotion.duration || 24} giờ`,
-      products: promotion.products || ['Tất cả sản phẩm Royal Canin', 'Pedigree', 'Whiskas'],
+      products: promotion.products || ['Thời trang nam nữ', 'Điện tử & Phụ kiện', 'Gia dụng thông minh'],
       conditions: {
         minOrder: promotion.minOrder || 0,
         maxDiscount: promotion.maxDiscount || 200000,
@@ -225,8 +225,8 @@ class MarketingAgent extends Agent {
       to: userEmail,
       sequence: [
         { day: 0, subject: '🎉 Chào mừng bạn!', coupon: 'WELCOME10', content: 'Chào mừng & giới thiệu' },
-        { day: 3, subject: '📚 Hướng dẫn chọn thức ăn cho thú cưng', content: 'Blog content' },
-        { day: 7, subject: '⭐ Mẹo chăm sóc thú cưng tại nhà', content: 'Tips & tricks' },
+        { day: 3, subject: '📚 Hướng dẫn chọn sản phẩm phù hợp', content: 'Blog content' },
+        { day: 7, subject: '⭐ Mẹo mua sắm thông minh', content: 'Tips & tricks' },
         { day: 14, subject: '🎁 Ưu đãi đặc biệt cho bạn', coupon: 'VIP14', content: 'Re-engagement' }
       ],
       totalEmails: 4,

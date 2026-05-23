@@ -1,6 +1,24 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 
+const projects = [
+  {
+    name: 'chromium',
+    use: { ...devices['Desktop Chrome'] },
+  },
+  {
+    name: 'Mobile Chrome',
+    use: { ...devices['Pixel 5'] },
+  },
+];
+
+if (process.env.E2E_FIREFOX === '1') {
+  projects.splice(1, 0, {
+    name: 'firefox',
+    use: { ...devices['Desktop Firefox'] },
+  });
+}
+
 /**
  * Playwright Config — Cho E2E testing của TRỌNG ĐỊNH STORE
  * 
@@ -16,10 +34,10 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 module.exports = defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: [
     ['html', { outputFolder: 'e2e/report' }],
     ['list'],
@@ -31,22 +49,10 @@ module.exports = defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    serviceWorkers: 'block',
   },
 
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-  ],
+  projects,
 
   webServer: {
     command: process.env.CI ? 'npm run build && npm run preview' : 'npm run dev',

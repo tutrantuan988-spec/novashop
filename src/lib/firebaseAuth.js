@@ -25,12 +25,16 @@ export async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
+    const idToken = await user.getIdToken(true);
+    if (!idToken) {
+      throw new Error('Không lấy được Google idToken, vui lòng thử lại.');
+    }
     return {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL,
-      idToken: await user.getIdToken()
+      idToken
     };
   } catch (error) {
     if (error.code === 'auth/popup-closed-by-user') {

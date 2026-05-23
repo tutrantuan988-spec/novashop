@@ -239,9 +239,9 @@ async function importToFirestore(products, options = {}) {
 function generateTemplate(format = 'csv') {
   const headers = ['Name', 'Price', 'OriginalPrice', 'Category', 'Brand', 'Stock', 'Description', 'Images', 'Tags'];
   const sampleData = [
-    ['Royal Canin Adult Dog Food 2kg', '285000', '320000', 'dog-food', 'Royal Canin', '50', 'Thức ăn cao cấp cho chó trưởng thành', '', 'dog;premium'],
-    ['Whiskas Adult Ocean Fish 1.2kg', '115000', '135000', 'cat-food', 'Whiskas', '100', 'Thức ăn cho mèo vị cá biển', '', 'cat;fish'],
-    ['Vòng cổ da cao cấp', '85000', '100000', 'accessories', '', '30', 'Vòng cổ da thật cho chó mèo', '', 'accessories;leather'],
+    ['Áo thun nam Premium 200gsm', '285000', '320000', 'thoi-trang', 'Premium Fashion', '50', 'Áo thun cotton cao cấp, form regular fit', '', 'thoi-trang;nam;premium'],
+    ['Tai nghe Bluetooth TWS Pro', '450000', '550000', 'dien-tu', 'SoundMax', '100', 'Tai nghe không dây chống ồn chủ động', '', 'dien-tu;audio;bluetooth'],
+    ['Nồi chiên không dầu 5L', '1250000', '1500000', 'gia-dung', 'HomeCook', '30', 'Nồi chiên không dầu dung tích 5 lít, 8 chương trình nấu', '', 'gia-dung;nhà-bếp'],
   ];
 
   if (format === 'csv') {

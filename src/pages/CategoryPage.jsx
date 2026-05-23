@@ -32,18 +32,18 @@ const SORT_OPTIONS = [
 ];
 
 const CATEGORY_COLORS = {
-  'thoi-trang': { from: '#3e2d1a', to: '#5e442d' },
-  'dien-tu': { from: '#2d1a3e', to: '#442d5e' },
-  'do-gia-dung': { from: '#1a3e3e', to: '#2d5e5e' },
-  'suc-khoe-lam-dep': { from: '#3e1a1a', to: '#5e2d2d' },
-  'lam-dep': { from: '#4a1942', to: '#6b2d5b' },
-  'the-thao': { from: '#1a4a1a', to: '#2d6b2d' },
-  'sach': { from: '#4a3a1a', to: '#6b552d' },
-  'me-be': { from: '#4a2d3e', to: '#6b3d55' },
-  'oto-xe-may': { from: '#2d2d3e', to: '#44445e' },
-  'thuc-pham': { from: '#3e2d1a', to: '#5e442d' },
-  'nong-nghiep': { from: '#1a3e2d', to: '#2d5e44' },
-  default: { from: '#14213d', to: '#2a3f6d' }
+  'thoi-trang': { from: '#FFD6E7', to: '#FFF0F5' },
+  'dien-tu': { from: '#E8EAFF', to: '#FAE8FF' },
+  'do-gia-dung': { from: '#E0F2FE', to: '#F0FDF4' },
+  'suc-khoe-lam-dep': { from: '#FFE4E6', to: '#FFF1F2' },
+  'lam-dep': { from: '#FCE7F3', to: '#FFF1F2' },
+  'the-thao': { from: '#ECFDF5', to: '#F0FDFA' },
+  'sach': { from: '#FEF3C7', to: '#FFFBEB' },
+  'me-be': { from: '#FCE7F3', to: '#FDF2F8' },
+  'oto-xe-may': { from: '#F1F5F9', to: '#F8FAFC' },
+  'thuc-pham': { from: '#FEF08A', to: '#FEFCE8' },
+  'nong-nghiep': { from: '#DCFCE7', to: '#F0FDF4' },
+  default: { from: '#FFD6E7', to: '#FFF0F5' }
 };
 
 function CategoryPage() {
@@ -100,13 +100,7 @@ function CategoryPage() {
     if (categoryMeta) {
       document.title = `${categoryMeta.title || categoryMeta.name || 'Danh mục'} - ${SITE.name}`;
     }
-    setQuery('');
-    setSort('featured');
-    setFilterSidebarOpen(false);
-    setFilteredProducts([]);
-    setCurrentPage(1);
-    window.scrollTo({ top: 0 });
-  }, [slug, categoryMeta]);
+  }, [categoryMeta]);
 
   const filtered = useMemo(() => {
     const baseList = filteredProducts.length > 0 ? filteredProducts : allProducts;
@@ -212,22 +206,23 @@ function CategoryPage() {
           <span
             style={{
               display: 'inline-block',
-              padding: '6px 16px',
+              padding: '6px 18px',
               borderRadius: 20,
-              background: 'rgba(255,255,255,0.15)',
-              color: '#fff',
+              background: '#FFF0F5',
+              border: '1.5px solid #FFD6E7',
+              color: '#BE185D',
               fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: '0.08em',
+              fontWeight: 800,
+              letterSpacing: '0.05em',
               textTransform: 'uppercase',
               marginBottom: 16
             }}
           >
             {filtered.length} sản phẩm
           </span>
-          <h1 style={{ color: '#fff', fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: 12 }}>{categoryName}</h1>
-          <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.1rem', maxWidth: 520, margin: '0 auto' }}>
-            {categoryMeta?.description || ''}
+          <h1 className="font-pacifico" style={{ color: '#BE185D', fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', marginBottom: 12, fontWeight: 'normal', textTransform: 'capitalize' }}>{categoryName}</h1>
+          <p style={{ color: '#6B3A5E', fontSize: '1.1rem', fontWeight: '600', maxWidth: 520, margin: '0 auto' }}>
+            {categoryMeta?.description || 'Nền tảng mua sắm thời trang và phong cách sống cao cấp dành cho bạn.'}
           </p>
         </div>
       </section>
@@ -324,11 +319,7 @@ function CategoryPage() {
             onClose={() => setFilterSidebarOpen(false)}
           />
 
-          <div className="category-products">
-            <button className="filter-toggle" onClick={() => setFilterSidebarOpen(true)}>
-              <SlidersHorizontal size={16} /> Bộ lọc
-            </button>
-
+          <div className="category-products" style={{ flex: 1, width: '100%' }}>
             <p className="category-result-count">
               Đã tìm thấy <strong>{filtered.length}</strong> sản phẩm
             </p>
@@ -380,11 +371,13 @@ function CategoryPage() {
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-6px)';
-                      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+                      e.currentTarget.style.boxShadow = '0 12px 30px rgba(233, 30, 140, 0.15)';
+                      e.currentTarget.style.borderColor = '#EC4899';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)';
                       e.currentTarget.style.boxShadow = 'none';
+                      e.currentTarget.style.borderColor = 'var(--border)';
                     }}
                   >
                     {/* Image */}

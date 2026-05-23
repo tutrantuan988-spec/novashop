@@ -5,23 +5,23 @@ require('dotenv').config({ path: '.env.local' });
 const prisma = new PrismaClient();
 
 const categories = [
-  { name: 'Thức ăn cho chó', slug: 'thuc-an-cho-cho', description: 'Thức ăn hạt, pate và dinh dưỡng cho chó mọi độ tuổi', imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc101?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Thức ăn cho mèo', slug: 'thuc-an-cho-meo', description: 'Thức ăn hạt, pate và snack dinh dưỡng cho mèo', imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Phụ kiện thú cưng', slug: 'phu-kien-thu-cung', description: 'Vòng cổ, bát ăn, dây dắt, đồ chơi và nhà cây cho thú cưng', imageUrl: 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Vệ sinh & Grooming', slug: 've-sinh-grooming', description: 'Sản phẩm vệ sinh, khử mùi, chăm sóc lông và móng', imageUrl: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=80' },
+  { name: 'Thời trang', slug: 'thoi-trang', description: 'Quần áo, giày dép và phụ kiện thời trang nam nữ', imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=80' },
+  { name: 'Điện tử', slug: 'dien-tu', description: 'Điện thoại, laptop, tai nghe và phụ kiện công nghệ', imageUrl: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?auto=format&fit=crop&w=900&q=80' },
+  { name: 'Gia dụng', slug: 'gia-dung', description: 'Đồ gia dụng, nội thất, trang trí nhà cửa thông minh', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=900&q=80' },
+  { name: 'Làm đẹp', slug: 'lam-dep', description: 'Mỹ phẩm, dưỡng da, nước hoa và chăm sóc cá nhân', imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=80' },
 ];
 
 const products = [
-  { categorySlug: 'thuc-an-cho-cho', name: 'Royal Canin Medium Puppy 1kg', slug: 'royal-canin-medium-puppy-1kg', description: 'Thức ăn hạt cao cấp cho chó con giống vừa từ 2 đến 12 tháng tuổi.', price: 185000, comparePrice: 210000, stock: 45, sku: 'DOG-RC-PUPPY-1KG', imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc101?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Royal Canin', weight: '1kg', badge: 'Bán chạy', rating: 4.8, reviewCount: 124 } },
-  { categorySlug: 'thuc-an-cho-cho', name: 'Pedigree vị gà & rau 1.5kg', slug: 'pedigree-vi-ga-rau-15kg', description: 'Thức ăn hạt cho chó trưởng thành, bổ sung protein và chất xơ dễ tiêu hóa.', price: 95000, comparePrice: 110000, stock: 78, sku: 'DOG-PED-CHICKEN-15KG', imageUrl: 'https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Pedigree', weight: '1.5kg', badge: 'Sale', rating: 4.5, reviewCount: 89 } },
-  { categorySlug: 'thuc-an-cho-cho', name: 'Orijen Original Dog 2kg', slug: 'orijen-original-dog-2kg', description: 'Thức ăn siêu cao cấp giàu protein động vật, phù hợp chó cần dinh dưỡng cao.', price: 450000, comparePrice: 520000, stock: 18, sku: 'DOG-ORI-ORIGINAL-2KG', imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Orijen', weight: '2kg', badge: 'Mới', rating: 4.9, reviewCount: 42 } },
-  { categorySlug: 'thuc-an-cho-meo', name: 'Whiskas Adult vị cá thu 1.1kg', slug: 'whiskas-adult-vi-ca-thu-11kg', description: 'Thức ăn hạt cho mèo trưởng thành, bổ sung taurine và vitamin E.', price: 72000, comparePrice: 85000, stock: 62, sku: 'CAT-WHI-MACKEREL-11KG', imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Whiskas', weight: '1.1kg', badge: 'Bán chạy', rating: 4.6, reviewCount: 156 } },
-  { categorySlug: 'thuc-an-cho-meo', name: 'Me-O Adult cá ngừ 1.3kg', slug: 'me-o-adult-ca-ngu-13kg', description: 'Thức ăn hạt nhập khẩu Thái Lan, giàu omega-3 hỗ trợ giảm rụng lông.', price: 58000, comparePrice: 68000, stock: 55, sku: 'CAT-MEO-TUNA-13KG', imageUrl: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Me-O', weight: '1.3kg', rating: 4.3, reviewCount: 72 } },
-  { categorySlug: 'thuc-an-cho-meo', name: 'Nekko Creamy Snack cá ngừ hộp 4 gói', slug: 'nekko-creamy-snack-ca-ngu-4-goi', description: 'Snack kem cho mèo vị cá ngừ, phù hợp làm phần thưởng hằng ngày.', price: 45000, comparePrice: 52000, stock: 100, sku: 'CAT-NEK-CREAMY-4', imageUrl: 'https://images.unsplash.com/photo-1519052537078-e6302a4968ef?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Nekko', weight: '4x15g', badge: 'Bán chạy', rating: 4.5, reviewCount: 138 } },
-  { categorySlug: 'phu-kien-thu-cung', name: 'Vòng cổ da cao cấp size M', slug: 'vong-co-da-cao-cap-size-m', description: 'Vòng cổ da mềm, khóa kim loại chắc chắn, phù hợp chó mèo cỡ vừa.', price: 120000, comparePrice: 150000, stock: 30, sku: 'ACC-COLLAR-LEATHER-M', imageUrl: 'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'PetCare', weight: '150g', badge: 'Sale', rating: 4.3, reviewCount: 41 } },
-  { categorySlug: 'phu-kien-thu-cung', name: 'Bát ăn inox chống trượt 2 ngăn', slug: 'bat-an-inox-chong-truot-2-ngan', description: 'Bát inox 304 hai ngăn, đế cao su chống trượt, dễ vệ sinh.', price: 85000, comparePrice: 95000, stock: 50, sku: 'ACC-BOWL-INOX-2', imageUrl: 'https://images.unsplash.com/photo-1585846416120-3a7354ed7d39?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'PetCare', weight: '400g', rating: 4.5, reviewCount: 33 } },
-  { categorySlug: 'phu-kien-thu-cung', name: 'Nhà cây mèo 3 tầng', slug: 'nha-cay-meo-3-tang', description: 'Nhà cây mèo 3 tầng có cột cào móng, đệm ngủ mềm và khung gỗ chắc chắn.', price: 850000, comparePrice: 980000, stock: 8, sku: 'ACC-CATTREE-3F', imageUrl: 'https://images.unsplash.com/photo-1545249390-6bdfa2aeb079?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'CatTree', weight: '8kg', badge: 'Bán chạy', rating: 4.8, reviewCount: 47 } },
-  { categorySlug: 've-sinh-grooming', name: 'Xịt khử mùi BioPet 500ml', slug: 'xit-khu-mui-biopet-500ml', description: 'Xịt khử mùi sinh học an toàn cho chó mèo, dùng cho chuồng và lông.', price: 75000, comparePrice: 88000, stock: 65, sku: 'GRM-BIOPET-500ML', imageUrl: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'BioPet', weight: '500ml', rating: 4.4, reviewCount: 86 } },
+  { categorySlug: 'thoi-trang', name: 'Áo thun nam Premium Cotton', slug: 'ao-thun-nam-premium-cotton', description: 'Áo thun nam chất liệu cotton premium, form regular fit, thoáng mát thấm hút mồ hôi.', price: 185000, comparePrice: 210000, stock: 45, sku: 'FASH-AT-PREM-CTN', imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Premium', size: 'M', badge: 'Bán chạy', rating: 4.8, reviewCount: 124 } },
+  { categorySlug: 'thoi-trang', name: 'Quần jean nam Slim Fit', slug: 'quan-jean-nam-slim-fit', description: 'Quần jean nam form slim fit, chất denim co giãn thoải mái, phù hợp nhiều phong cách.', price: 95000, comparePrice: 110000, stock: 78, sku: 'FASH-QJ-SLIM-DNM', imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Denim Co', size: '32', badge: 'Sale', rating: 4.5, reviewCount: 89 } },
+  { categorySlug: 'thoi-trang', name: 'Giày sneaker Nike Air Max', slug: 'giay-sneaker-nike-air-max', description: 'Giày sneaker Nike Air Max chính hãng, đế khí êm ái, thiết kế thể thao hiện đại.', price: 450000, comparePrice: 520000, stock: 18, sku: 'FASH-GS-NIKE-AMX', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Nike', size: '42', badge: 'Mới', rating: 4.9, reviewCount: 42 } },
+  { categorySlug: 'dien-tu', name: 'Điện thoại Samsung Galaxy A54', slug: 'dien-thoai-samsung-galaxy-a54', description: 'Điện thoại Samsung Galaxy A54 5G, màn hình Super AMOLED 6.4 inch, camera 50MP.', price: 720000, comparePrice: 850000, stock: 62, sku: 'ELEC-DT-SAM-A54', imageUrl: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Samsung', storage: '128GB', badge: 'Bán chạy', rating: 4.6, reviewCount: 156 } },
+  { categorySlug: 'dien-tu', name: 'Tai nghe Bluetooth JBL', slug: 'tai-nghe-bluetooth-jbl', description: 'Tai nghe Bluetooth JBL chính hãng, âm bass mạnh mẽ, pin 12 giờ liên tục.', price: 58000, comparePrice: 68000, stock: 55, sku: 'ELEC-TN-JBL-BT', imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'JBL', badge: 'Bán chạy', rating: 4.3, reviewCount: 72 } },
+  { categorySlug: 'dien-tu', name: 'Sạc dự phòng Xiaomi 20000mAh', slug: 'sac-du-phong-xiaomi-20000mah', description: 'Sạc dự phòng Xiaomi 20000mAh, sạc nhanh 22.5W, 2 cổng USB, thiết kế nhỏ gọn.', price: 45000, comparePrice: 52000, stock: 100, sku: 'ELEC-SP-XMI-20K', imageUrl: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Xiaomi', capacity: '20000mAh', badge: 'Bán chạy', rating: 4.5, reviewCount: 138 } },
+  { categorySlug: 'gia-dung', name: 'Nồi chiên không dầu Sunhouse', slug: 'noi-chien-khong-dau-sunhouse', description: 'Nồi chiên không dầu Sunhouse 6 lít, công nghệ Rapid Air, chiên nướng không dầu mỡ.', price: 120000, comparePrice: 150000, stock: 30, sku: 'HOME-NCF-SH-6L', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Sunhouse', capacity: '6L', badge: 'Sale', rating: 4.3, reviewCount: 41 } },
+  { categorySlug: 'gia-dung', name: 'Đèn LED trang trí thông minh', slug: 'den-led-trang-tri-thong-minh', description: 'Đèn LED trang trí điều khiển từ xa, đổi màu RGB, hẹn giờ, tương thích smart home.', price: 85000, comparePrice: 95000, stock: 50, sku: 'HOME-DEN-LED-SMT', imageUrl: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'SmartLight', badge: 'Mới', rating: 4.5, reviewCount: 33 } },
+  { categorySlug: 'lam-dep', name: 'Serum Vitamin C dưỡng da', slug: 'serum-vitamin-c-duong-da', description: 'Serum Vitamin C 20% chống oxy hóa, làm sáng da, mờ thâm nám, cấp ẩm sâu.', price: 850000, comparePrice: 980000, stock: 8, sku: 'BEAUTY-SRM-VC20', imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'SkinLab', volume: '30ml', badge: 'Bán chạy', rating: 4.8, reviewCount: 47 } },
+  { categorySlug: 'lam-dep', name: 'Nước hoa nam Dior Sauvage', slug: 'nuoc-hoa-nam-dior-sauvage', description: 'Nước hoa nam Dior Sauvage EDT 100ml, hương thơm gỗ phương Đông hiện đại, lưu hương 8-12h.', price: 75000, comparePrice: 88000, stock: 65, sku: 'BEAUTY-NH-DS-100', imageUrl: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&q=80', metadata: { brand: 'Dior', volume: '100ml', rating: 4.4, reviewCount: 86 } },
 ];
 
 const customers = [
@@ -35,8 +35,8 @@ async function main() {
 
   const organization = await prisma.organization.upsert({
     where: { slug: 'novashop' },
-    update: { name: 'NovaShop Pet Store', subscriptionTier: 'PROFESSIONAL', subscriptionStatus: 'active' },
-    create: { name: 'NovaShop Pet Store', slug: 'novashop', subscriptionTier: 'PROFESSIONAL', subscriptionStatus: 'active' },
+    update: { name: 'NovaShop Multi-Category Store', subscriptionTier: 'PROFESSIONAL', subscriptionStatus: 'active' },
+    create: { name: 'NovaShop Multi-Category Store', slug: 'novashop', subscriptionTier: 'PROFESSIONAL', subscriptionStatus: 'active' },
   });
 
   const passwordHash = await bcrypt.hash('admin123', 12);
@@ -54,8 +54,8 @@ async function main() {
 
   await prisma.organizationSettings.upsert({
     where: { organizationId: organization.id },
-    update: { themeColor: '#ff7a1a', currency: 'VND', locale: 'vi', timezone: 'Asia/Ho_Chi_Minh', metadata: { storeName: 'NovaShop Pet Store', supportEmail: 'support@novashop.vn', supportPhone: '0900000000' } },
-    create: { organizationId: organization.id, themeColor: '#ff7a1a', currency: 'VND', locale: 'vi', timezone: 'Asia/Ho_Chi_Minh', metadata: { storeName: 'NovaShop Pet Store', supportEmail: 'support@novashop.vn', supportPhone: '0900000000' } },
+    update: { themeColor: '#ff7a1a', currency: 'VND', locale: 'vi', timezone: 'Asia/Ho_Chi_Minh', metadata: { storeName: 'NovaShop Multi-Category Store', supportEmail: 'support@novashop.vn', supportPhone: '0900000000' } },
+    create: { organizationId: organization.id, themeColor: '#ff7a1a', currency: 'VND', locale: 'vi', timezone: 'Asia/Ho_Chi_Minh', metadata: { storeName: 'NovaShop Multi-Category Store', supportEmail: 'support@novashop.vn', supportPhone: '0900000000' } },
   });
 
   const categoryBySlug = new Map();
@@ -90,7 +90,7 @@ async function main() {
     customerRecords.push(saved);
   }
 
-  const orderProducts = [productBySlug.get('royal-canin-medium-puppy-1kg'), productBySlug.get('whiskas-adult-vi-ca-thu-11kg')];
+  const orderProducts = [productBySlug.get('ao-thun-nam-premium-cotton'), productBySlug.get('dien-thoai-samsung-galaxy-a54')];
   const subtotal = orderProducts.reduce((sum, product) => sum + product.price, 0);
   const shipping = 25000;
   const order = await prisma.order.upsert({
@@ -120,11 +120,11 @@ async function main() {
   });
 
   const existingReview = await prisma.review.findFirst({
-    where: { productId: productBySlug.get('whiskas-adult-vi-ca-thu-11kg').id, userId: reviewUser.id },
+    where: { productId: productBySlug.get('ao-thun-nam-premium-cotton').id, userId: reviewUser.id },
   });
   if (!existingReview) {
     await prisma.review.create({
-      data: { productId: productBySlug.get('whiskas-adult-vi-ca-thu-11kg').id, userId: reviewUser.id, rating: 5, title: 'Mèo ăn rất hợp', content: 'Hàng chính hãng, đóng gói kỹ, mèo nhà mình ăn hết rất nhanh.', isVerified: true, isActive: true },
+      data: { productId: productBySlug.get('ao-thun-nam-premium-cotton').id, userId: reviewUser.id, rating: 5, title: 'Sản phẩm chất lượng cao', content: 'Sản phẩm rất tốt, hàng chính hãng, đóng gói kỹ, chất lượng đúng mô tả.', isVerified: true, isActive: true },
     });
   }
 

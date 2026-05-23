@@ -1,0 +1,12 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tt_metal" x1="10" y1="10" x2="86" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2D7BF"/>
+      <stop offset="0.5" stop-color="#D4A373"/>
+      <stop offset="1" stop-color="#B88757"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="90" height="90" rx="26" stroke="url(#tt_metal)" stroke-opacity="0.75"/>
+  <path d="M25 28H71V34H52V68H44V34H25V28Z" fill="url(#tt_metal)"/>
+  <path d="M33 43H63V49H53V68H45V49H33V43Z" fill="#F8E6D3"/>
+</svg>

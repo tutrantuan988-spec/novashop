@@ -9,6 +9,8 @@
 
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const db = require('../db/postgres');
+const { saveAuditLog, createAuditLog, AUDIT_EVENTS } = require('./auditLog');
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
@@ -138,7 +140,7 @@ function requireAuth(req, res, next) {
  * @param {import('express').Response} res 
  * @param {import('express').NextFunction} next 
  */
-function requireAdmin(req, res, next) {
+async function requireAdmin(req, res, next) {
   // First check if user is authenticated
   if (!req.user) {
     return res.status(401).json({ 
@@ -147,24 +149,83 @@ function requireAdmin(req, res, next) {
     });
   }
 
-  // Check if user has admin role
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ 
-      error: 'Admin access required',
-      code: 'FORBIDDEN'
+  try {
+    let isAdmin = false;
+    let actualRole = req.user.role;
+
+    if (req.user.authMethod === 'jwt') {
+      // Query the database directly to verify the role and prevent token/session role forging
+      const result = await db.query('SELECT role FROM users WHERE id = $1', [req.user.userId]);
+      if (result.rows.length > 0) {
+        actualRole = result.rows[0].role;
+        if (actualRole === 'admin') {
+          isAdmin = true;
+        }
+      }
+    } else if (req.user.authMethod === 'legacy') {
+      // Legacy admin token verification
+      if (isAdminEmail(req.user.email)) {
+        isAdmin = true;
+      }
+    } else {
+      // Fallback
+      if (req.user.role === 'admin') {
+        isAdmin = true;
+      }
+    }
+
+    if (!isAdmin) {
+      // Create security audit log entry for unauthorized access attempt
+      const entry = createAuditLog({
+        event: AUDIT_EVENTS.SECURITY_PERMISSION_DENIED,
+        userId: req.user?.userId || req.user?.email || 'anonymous',
+        userEmail: req.user?.email || 'unknown',
+        userRole: actualRole || req.user?.role || 'unknown',
+        action: `Access Denied: ${req.method} ${req.path}`,
+        resource: 'security',
+        resourceId: null,
+        metadata: {
+          method: req.method,
+          path: req.path,
+          reason: 'Non-admin attempting to access admin resource',
+          attemptedRole: req.user?.role,
+          actualDatabaseRole: actualRole
+        },
+        ipAddress: req.ip || req.connection?.remoteAddress || 'unknown',
+        userAgent: req.get('user-agent') || 'unknown',
+        status: 'failure',
+        errorMessage: 'Admin access required'
+      });
+
+      const adminDb = req.app.locals.adminDb;
+      saveAuditLog(adminDb, entry).catch(() => {});
+
+      return res.status(403).json({ 
+        error: 'Admin access required',
+        code: 'FORBIDDEN'
+      });
+    }
+
+    // Keep req.user.role updated
+    req.user.role = actualRole;
+
+    // CRITICAL: In production, JWT_SECRET must be set
+    if (IS_PRODUCTION && JWT_SECRET === 'dev-secret-change-in-production') {
+      console.error('[SECURITY] JWT_SECRET not configured in production!');
+      return res.status(503).json({ 
+        error: 'Server configuration error',
+        code: 'CONFIG_ERROR'
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error('[SECURITY] Error verifying admin role in database:', error);
+    return res.status(500).json({
+      error: 'Internal server error during authorization',
+      code: 'AUTH_ERROR'
     });
   }
-
-  // CRITICAL: In production, JWT_SECRET must be set
-  if (IS_PRODUCTION && JWT_SECRET === 'dev-secret-change-in-production') {
-    console.error('[SECURITY] JWT_SECRET not configured in production!');
-    return res.status(503).json({ 
-      error: 'Server configuration error',
-      code: 'CONFIG_ERROR'
-    });
-  }
-
-  next();
 }
 
 /**

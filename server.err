@@ -1,15 +1,6 @@
-C:\Users\TUAN:1
-[6F2C:6F44][2026-01-06T10:33:56]i001: Burn v3.14.1.8722, Windows v10.0 (Build 26200: Service Pack 0), path: C:\Windows\Temp\{73561868-8081-494B-9816-94A789AA2F63}\.cr\VC_redist.x64.exe
- ^
-
-SyntaxError: Invalid or unexpected token
-    at wrapSafe (node:internal/modules/cjs/loader:1743:18)
-    at Module._compile (node:internal/modules/cjs/loader:1786:20)
-    at Object..js (node:internal/modules/cjs/loader:1943:10)
-    at Module.load (node:internal/modules/cjs/loader:1533:32)
-    at Module._load (node:internal/modules/cjs/loader:1335:12)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
-    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
-    at node:internal/main/run_main_module:33:47
-
-Node.js v24.14.1
+⚠️ Redis không khả dụng — dùng in-memory fallback
+[PostgreSQL] Failed to initialize pool: 
+[PostgreSQL] Init failed: 
+[Firebase Admin] Credentials probe failed, disabling Firestore: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[2026-05-21T06:05:01.194Z] [PID: 31888] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Thu May 21 2026 13:05:00 GMT+0700 (Giờ Đông Dương)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-21T07:11:42.555Z] [PID: 31888] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Thu May 21 2026 14:05:00 GMT+0700 (Giờ Đông Dương)! Possible blocking IO or high CPU user at the same process used by node-cron.

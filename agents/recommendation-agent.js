@@ -14,20 +14,20 @@ const { Agent, PERMISSION_SCOPES } = require('./agent-framework');
 
 // Product relationships cho recommendations
 const PRODUCT_RELATIONSHIPS = {
-  'thức ăn chó': {
-    crossSell: ['pate thưởng', 'bánh thưởng', 'đồ chơi', 'bát ăn', 'vòng cổ'],
-    upSell: ['thức ăn cao cấp', 'thức ăn chuyên biệt giống'],
-    bundle: ['set combo thức ăn + pate', 'set quà tặng thú cưng']
+  'thoi-trang': {
+    crossSell: ['phụ kiện thời trang', 'ví', 'túi xách', 'mũ nón', 'thắt lưng'],
+    upSell: ['thời trang cao cấp', 'thiết kế thương hiệu'],
+    bundle: ['set combo outfit hoàn chỉnh', 'set quà tặng thời trang']
   },
-  'thức ăn mèo': {
-    crossSell: ['pate mèo', 'đồ chơi mèo', 'cát vệ sinh', 'bát ăn', 'cây cào móng'],
-    upSell: ['thức ăn nhập khẩu', 'thức ăn chuyên biệt giống mèo'],
-    bundle: ['set combo mèo', 'set quà tặng mèo']
+  'dien-tu': {
+    crossSell: ['ốp lưng', 'cáp sạc', 'tai nghe', 'sạc dự phòng', 'miếng dán màn hình'],
+    upSell: ['thiết bị cao cấp', 'flagship mới nhất'],
+    bundle: ['set combo công nghệ', 'set quà tặng điện tử']
   },
-  'phụ kiện': {
-    crossSell: ['thức ăn', 'bánh thưởng', 'đồ chơi'],
-    upSell: ['phụ kiện cao cấp', 'phụ kiện thiết kế'],
-    bundle: ['set phụ kiện trọn bộ']
+  'gia-dung': {
+    crossSell: ['đồ dùng nhà bếp', 'chăn ga gối', 'nến thơm', 'khăn tắm'],
+    upSell: ['gia dụng thông minh', 'thiết bị cao cấp'],
+    bundle: ['set gia dụng trọn bộ']
   }
 };
 
@@ -80,7 +80,7 @@ class RecommendationAgent extends Agent {
    * Cross-sell: sản phẩm bán kèm
    */
   getCrossSell(productId, category, limit = 5) {
-    const relationships = PRODUCT_RELATIONSHIPS[category] || PRODUCT_RELATIONSHIPS['thức ăn chó'];
+    const relationships = PRODUCT_RELATIONSHIPS[category] || PRODUCT_RELATIONSHIPS['thoi-trang'];
     const items = relationships.crossSell.slice(0, limit).map((name, i) => ({
       id: `cs_${i}_${Date.now()}`,
       name: `${name} chất lượng cao`,
@@ -102,13 +102,13 @@ class RecommendationAgent extends Agent {
    * Up-sell: sản phẩm cao cấp hơn
    */
   getUpSell(productId, category, limit = 3) {
-    const relationships = PRODUCT_RELATIONSHIPS[category] || PRODUCT_RELATIONSHIPS['thức ăn chó'];
+    const relationships = PRODUCT_RELATIONSHIPS[category] || PRODUCT_RELATIONSHIPS['thoi-trang'];
     const items = relationships.upSell.slice(0, limit).map((name, i) => ({
       id: `us_${i}_${Date.now()}`,
       name: `${name} cao cấp`,
       type: 'up-sell',
       confidence: 0.7 - (i * 0.1),
-      reason: 'Phiên bản cao cấp hơn, dinh dưỡng vượt trội',
+      reason: 'Phiên bản cao cấp hơn, chất lượng vượt trội',
       premium: true
     }));
 
@@ -129,10 +129,10 @@ class RecommendationAgent extends Agent {
     const segment = segments[Math.floor(Math.random() * segments.length)];
     
     const recommendations = [
-      { id: 'rec1', name: 'Royal Canin Maxi Adult', type: 'personalized', reason: 'Dựa trên giống chó bạn đã mua', confidence: 0.92 },
-      { id: 'rec2', name: 'Pedigree Dentastix', type: 'personalized', reason: 'Phụ kiện thường mua kèm', confidence: 0.88 },
-      { id: 'rec3', name: 'Whiskas Pate Cá Ngừ', type: 'personalized', reason: 'Sản phẩm phổ biến trong phân khúc của bạn', confidence: 0.85 },
-      { id: 'rec4', name: 'Đồ chơi Kong Classic', type: 'personalized', reason: 'Khách hàng tương tự cũng mua', confidence: 0.82 }
+      { id: 'rec1', name: 'Áo khoác nam Premium', type: 'personalized', reason: 'Dựa trên phong cách bạn đã mua', confidence: 0.92 },
+      { id: 'rec2', name: 'Ví da nam Genuine', type: 'personalized', reason: 'Phụ kiện thường mua kèm', confidence: 0.88 },
+      { id: 'rec3', name: 'Tai nghe Bluetooth Pro', type: 'personalized', reason: 'Sản phẩm phổ biến trong phân khúc của bạn', confidence: 0.85 },
+      { id: 'rec4', name: 'Nồi chiên không dầu 5L', type: 'personalized', reason: 'Khách hàng tương tự cũng mua', confidence: 0.82 }
     ].slice(0, limit);
 
     return {
@@ -152,13 +152,13 @@ class RecommendationAgent extends Agent {
       return this.getPopular(null, limit);
     }
 
-    const categories = cartItems.map(item => item.category || 'thức ăn chó');
+    const categories = cartItems.map(item => item.category || 'thoi-trang');
     const mainCategory = categories[0];
-    const relationships = PRODUCT_RELATIONSHIPS[mainCategory] || PRODUCT_RELATIONSHIPS['thức ăn chó'];
+    const relationships = PRODUCT_RELATIONSHIPS[mainCategory] || PRODUCT_RELATIONSHIPS['thoi-trang'];
 
     const recommendations = [
-      { name: relationships.crossSell[0] || 'Pate thưởng', reason: 'Hoàn hảo để kết hợp với đơn hàng của bạn', price: '35.000₫' },
-      { name: relationships.crossSell[1] || 'Bánh thưởng', reason: 'Thêm 50.000₫ để được freeship!', price: '25.000₫' }
+      { name: relationships.crossSell[0] || 'Phụ kiện thời trang', reason: 'Hoàn hảo để kết hợp với đơn hàng của bạn', price: '35.000₫' },
+      { name: relationships.crossSell[1] || 'Ví da cao cấp', reason: 'Thêm 50.000₫ để được freeship!', price: '25.000₫' }
     ].slice(0, limit);
 
     return {
@@ -173,11 +173,11 @@ class RecommendationAgent extends Agent {
    */
   getPopular(category, limit = 8) {
     const popular = [
-      { id: 'pop1', name: 'Royal Canin Maxi Adult 15kg', price: 890000, sold: 1234, rating: 4.8 },
-      { id: 'pop2', name: 'Pedigree Adult 3kg', price: 175000, sold: 2341, rating: 4.6 },
-      { id: 'pop3', name: 'Whiskas 1+ Cá Biển 1.2kg', price: 85000, sold: 3120, rating: 4.7 },
-      { id: 'pop4', name: 'Me-O Pate Gà 400g', price: 28000, sold: 5678, rating: 4.5 },
-      { id: 'pop5', name: 'Royal Canin Kitten 2kg', price: 295000, sold: 987, rating: 4.9 }
+      { id: 'pop1', name: 'Áo khoác nam Premium', price: 890000, sold: 1234, rating: 4.8 },
+      { id: 'pop2', name: 'Giày sneaker Urban Classic', price: 520000, sold: 2341, rating: 4.6 },
+      { id: 'pop3', name: 'Tai nghe Bluetooth Pro', price: 155000, sold: 3120, rating: 4.7 },
+      { id: 'pop4', name: 'Sạc dự phòng 20000mAh', price: 125000, sold: 5678, rating: 4.5 },
+      { id: 'pop5', name: 'Nồi chiên không dầu 5L', price: 680000, sold: 987, rating: 4.9 }
     ];
 
     return {
@@ -189,7 +189,7 @@ class RecommendationAgent extends Agent {
   }
 
   getBundleDeals(category) {
-    const relationships = PRODUCT_RELATIONSHIPS[category] || PRODUCT_RELATIONSHIPS['thức ăn chó'];
+    const relationships = PRODUCT_RELATIONSHIPS[category] || PRODUCT_RELATIONSHIPS['thoi-trang'];
     return {
       bundles: relationships.bundle.slice(0, 2).map((name, i) => ({
         id: `bundle_${i}`,
@@ -205,12 +205,12 @@ class RecommendationAgent extends Agent {
 
   getSegmentRecommendations(strategy, limit = 5) {
     const strategies = {
-      'winter': { title: 'Mùa đông ấm áp', items: ['Đệm lót cho thú cưng', 'Áo ấm chó mèo', 'Thức ăn giàu calo'] },
-      'new-pet': { title: 'Mới nuôi thú cưng', items: ['Set khởi đầu', 'Bát ăn + bát uống', 'Đồ chơi cơ bản', 'Thức ăn khởi đầu'] },
-      'premium': { title: 'Dòng cao cấp', items: ['Royal Canin Pure', 'Đồ chơi thông minh', 'Phụ kiện thiết kế'] }
+      'winter': { title: 'Mùa đông ấm áp', items: ['Áo khoác giữ nhiệt', 'Khăn len cashmere', 'Giày boot da'] },
+      'new-customer': { title: 'Mới mua sắm', items: ['Set khởi đầu', 'Áo thun basic + quần jeans', 'Phụ kiện cơ bản', 'Túi xách đa năng'] },
+      'premium': { title: 'Dòng cao cấp', items: ['Áo khoác designer', 'Đồng hồ thông minh', 'Nước hoa cao cấp'] }
     };
 
-    const s = strategies[strategy] || strategies['new-pet'];
+    const s = strategies[strategy] || strategies['new-customer'];
     return {
       strategy,
       title: s.title,

@@ -2,15 +2,15 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, ChevronDown, Loader2, Send, Sparkles, X } from 'lucide-react';
 
 const QUICK_COMMANDS = [
-  'Tìm thức ăn cho chó',
+  'Tìm sản phẩm thời trang',
   'Thêm sản phẩm đầu tiên vào giỏ hàng',
   'Cuộn xuống sản phẩm nổi bật',
   'Mở giỏ hàng',
   'Tìm sản phẩm giá rẻ nhất',
 ];
 
-const SYSTEM_CONTEXT = `Bạn là AI trợ lý điều hướng giao diện cho cửa hàng trực tuyến "NovaShop".
-Trang web bán thức ăn, đồ chơi và phụ kiện cho chó mèo.
+const SYSTEM_CONTEXT = `Bạn là AI trợ lý điều hướng giao diện cho cửa hàng trực tuyến "Lifestyle".
+Trang web bán đa danh mục: Thời trang, Điện tử, Gia dụng, Làm đẹp.
 Các tính năng chính: tìm sản phẩm, thêm vào giỏ hàng, xem chi tiết sản phẩm, thanh toán.
 Hãy thực hiện các thao tác trên trang web theo yêu cầu của người dùng bằng tiếng Việt.`;
 
@@ -121,7 +121,7 @@ function AICopilotWidget() {
               <div className="ai-copilot-empty">
                 <Sparkles size={28} />
                 <p>Gõ lệnh tự nhiên để điều khiển trang</p>
-                <small>Ví dụ: "tìm thức ăn cho mèo" hoặc "thêm vào giỏ hàng"</small>
+                <small>Ví dụ: "tìm áo thun nam" hoặc "thêm vào giỏ hàng"</small>
               </div>
             )}
             {log.map((m, i) => (

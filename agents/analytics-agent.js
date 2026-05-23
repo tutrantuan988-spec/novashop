@@ -110,22 +110,22 @@ class AnalyticsAgent extends Agent {
     return {
       period,
       topSellers: [
-        { name: 'Royal Canin Senior', sold: 234, revenue: 58900000, stock: 45, trend: 'up' },
-        { name: 'Pedigree Adult', sold: 189, revenue: 28300000, stock: 120, trend: 'stable' },
-        { name: 'Whiskas 1+', sold: 156, revenue: 19500000, stock: 89, trend: 'up' },
-        { name: 'Me-O Pate', sold: 142, revenue: 17700000, stock: 67, trend: 'down' },
-        { name: 'Royal Canin Kitten', sold: 128, revenue: 38400000, stock: 34, trend: 'up' }
+        { name: 'Áo khoác nam Premium', sold: 234, revenue: 58900000, stock: 45, trend: 'up' },
+        { name: 'Giày sneaker Urban Classic', sold: 189, revenue: 28300000, stock: 120, trend: 'stable' },
+        { name: 'Tai nghe Bluetooth Pro', sold: 156, revenue: 19500000, stock: 89, trend: 'up' },
+        { name: 'Sạc dự phòng 20000mAh', sold: 142, revenue: 17700000, stock: 67, trend: 'down' },
+        { name: 'Nồi chiên không dầu 5L', sold: 128, revenue: 38400000, stock: 34, trend: 'up' }
       ],
       inventory: {
         totalProducts: 156,
-        lowStock: [12, 'sản phẩm sắp hết', 'Cần nhập thêm: Royal Canin Kitten, Whiskas Pate'],
-        overStock: [8, 'sản phẩm tồn nhiều', 'Xem xét giảm giá: Me-O Pate, Pedigree Puppy'],
+        lowStock: [12, 'sản phẩm sắp hết', 'Cần nhập thêm: Giày sneaker Urban Classic, Tai nghe Bluetooth Pro'],
+        overStock: [8, 'sản phẩm tồn nhiều', 'Xem xét giảm giá: Sạc dự phòng, Quần jeans Basic'],
         outOfStock: 3
       },
       categories: {
-        'Thức ăn chó': { revenue: 124000000, growth: 12.5 },
-        'Thức ăn mèo': { revenue: 98000000, growth: 8.3 },
-        'Phụ kiện': { revenue: 45000000, growth: 15.7 }
+        'Thời trang': { revenue: 124000000, growth: 12.5 },
+        'Điện tử': { revenue: 98000000, growth: 8.3 },
+        'Gia dụng': { revenue: 45000000, growth: 15.7 }
       },
       filters
     };
@@ -149,7 +149,7 @@ class AnalyticsAgent extends Agent {
       ],
       buyingHabits: {
         avgOrderFrequency: '12 ngày',
-        preferredCategory: 'Thức ăn chó',
+        preferredCategory: 'Thời trang',
         avgItemsPerOrder: 3.2,
         peakTime: '20:00-22:00'
       }
@@ -175,7 +175,7 @@ class AnalyticsAgent extends Agent {
       trend: 'upward',
       confidence: 0.85,
       recommendations: [
-        'Tồn kho Royal Canin Kitten sắp hết — cần nhập thêm 100 túi',
+        'Tồn kho Giày sneaker Urban Classic sắp hết — cần nhập thêm 100 đôi',
         'Cuối tuần doanh thu thường tăng 40% — chuẩn bị flash sale',
         'Tháng tới có thể đạt doanh thu 150 triệu với xu hướng hiện tại'
       ]

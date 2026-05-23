@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ProductsProvider } from './context/ProductsContext';
@@ -10,12 +10,16 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
+import AuthModal from './components/AuthModal';
 import Breadcrumb from './components/Breadcrumb';
 import ChatWidget from './components/ChatWidget';
 import CompareBar from './components/CompareBar';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
+import MobileBottomNav from './components/MobileBottomNav';
+import PrivacyNotice from './components/PrivacyNotice';
 import HomePage from './pages/HomePage';
+import useUltraMotion from './hooks/useUltraMotion';
 
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
@@ -29,6 +33,7 @@ const OrderHistoryPage = lazy(() => import('./pages/OrderHistoryPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const ServerErrorPage = lazy(() => import('./pages/ServerErrorPage'));
 const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
@@ -47,8 +52,10 @@ const CategoryListPage = lazy(() => import('./pages/CategoryListPage'));
 const BrandPage = lazy(() => import('./pages/BrandPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const FlashSalePage = lazy(() => import('./pages/FlashSalePage'));
 const ComparisonPage = lazy(() => import('./pages/ComparisonPage'));
+const HelloKittyShopPage = lazy(() => import('./pages/HelloKittyShopPage'));
 
 const Loading = () => (
   <div className="page-loading" role="status" aria-live="polite">
@@ -58,6 +65,10 @@ const Loading = () => (
 );
 
 export default function App() {
+  const location = useLocation();
+  const isKittyPage = location.pathname === '/kittyshop';
+  useUltraMotion();
+
   return (
     <ErrorBoundary>
       <ToastProvider>
@@ -67,24 +78,31 @@ export default function App() {
               <ComparisonProvider>
               <CartProvider>
               <div className="site-shell">
-                <Header />
-                <Breadcrumb />
+                {!isKittyPage && <Header />}
+                {!isKittyPage && <Breadcrumb />}
                 <main id="main">
                   <Suspense fallback={<Loading />}>
                     <Routes>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/gio-hang" element={<CartPage />} />
                       <Route path="/tim-kiem" element={<SearchPage />} />
-                      <Route path="/them-san-pham" element={<AddProductPage />} />
-                      <Route path="/quan-ly-san-pham" element={<ProductListPage />} />
+                      <Route path="/them-san-pham" element={(
+                        <ProtectedRoute requireAdmin>
+                          <AddProductPage />
+                        </ProtectedRoute>
+                      )} />
+                      <Route path="/quan-ly-san-pham" element={(
+                        <ProtectedRoute requireAdmin>
+                          <ProductListPage />
+                        </ProtectedRoute>
+                      )} />
                       <Route path="/san-pham/:slug" element={<ProductDetailPage />} />
                       <Route path="/chinh-sach/:slug" element={<PolicyPage />} />
                       <Route path="/about" element={<AboutPage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/blog" element={<BlogPage />} />
-                      <Route path="/blog/:slug" element={<BlogPage />} />
+                      <Route path="/blog/:slug" element={<BlogPostPage />} />
                       <Route path="/flash-sale" element={<FlashSalePage />} />
-                      <Route path="/khuyen-mai" element={<FlashSalePage />} />
                       <Route path="/so-sanh" element={<ComparisonPage />} />
                       <Route path="/track-order" element={<GuestOrderTrackingPage />} />
                       <Route path="/tai-khoan/dia-chi" element={(
@@ -172,18 +190,23 @@ export default function App() {
                       <Route path="/danh-muc/:slug" element={<CategoryPage />} />
                       <Route path="/thuong-hieu/:slug" element={<BrandPage />} />
                       <Route path="/don-hang/:id" element={<OrderConfirmationPage />} />
-                      <Route path="/khuyen-mai" element={<Navigate to="/#flash-sale" replace />} />
+                      <Route path="/khuyen-mai" element={<Navigate to="/flash-sale" replace />} />
                       <Route path="/danh-gia" element={<DanhGiaPage />} />
+                      <Route path="/kittyshop" element={<HelloKittyShopPage />} />
                       <Route path="/ho-tro" element={<Navigate to="/contact" replace />} />
+                      <Route path="/500" element={<ServerErrorPage />} />
                       <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </Suspense>
                 </main>
-                <Footer />
-                <CartDrawer />
-                <ChatWidget />
-                <CompareBar />
+                {!isKittyPage && <Footer />}
+                {!isKittyPage && <CartDrawer />}
+                {!isKittyPage && <AuthModal />}
+                {!isKittyPage && <ChatWidget />}
+                {!isKittyPage && <CompareBar />}
                 <ScrollToTop />
+                {!isKittyPage && <MobileBottomNav />}
+                <PrivacyNotice />
               </div>
               </CartProvider>
               </ComparisonProvider>

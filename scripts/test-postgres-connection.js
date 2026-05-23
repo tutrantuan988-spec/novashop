@@ -4,8 +4,8 @@
  * Usage: node server/db/test-connection.js
  */
 
-require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env.local') });
-const { initializePool, checkHealth, getPoolStats, shutdown } = require('./postgres');
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env.local') });
+const { initializePool, checkHealth, shutdown } = require('../server/db/postgres');
 
 async function testConnection() {
   console.log('🔍 Testing PostgreSQL connection...\n');
@@ -20,34 +20,18 @@ async function testConnection() {
     console.log('2. Checking database health...');
     const health = await checkHealth();
     
-    if (health.ok) {
+    if (health.status === 'healthy') {
       console.log('✅ Database is healthy');
-      console.log(`   Latency: ${health.latency}ms`);
-      console.log(`   Server time: ${health.serverTime}`);
-      console.log(`   Pool stats:`, health.pool);
+      console.log(`   Server time: ${health.timestamp}`);
     } else {
       console.log('❌ Database health check failed');
-      console.log(`   Reason: ${health.reason}`);
-      console.log(`   Message: ${health.message}`);
-    }
-    console.log('');
-
-    // Get pool stats
-    console.log('3. Pool statistics:');
-    const stats = getPoolStats();
-    if (stats) {
-      console.log(`   Total connections: ${stats.totalCount}/${stats.maxConnections}`);
-      console.log(`   Idle connections: ${stats.idleCount}`);
-      console.log(`   Waiting requests: ${stats.waitingCount}`);
-      console.log(`   Utilization: ${stats.utilizationPercent}%`);
-    } else {
-      console.log('   Pool not initialized');
+      console.log(`   Error: ${health.error}`);
     }
     console.log('');
 
     // Test query
-    console.log('4. Testing query execution...');
-    const { query } = require('./postgres');
+    console.log('3. Testing query execution...');
+    const { query } = require('../server/db/postgres');
     const result = await query('SELECT NOW() as current_time, version() as version');
     console.log('✅ Query executed successfully');
     console.log(`   Current time: ${result.rows[0].current_time}`);

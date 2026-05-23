@@ -1,8 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const PAGE_SIZE = 10;
 
 export default function ProductListPage() {
+  const { isAdmin, authLoading } = useAuth();
+
+  if (authLoading) {
+    return <div className="page-loading"><div className="spinner" aria-hidden /><span>Đang kiểm tra quyền...</span></div>;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState([]);

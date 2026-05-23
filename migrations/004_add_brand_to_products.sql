@@ -12,7 +12,7 @@ ALTER TABLE products
 -- Index for brand filtering
 CREATE INDEX IF NOT EXISTS idx_products_brand ON products(brand);
 
-COMMENT ON COLUMN products.brand IS 'Brand name for display and filtering (e.g., Royal Canin, Pedigree)';
+COMMENT ON COLUMN products.brand IS 'Brand name for display and filtering (e.g., Nike, Samsung, Dior)';
 
 -- ============================================================================
 -- Verification

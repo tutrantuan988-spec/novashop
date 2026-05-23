@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import DynamicProductForm from '../components/DynamicProductForm';
 import ImageManager from '../components/ImageManager';
 import { uploadProductImage, isUploadConfigured } from '../services/upload';
@@ -32,6 +34,16 @@ const STATUS_OPTIONS = [
 ];
 
 export default function AddProductPage() {
+  const { isAdmin, authLoading } = useAuth();
+
+  if (authLoading) {
+    return <div className="page-loading"><div className="spinner" aria-hidden /><span>Đang kiểm tra quyền...</span></div>;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
   const searchParams = new URLSearchParams(window.location.search);
   const editId = searchParams.get('edit');
   const isEditMode = !!editId;

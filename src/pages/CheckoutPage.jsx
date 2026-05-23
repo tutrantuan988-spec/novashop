@@ -1,6 +1,22 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BadgeCheck, CheckCircle2, CreditCard, Shield, Truck } from 'lucide-react';
+import {
+  BadgeCheck,
+  CheckCircle2,
+  CreditCard,
+  Shield,
+  Truck,
+  ChevronRight,
+  ChevronLeft,
+  Lock,
+  Wallet,
+  Building2,
+  Smartphone,
+  Loader2,
+  MapPin,
+  Tag,
+  BookmarkPlus
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCart } from '../context/CartContext';
@@ -9,19 +25,51 @@ import { useToast } from '../context/ToastContext';
 import { formatVND } from '../utils/format';
 import SITE from '../config/site-config';
 import { checkoutSchema } from '../lib/checkoutSchema';
-import {
-  createOrderApi,
-  validateCouponApi
-} from '../services/api';
-import {
-  getProvinces,
-  getDistricts,
-  getWards
-} from '../services/locationApi';
+import { createOrderApi, validateCouponApi } from '../services/api';
+import { getProvinces, getDistricts, getWards } from '../services/locationApi';
 import { isRecaptchaConfigured, executeRecaptcha } from '../lib/recaptcha';
 
 const SHIPPING_FEE = 30000;
 const FREE_SHIP_THRESHOLD = 300000;
+
+const STEPS = [
+  { key: 'shipping', label: 'Giao hàng', icon: Truck },
+  { key: 'payment', label: 'Thanh toán', icon: CreditCard },
+  { key: 'confirm', label: 'Xác nhận', icon: CheckCircle2 }
+];
+
+const PAYMENT_METHODS = [
+  {
+    value: 'cod',
+    label: 'Thanh toán khi nhận hàng (COD)',
+    desc: 'Kiểm tra hàng trước khi thanh toán',
+    icon: Truck
+  },
+  {
+    value: 'bank',
+    label: 'Chuyển khoản MBBank',
+    desc: 'Quét QR hoặc chuyển khoản sau khi đặt hàng',
+    icon: Building2
+  },
+  {
+    value: 'vnpay',
+    label: 'VNPay (ATM / Visa / QR)',
+    desc: 'Hỗ trợ ATM nội địa, Visa, MasterCard, QR Pay',
+    icon: CreditCard
+  },
+  {
+    value: 'momo',
+    label: 'Ví MoMo',
+    desc: 'Thanh toán nhanh qua ví điện tử MoMo',
+    icon: Smartphone
+  },
+  {
+    value: 'stripe',
+    label: 'Stripe (Thẻ quốc tế)',
+    desc: 'Visa, MasterCard, AMEX, JCB',
+    icon: Wallet
+  }
+];
 
 function CheckoutPageInner() {
   const navigate = useNavigate();
@@ -30,12 +78,17 @@ function CheckoutPageInner() {
   const toast = useToast();
   const recaptchaEnabled = isRecaptchaConfigured();
 
+  const [currentStep, setCurrentStep] = useState('shipping');
+  const [formData, setFormData] = useState(null);
+  const [submitError, setSubmitError] = useState('');
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
-    setValue
+    setValue,
+    trigger
   } = useForm({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -47,7 +100,8 @@ function CheckoutPageInner() {
       district: '',
       ward: '',
       note: '',
-      payment: 'cod'
+      payment: 'cod',
+      saveAddress: false
     }
   });
 
@@ -68,12 +122,14 @@ function CheckoutPageInner() {
   const [locationLoading, setLocationLoading] = useState(false);
 
   const payment = watch('payment');
-  const isPlacing = isSubmitting;
+  const saveAddress = watch('saveAddress');
 
   useEffect(() => {
     document.title = `Thanh toán - ${SITE.name}`;
     window.scrollTo({ top: 0 });
-    getProvinces().then(setProvinces).catch(() => toast.error('Không thể tải danh sách tỉnh/thành phố'));
+    getProvinces()
+      .then(setProvinces)
+      .catch(() => toast.error('Không thể tải danh sách tỉnh/thành phố'));
   }, []);
 
   useEffect(() => {
@@ -114,7 +170,6 @@ function CheckoutPageInner() {
       .finally(() => setLocationLoading(false));
   }, [selectedDistrict]);
 
-
   const totals = useMemo(() => {
     let discount = 0;
     let shipping = subtotal >= FREE_SHIP_THRESHOLD ? 0 : SHIPPING_FEE;
@@ -131,6 +186,7 @@ function CheckoutPageInner() {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
     setCouponBusy(true);
+    setCouponMessage('');
     try {
       const result = await validateCouponApi(code, subtotal);
       setAppliedCoupon(result);
@@ -143,7 +199,41 @@ function CheckoutPageInner() {
     }
   };
 
-  const handleShippingSubmit = async (data) => {
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponMessage('');
+    setCoupon('');
+  };
+
+  const handleShippingNext = async (data) => {
+    const isValid = await trigger(['fullName', 'phone', 'email', 'address', 'city', 'district', 'ward']);
+    if (!isValid) return;
+    setFormData(data);
+    setCurrentStep('payment');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePaymentNext = async () => {
+    const isValid = await trigger('payment');
+    if (!isValid) return;
+    setCurrentStep('confirm');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBack = () => {
+    setSubmitError('');
+    if (currentStep === 'confirm') {
+      setCurrentStep('payment');
+    } else if (currentStep === 'payment') {
+      setCurrentStep('shipping');
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!formData) return;
+    setSubmitError('');
+    setStockIssues([]);
+
     try {
       let recaptchaToken = '';
       if (recaptchaEnabled) {
@@ -156,10 +246,10 @@ function CheckoutPageInner() {
 
       const orderData = {
         customer: {
-          name: data.fullName,
-          email: data.email,
-          phone: data.phone,
-          address: `${data.address}, ${wardName}, ${districtName}, ${cityName}`
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: `${formData.address}, ${wardName}, ${districtName}, ${cityName}`
         },
         items: items.map((i) => ({
           id: i.id,
@@ -173,16 +263,16 @@ function CheckoutPageInner() {
         discount: totals.discount,
         shipping: totals.shipping,
         total: totals.total,
-        paymentMethod: data.payment,
+        paymentMethod: formData.payment,
         coupon: appliedCoupon?.code || null,
-        note: data.note,
+        note: formData.note,
+        saveAddress: user ? (saveAddress || false) : false,
         recaptchaToken
       };
 
-      setStockIssues([]); // Reset trước mỗi lần submit
       const saved = await createOrderApi(orderData);
 
-      if (data.payment === 'vnpay') {
+      if (formData.payment === 'vnpay') {
         setVnpayLoading(true);
         try {
           const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
@@ -202,7 +292,7 @@ function CheckoutPageInner() {
         }
       }
 
-      if (data.payment === 'momo') {
+      if (formData.payment === 'momo') {
         setVnpayLoading(true);
         try {
           const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
@@ -222,24 +312,346 @@ function CheckoutPageInner() {
         }
       }
 
+      if (formData.payment === 'stripe') {
+        setVnpayLoading(true);
+        try {
+          const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+          const stripeRes = await fetch(`${apiBase}/api/payments/stripe/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: saved.id })
+          });
+          const stripeData = await stripeRes.json();
+          if (!stripeRes.ok) throw new Error(stripeData.error || 'Không thể tạo thanh toán Stripe');
+          window.location.href = stripeData.url;
+          return;
+        } catch (err) {
+          setVnpayLoading(false);
+          toast.error(`Stripe: ${err.message}`);
+          return;
+        }
+      }
+
       setOrderPlaced({ id: saved.id, total: saved.total ?? totals.total });
       clearCart();
     } catch (error) {
-      // Server trả 409 + INSUFFICIENT_STOCK → highlight items thiếu
       if (error.code === 'INSUFFICIENT_STOCK' && Array.isArray(error.insufficientItems)) {
         setStockIssues(error.insufficientItems);
         const list = error.insufficientItems
           .map((it) => `${it.name}: chỉ còn ${it.available} (bạn đặt ${it.requested})`)
           .join('; ');
         toast.error(`Không đủ tồn kho — ${list}`);
-        // Scroll lên đầu giỏ hàng để user thấy highlight
         document.getElementById('cart-summary')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
-      toast.error(`Đặt hàng thất bại: ${error.message || 'Vui lòng thử lại sau.'}`);
+      const msg = error.message || 'Vui lòng thử lại sau.';
+      setSubmitError(msg);
+      toast.error(`Đặt hàng thất bại: ${msg}`);
     }
   };
 
+  const currentStepIndex = STEPS.findIndex(s => s.key === currentStep);
+
+  const renderStepIndicator = () => (
+    <div className="checkout-steps">
+      {STEPS.map((step, index) => {
+        const Icon = step.icon;
+        const isActive = step.key === currentStep;
+        const isCompleted = index < currentStepIndex;
+        return (
+          <div key={step.key} className="checkout-step-item">
+            <div className={`checkout-step-circle ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+              {isCompleted ? <CheckCircle2 size={18} /> : <Icon size={18} />}
+            </div>
+            <span className={`checkout-step-label ${isActive ? 'active' : ''}`}>{step.label}</span>
+            {index < STEPS.length - 1 && <ChevronRight size={16} className="checkout-step-chevron" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const renderShippingStep = () => (
+    <div className="card-box checkout-step-content">
+      <h2><MapPin size={18} aria-hidden /> Thông tin giao hàng</h2>
+      <div className="form-grid">
+        <label>
+          <span>Họ và tên *</span>
+          <input
+            {...register('fullName')}
+            autoComplete="name"
+            aria-invalid={!!errors.fullName}
+            placeholder="Nguyễn Văn A"
+          />
+          {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
+        </label>
+        <label>
+          <span>Số điện thoại *</span>
+          <input
+            {...register('phone')}
+            autoComplete="tel"
+            placeholder="0901 234 567"
+            aria-invalid={!!errors.phone}
+          />
+          {errors.phone && <span className="field-error">{errors.phone.message}</span>}
+        </label>
+        <label className="full">
+          <span>Email *</span>
+          <input
+            {...register('email')}
+            type="email"
+            autoComplete="email"
+            placeholder="email@example.com"
+            aria-invalid={!!errors.email}
+          />
+          {errors.email && <span className="field-error">{errors.email.message}</span>}
+        </label>
+        <label className="full">
+          <span>Địa chỉ *</span>
+          <input
+            {...register('address')}
+            autoComplete="street-address"
+            placeholder="Số nhà, tên đường"
+            aria-invalid={!!errors.address}
+          />
+          {errors.address && <span className="field-error">{errors.address.message}</span>}
+        </label>
+        <label className="full">
+          <span>Tỉnh/Thành phố *</span>
+          <select
+            value={selectedProvince}
+            onChange={(e) => {
+              setSelectedProvince(e.target.value);
+              setValue('city', e.target.value ? provinces.find(p => p.code === Number(e.target.value))?.name || '' : '');
+            }}
+            aria-invalid={!!errors.city}
+          >
+            <option value="">-- Chọn tỉnh/thành phố --</option>
+            {provinces.map((p) => (
+              <option key={p.code} value={p.code}>{p.name}</option>
+            ))}
+          </select>
+          {locationLoading && <span className="field-loading">Đang tải...</span>}
+          {errors.city && <span className="field-error">{errors.city.message}</span>}
+        </label>
+        <label>
+          <span>Quận/Huyện *</span>
+          <select
+            value={selectedDistrict}
+            onChange={(e) => {
+              setSelectedDistrict(e.target.value);
+              setValue('district', e.target.value ? districts.find(d => d.code === Number(e.target.value))?.name || '' : '');
+            }}
+            disabled={!districts.length || locationLoading}
+            aria-invalid={!!errors.district}
+          >
+            <option value="">-- Chọn quận/huyện --</option>
+            {districts.map((d) => (
+              <option key={d.code} value={d.code}>{d.name}</option>
+            ))}
+          </select>
+          {errors.district && <span className="field-error">{errors.district.message}</span>}
+        </label>
+        <label>
+          <span>Phường/Xã *</span>
+          <select
+            value={selectedWard}
+            onChange={(e) => {
+              setSelectedWard(e.target.value);
+              setValue('ward', e.target.value ? wards.find(w => w.code === Number(e.target.value))?.name || '' : '');
+            }}
+            disabled={!wards.length || locationLoading}
+            aria-invalid={!!errors.ward}
+          >
+            <option value="">-- Chọn phường/xã --</option>
+            {wards.map((w) => (
+              <option key={w.code} value={w.code}>{w.name}</option>
+            ))}
+          </select>
+          {errors.ward && <span className="field-error">{errors.ward.message}</span>}
+        </label>
+        <label className="full">
+          <span>Ghi chú</span>
+          <textarea
+            {...register('note')}
+            rows={3}
+            placeholder="Ví dụ: giao trong giờ hành chính, gọi trước khi giao..."
+          />
+        </label>
+        {user && (
+          <label className="full save-address-label">
+            <input type="checkbox" {...register('saveAddress')} />
+            <span><BookmarkPlus size={14} /> Lưu địa chỉ này cho lần mua sau</span>
+          </label>
+        )}
+      </div>
+      <div className="step-actions">
+        <button type="button" className="step-next-btn" onClick={handleSubmit(handleShippingNext)}>
+          Tiếp tục <ChevronRight size={18} />
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderPaymentStep = () => (
+    <div className="card-box checkout-step-content">
+      <h2><CreditCard size={18} aria-hidden /> Phương thức thanh toán</h2>
+      <div className="payment-options">
+        {PAYMENT_METHODS.map((method) => {
+          const Icon = method.icon;
+          const isSelected = payment === method.value;
+          return (
+            <label
+              key={method.value}
+              className={`payment-option ${isSelected ? 'active' : ''}`}
+            >
+              <input type="radio" {...register('payment')} value={method.value} />
+              <div className="payment-option-icon">
+                <Icon size={20} />
+              </div>
+              <div className="payment-option-info">
+                <strong>{method.label}</strong>
+                <span>{method.desc}</span>
+              </div>
+              {isSelected && <CheckCircle2 size={18} className="payment-check" />}
+            </label>
+          );
+        })}
+      </div>
+
+      {payment === 'bank' && (
+        <div className="payment-detail-card">
+          <img
+            src={`https://img.vietqr.io/image/MBBANK-0369712958-compact2.jpg?amount=${totals.total}&addInfo=${encodeURIComponent('Thanh toan don hang')}&accountName=${encodeURIComponent('TRAN TUAN TU')}`}
+            alt="QR VietQR chuyển khoản MBBank"
+            className="payment-qr-img"
+            onError={(e) => { e.target.src = '/qr-payment.png'; }}
+          />
+          <p className="payment-detail-title">Quét mã để chuyển khoản MBBank</p>
+          <p className="payment-detail-info">Chủ TK: <strong>TRAN TUAN TU</strong></p>
+          <p className="payment-detail-info">Số TK: <strong>0369712958</strong></p>
+          <p className="payment-detail-amount">Số tiền: {formatVND(totals.total)}</p>
+        </div>
+      )}
+
+      {payment === 'vnpay' && (
+        <div className="payment-detail-card">
+          <CreditCard size={36} className="payment-detail-icon vnpay-icon" />
+          <p className="payment-detail-title">Thanh toán qua VNPay</p>
+          <p className="payment-detail-info">Hỗ trợ ATM nội địa, Visa, Mastercard, JCB, QR Pay</p>
+          <div className="payment-tags">
+            {['ATM nội địa', 'Visa', 'Mastercard', 'JCB', 'QR Pay'].map((m) => (
+              <span key={m} className="payment-tag">{m}</span>
+            ))}
+          </div>
+          <p className="payment-detail-hint">Nhấn "Đặt hàng" → chuyển sang cổng VNPay để thanh toán</p>
+        </div>
+      )}
+
+      {payment === 'momo' && (
+        <div className="payment-detail-card">
+          <div className="momo-logo">
+            <span>M</span>
+          </div>
+          <p className="payment-detail-title">Thanh toán qua MoMo</p>
+          <p className="payment-detail-info">Quét QR hoặc mở ứng dụng MoMo để thanh toán</p>
+          <p className="payment-detail-hint">Nhấn "Đặt hàng" → chuyển sang cổng MoMo để thanh toán</p>
+        </div>
+      )}
+
+      {payment === 'stripe' && (
+        <div className="payment-detail-card">
+          <Wallet size={36} className="payment-detail-icon stripe-icon" />
+          <p className="payment-detail-title">Thanh toán qua Stripe</p>
+          <p className="payment-detail-info">Hỗ trợ Visa, MasterCard, American Express, JCB</p>
+          <div className="payment-tags">
+            {['Visa', 'MasterCard', 'AMEX', 'JCB'].map((m) => (
+              <span key={m} className="payment-tag">{m}</span>
+            ))}
+          </div>
+          <p className="payment-detail-hint">Nhấn "Đặt hàng" → chuyển sang cổng Stripe để thanh toán</p>
+        </div>
+      )}
+
+      <div className="trust-badges">
+        <span className="trust-badge"><Lock size={14} /> SSL bảo mật</span>
+        <span className="trust-badge"><Shield size={14} /> Bảo vệ dữ liệu</span>
+        <span className="trust-badge"><CheckCircle2 size={14} /> Thanh toán an toàn</span>
+      </div>
+
+      <div className="step-actions">
+        <button type="button" className="step-back-btn" onClick={handleBack}>
+          <ChevronLeft size={18} /> Quay lại
+        </button>
+        <button type="button" className="step-next-btn" onClick={handlePaymentNext}>
+          Tiếp tục <ChevronRight size={18} />
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderConfirmStep = () => {
+    const wardName = selectedWard ? wards.find(w => w.code === Number(selectedWard))?.name || '' : '';
+    const districtName = selectedDistrict ? districts.find(d => d.code === Number(selectedDistrict))?.name || '' : '';
+    const cityName = selectedProvince ? provinces.find(p => p.code === Number(selectedProvince))?.name || '' : '';
+    const selectedPayment = PAYMENT_METHODS.find(m => m.value === formData?.payment);
+    const PaymentIcon = selectedPayment?.icon || CreditCard;
+
+    return (
+      <div className="card-box checkout-step-content">
+        <h2><CheckCircle2 size={18} aria-hidden /> Xác nhận đơn hàng</h2>
+
+        {submitError && (
+          <div className="submit-error-box" role="alert">
+            <strong>Đặt hàng thất bại</strong>
+            <p>{submitError}</p>
+          </div>
+        )}
+
+        <div className="confirm-section">
+          <h3>Thông tin giao hàng</h3>
+          <div className="confirm-info">
+            <div className="confirm-row">
+              <span className="confirm-label">Người nhận</span>
+              <span className="confirm-value">{formData?.fullName}</span>
+            </div>
+            <div className="confirm-row">
+              <span className="confirm-label">Số điện thoại</span>
+              <span className="confirm-value">{formData?.phone}</span>
+            </div>
+            <div className="confirm-row">
+              <span className="confirm-label">Email</span>
+              <span className="confirm-value">{formData?.email}</span>
+            </div>
+            <div className="confirm-row">
+              <span className="confirm-label">Địa chỉ</span>
+              <span className="confirm-value">{formData?.address}, {wardName}, {districtName}, {cityName}</span>
+            </div>
+            {formData?.note && (
+              <div className="confirm-row">
+                <span className="confirm-label">Ghi chú</span>
+                <span className="confirm-value">{formData.note}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="confirm-section">
+          <h3>Phương thức thanh toán</h3>
+          <div className="confirm-payment">
+            <PaymentIcon size={18} />
+            <span>{selectedPayment?.label}</span>
+          </div>
+        </div>
+
+        <div className="step-actions">
+          <button type="button" className="step-back-btn" onClick={handleBack}>
+            <ChevronLeft size={18} /> Quay lại
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   if (orderPlaced) {
     return (
@@ -272,169 +684,21 @@ function CheckoutPageInner() {
     <section className="section checkout" aria-labelledby="checkout-title">
       <h1 id="checkout-title">Thanh toán đơn hàng</h1>
 
-      <form onSubmit={handleSubmit(handleShippingSubmit)} className="checkout-grid" noValidate>
+      {renderStepIndicator()}
+
+      <form
+        onSubmit={currentStep === 'confirm' ? handleSubmit(handleFinalSubmit) : (e) => e.preventDefault()}
+        className="checkout-grid"
+        noValidate
+      >
         <div className="checkout-form">
-          <div className="card-box">
-            <h2><Truck size={18} aria-hidden /> Thông tin giao hàng</h2>
-            <div className="form-grid">
-              <label>
-                <span>Họ và tên *</span>
-                <input {...register('fullName')} autoComplete="name" aria-invalid={!!errors.fullName} />
-                {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
-              </label>
-              <label>
-                <span>Số điện thoại *</span>
-                <input {...register('phone')} autoComplete="tel" placeholder="0901 234 567" aria-invalid={!!errors.phone} />
-                {errors.phone && <span className="field-error">{errors.phone.message}</span>}
-              </label>
-              <label className="full">
-                <span>Email *</span>
-                <input {...register('email')} type="email" autoComplete="email" aria-invalid={!!errors.email} />
-                {errors.email && <span className="field-error">{errors.email.message}</span>}
-              </label>
-              <label className="full">
-                <span>Địa chỉ *</span>
-                <input {...register('address')} autoComplete="street-address" placeholder="Số nhà, tên đường" aria-invalid={!!errors.address} />
-                {errors.address && <span className="field-error">{errors.address.message}</span>}
-              </label>
-              <label className="full">
-                <span>Tỉnh/Thành phố *</span>
-                <select
-                  value={selectedProvince}
-                  onChange={(e) => {
-                    setSelectedProvince(e.target.value);
-                    setValue('city', e.target.value ? provinces.find(p => p.code === Number(e.target.value))?.name || '' : '');
-                  }}
-                  aria-invalid={!!errors.city}
-                >
-                  <option value="">-- Chọn tỉnh/thành phố --</option>
-                  {provinces.map((p) => (
-                    <option key={p.code} value={p.code}>{p.name}</option>
-                  ))}
-                </select>
-                {errors.city && <span className="field-error">{errors.city.message}</span>}
-              </label>
-              <label>
-                <span>Quận/Huyện *</span>
-                <select
-                  value={selectedDistrict}
-                  onChange={(e) => {
-                    setSelectedDistrict(e.target.value);
-                    setValue('district', e.target.value ? districts.find(d => d.code === Number(e.target.value))?.name || '' : '');
-                  }}
-                  disabled={!districts.length || locationLoading}
-                  aria-invalid={!!errors.district}
-                >
-                  <option value="">-- Chọn quận/huyện --</option>
-                  {districts.map((d) => (
-                    <option key={d.code} value={d.code}>{d.name}</option>
-                  ))}
-                </select>
-                {errors.district && <span className="field-error">{errors.district.message}</span>}
-              </label>
-              <label>
-                <span>Phường/Xã *</span>
-                <select
-                  value={selectedWard}
-                  onChange={(e) => {
-                    setSelectedWard(e.target.value);
-                    setValue('ward', e.target.value ? wards.find(w => w.code === Number(e.target.value))?.name || '' : '');
-                  }}
-                  disabled={!wards.length || locationLoading}
-                  aria-invalid={!!errors.ward}
-                >
-                  <option value="">-- Chọn phường/xã --</option>
-                  {wards.map((w) => (
-                    <option key={w.code} value={w.code}>{w.name}</option>
-                  ))}
-                </select>
-                {errors.ward && <span className="field-error">{errors.ward.message}</span>}
-              </label>
-              <label className="full">
-                <span>Ghi chú</span>
-                <textarea {...register('note')} rows={3} placeholder="Ví dụ: giao trong giờ hành chính" />
-                {errors.note && <span className="field-error">{errors.note.message}</span>}
-              </label>
-            </div>
-          </div>
-
-          <div className="card-box">
-            <h2><CreditCard size={18} aria-hidden /> Phương thức thanh toán</h2>
-            <div className="payment-options">
-              <label className={payment === 'cod' ? 'payment active' : 'payment'}>
-                <input type="radio" {...register('payment')} value="cod" />
-                <div>
-                  <strong>Thanh toán khi nhận hàng (COD)</strong>
-                  <span>Kiểm tra hàng trước khi thanh toán</span>
-                </div>
-              </label>
-              <label className={payment === 'bank' ? 'payment active' : 'payment'}>
-                <input type="radio" {...register('payment')} value="bank" />
-                <div>
-                  <strong>Chuyển khoản MBBank</strong>
-                  <span>Quét QR hoặc chuyển khoản sau khi đặt hàng</span>
-                </div>
-              </label>
-              <label className={payment === 'vnpay' ? 'payment active' : 'payment'}>
-                <input type="radio" {...register('payment')} value="vnpay" />
-                <div>
-                  <strong>VNPay (ATM / Visa / QR)</strong>
-                  <span>Thanh toán qua VNPay — hỗ trợ thẻ ATM, Visa, MasterCard, QR Pay</span>
-                </div>
-              </label>
-              <label className={payment === 'momo' ? 'payment active' : 'payment'}>
-                <input type="radio" {...register('payment')} value="momo" />
-                <div>
-                  <strong>Ví MoMo</strong>
-                  <span>Thanh toán nhanh qua ví điện tử MoMo</span>
-                </div>
-              </label>
-            </div>
-
-            {payment === 'bank' && (
-              <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
-                <img
-                  src={`https://img.vietqr.io/image/MBBANK-0369712958-compact2.jpg?amount=${totals.total}&addInfo=${encodeURIComponent('Thanh toan don hang')}&accountName=${encodeURIComponent('TRAN TUAN TU')}`}
-                  alt="QR VietQR chuyển khoản MBBank"
-                  style={{ maxWidth: 240, width: '100%', borderRadius: 12, marginBottom: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-                  onError={(e) => { e.target.src = '/qr-payment.png'; }}
-                />
-                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Quét mã để chuyển khoản MBBank</p>
-                <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 2 }}>Chủ TK: TRAN TUAN TU</p>
-                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Số TK: 0369712958</p>
-                <p style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 700, marginTop: 6 }}>Số tiền: {formatVND(totals.total)}</p>
-              </div>
-            )}
-
-            {payment === 'vnpay' && (
-              <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
-                <CreditCard size={36} style={{ marginBottom: 8, color: '#0071ba' }} />
-                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Thanh toán qua VNPay</p>
-                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Hỗ trợ ATM nội địa, Visa, Mastercard, JCB, QR Pay</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                  {['ATM nội địa', 'Visa', 'Mastercard', 'JCB', 'QR Pay'].map((m) => (
-                    <span key={m} style={{ padding: '4px 10px', background: 'var(--bg)', borderRadius: 6, fontSize: 12, fontWeight: 700, color: 'var(--muted)', border: '1px solid var(--border)' }}>{m}</span>
-                  ))}
-                </div>
-                <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Thanh toán VNPay" → chuyển sang cổng VNPay để thanh toán</p>
-              </div>
-            )}
-
-            {payment === 'momo' && (
-              <div style={{ marginTop: 16, padding: 20, background: 'var(--surface)', borderRadius: 14, textAlign: 'center', border: '1.5px solid var(--border)' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: '#a5002e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                  <span style={{ color: '#fff', fontWeight: 900, fontSize: 18 }}>M</span>
-                </div>
-                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Thanh toán qua MoMo</p>
-                <p style={{ color: 'var(--muted)', fontSize: 14 }}>Quét QR hoặc mở ứng dụng MoMo để thanh toán</p>
-                <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>Nhấn "Thanh toán MoMo" → chuyển sang cổng MoMo để thanh toán</p>
-              </div>
-            )}
-          </div>
+          {currentStep === 'shipping' && renderShippingStep()}
+          {currentStep === 'payment' && renderPaymentStep()}
+          {currentStep === 'confirm' && renderConfirmStep()}
         </div>
 
         <aside id="cart-summary" className="checkout-summary card-box">
-          <h2>Đơn hàng của bạn</h2>
+          <h2><Tag size={18} aria-hidden /> Đơn hàng của bạn</h2>
 
           {stockIssues.length > 0 && (
             <div className="stock-warning" role="alert">
@@ -457,14 +721,13 @@ function CheckoutPageInner() {
                 <li
                   key={item.id}
                   className={issue ? 'summary-item-error' : ''}
-                  style={issue ? { background: 'rgba(239, 68, 68, 0.08)', borderLeft: '3px solid #ef4444', paddingLeft: 8 } : undefined}
                 >
                   <img src={item.image} alt={item.name} loading="lazy" />
                   <div>
                     <strong>{item.name}</strong>
                     <span>SL: {item.quantity}</span>
                     {issue && (
-                      <small style={{ color: '#ef4444', fontWeight: 700, display: 'block' }}>
+                      <small className="summary-stock-error">
                         Còn {issue.available} sản phẩm
                       </small>
                     )}
@@ -475,50 +738,86 @@ function CheckoutPageInner() {
             })}
           </ul>
 
-          <div className="coupon-row">
-            <input
-              type="text"
-              value={coupon}
-              onChange={(event) => setCoupon(event.target.value)}
-              placeholder="Nhập mã giảm giá"
-              aria-label="Mã giảm giá"
-              disabled={couponBusy}
-            />
-            <button type="button" onClick={applyCoupon} disabled={couponBusy}>
-              {couponBusy ? 'Đang kiểm tra...' : 'Áp dụng'}
-            </button>
+          <div className="coupon-section">
+            {appliedCoupon ? (
+              <div className="coupon-applied">
+                <Tag size={16} />
+                <span><strong>{appliedCoupon.code}</strong> — Giảm {formatVND(appliedCoupon.discount)}</span>
+                <button type="button" className="coupon-remove" onClick={removeCoupon} aria-label="Xóa mã giảm giá">
+                  ×
+                </button>
+              </div>
+            ) : (
+              <div className="coupon-row">
+                <input
+                  type="text"
+                  value={coupon}
+                  onChange={(event) => setCoupon(event.target.value)}
+                  placeholder="Nhập mã giảm giá"
+                  aria-label="Mã giảm giá"
+                  disabled={couponBusy}
+                />
+                <button type="button" onClick={applyCoupon} disabled={couponBusy || !coupon.trim()}>
+                  {couponBusy ? <Loader2 size={16} className="spinner" /> : 'Áp dụng'}
+                </button>
+              </div>
+            )}
+            {couponMessage && !appliedCoupon && (
+              <p className="coupon-error">{couponMessage}</p>
+            )}
+            {couponMessage && appliedCoupon && (
+              <p className="coupon-success">{couponMessage}</p>
+            )}
           </div>
-          {couponMessage && <p className={appliedCoupon ? 'coupon-success' : 'coupon-error'}>{couponMessage}</p>}
 
           <dl className="summary-totals">
             <div><dt>Tạm tính</dt><dd>{formatVND(totals.subtotal)}</dd></div>
-            {totals.discount > 0 && <div><dt>Giảm giá</dt><dd>-{formatVND(totals.discount)}</dd></div>}
-            <div><dt>Phí vận chuyển</dt><dd>{totals.shipping === 0 ? 'Miễn phí' : formatVND(totals.shipping)}</dd></div>
+            {totals.discount > 0 && <div><dt>Giảm giá</dt><dd className="discount-value">-{formatVND(totals.discount)}</dd></div>}
+            <div><dt>Phí vận chuyển</dt><dd>{totals.shipping === 0 ? <span className="free-ship">Miễn phí</span> : formatVND(totals.shipping)}</dd></div>
             <div className="grand"><dt>Tổng cộng</dt><dd>{formatVND(totals.total)}</dd></div>
           </dl>
 
-          <button
-            type="submit"
-            className="primary-button submit-btn"
-            disabled={isPlacing || vnpayLoading}
-          >
-            {isPlacing || vnpayLoading ? 'Đang xử lý...' : payment === 'vnpay' ? <><CreditCard size={18} aria-hidden /> Thanh toán VNPay</> : payment === 'momo' ? <><CreditCard size={18} aria-hidden /> Thanh toán MoMo</> : <><CheckCircle2 size={18} aria-hidden /> Đặt hàng</>}
-          </button>
+          {currentStep === 'confirm' && (
+            <button
+              type="submit"
+              className="primary-button submit-btn"
+              disabled={isSubmitting || vnpayLoading}
+            >
+              {(isSubmitting || vnpayLoading) ? (
+                <>
+                  <Loader2 size={18} className="spinner" />
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <Lock size={18} />
+                  Đặt hàng — {formatVND(totals.total)}
+                </>
+              )}
+            </button>
+          )}
+
+          {currentStep !== 'confirm' && (
+            <button
+              type="button"
+              className="primary-button submit-btn"
+              disabled={isSubmitting || vnpayLoading}
+              onClick={currentStep === 'shipping' ? handleSubmit(handleShippingNext) : handlePaymentNext}
+            >
+              Tiếp tục thanh toán <ChevronRight size={18} />
+            </button>
+          )}
+
           <p className="checkout-note">Bằng việc đặt hàng, bạn đồng ý với điều khoản và chính sách của {SITE.name}.</p>
 
-          <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--muted)', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Shield size={14} style={{ color: '#10b981' }} /> SSL bảo mật
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Shield size={14} style={{ color: '#10b981' }} /> Bảo vệ dữ liệu
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <CheckCircle2 size={14} style={{ color: '#10b981' }} /> Thanh toán an toàn
-            </span>
+          <div className="trust-badges sidebar-trust">
+            <span className="trust-badge"><Shield size={14} /> SSL bảo mật</span>
+            <span className="trust-badge"><Lock size={14} /> Bảo vệ dữ liệu</span>
+            <span className="trust-badge"><CheckCircle2 size={14} /> Thanh toán an toàn</span>
           </div>
+
           {recaptchaEnabled && (
-            <p style={{ marginTop: 8, fontSize: 11, color: 'var(--muted)', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+            <p className="recaptcha-note">
               <Shield size={12} /> Form được bảo vệ bởi Google reCAPTCHA
             </p>
           )}

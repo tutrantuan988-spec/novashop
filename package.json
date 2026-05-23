@@ -1,7 +1,7 @@
 {
   "name": "novashop",
   "version": "1.0.0",
-  "description": "TRỌNG ĐỊNH STORE - Website bán thức ăn thú cưng",
+  "description": "TRỌNG ĐỊNH STORE - Sàn thương mại điện tử đa danh mục",
   "author": "tutrantuan988",
   "license": "UNLICENSED",
   "private": true,
@@ -91,6 +91,7 @@
     "prisma": "^6.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.75.0",
     "react-router-dom": "^7.15.0",
     "recharts": "^3.8.1",

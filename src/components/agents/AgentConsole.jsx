@@ -17,6 +17,7 @@ import {
   Search, Send, Settings, ShoppingBag, TrendingUp, Users, X
 } from 'lucide-react';
 import api from '../../services/api';
+import SITE from '../../config/site-config';
 
 // ─── Agent Definitions ────────────────────────────────────────
 
@@ -322,7 +323,7 @@ export default function AgentConsole() {
         </select>
         
         <textarea
-          placeholder='{"period": "30d", "category": "thức ăn chó"}'
+          placeholder='{"period": "30d", "category": "thoi-trang"}'
           value={requestPayload}
           onChange={e => setRequestPayload(e.target.value)}
           className="agent-textarea"
@@ -586,7 +587,7 @@ export default function AgentConsole() {
       <div className="agent-console-header">
         <div>
           <h2>🧠 Agent Console</h2>
-          <p>Hệ thống 10 AI Agent tự động cho TRỌNG ĐỊNH STORE</p>
+          <p>Hệ thống 10 AI Agent tự động cho {SITE.name}</p>
         </div>
         <button onClick={loadSystemStatus} className="refresh-btn">
           <RefreshCw size={16} /> Làm mới

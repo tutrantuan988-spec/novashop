@@ -164,7 +164,7 @@ VALUES
   ('specifications', 'Thông số kỹ thuật', 'Specifications', 1, true),
   ('dimensions', 'Kích thước', 'Dimensions', 2, true),
   ('materials', 'Chất liệu', 'Materials', 3, true),
-  ('pet_care', 'Chăm sóc thú cưng', 'Pet Care', 4, true),
+  ('home_living', 'Nhà cửa & Đời sống', 'Home & Living', 4, true),
   ('performance', 'Hiệu năng', 'Performance', 5, true)
 ON CONFLICT (slug) DO UPDATE SET 
   display_order = EXCLUDED.display_order,
@@ -220,23 +220,23 @@ SELECT 'cpu', 'CPU', 'CPU', 'select', true, true, 6,
   '[{"value":"intel-i3","label_vi":"Intel Core i3"},{"value":"intel-i5","label_vi":"Intel Core i5"},{"value":"intel-i7","label_vi":"Intel Core i7"},{"value":"intel-i9","label_vi":"Intel Core i9"},{"value":"amd-r5","label_vi":"AMD Ryzen 5"},{"value":"amd-r7","label_vi":"AMD Ryzen 7"},{"value":"amd-r9","label_vi":"AMD Ryzen 9"},{"value":"m1","label_vi":"Apple M1"},{"value":"m2","label_vi":"Apple M2"},{"value":"m3","label_vi":"Apple M3"}]'::jsonb
 WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'cpu');
 
--- Pet: Weight (for pet food)
+-- Fashion: Style
 INSERT INTO attributes (slug, name_vi, name_en, type, is_filterable, is_searchable, display_order, options)
-SELECT 'pet-weight', 'Khối lượng', 'Pet Weight', 'select', true, true, 7,
-  '[{"value":"400g","label_vi":"400g"},{"value":"1kg","label_vi":"1kg"},{"value":"1.5kg","label_vi":"1.5kg"},{"value":"2kg","label_vi":"2kg"},{"value":"3kg","label_vi":"3kg"},{"value":"5kg","label_vi":"5kg"},{"value":"7.5kg","label_vi":"7.5kg"},{"value":"10kg","label_vi":"10kg"},{"value":"15kg","label_vi":"15kg"}]'::jsonb
-WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'pet-weight');
+SELECT 'style', 'Phong cách', 'Style', 'select', true, true, 7,
+  '[{"value":"casual","label_vi":"Casual"},{"value":"formal","label_vi":"Công sở"},{"value":"streetwear","label_vi":"Streetwear"},{"value":"sporty","label_vi":"Thể thao"},{"value":"vintage","label_vi":"Cổ điển"},{"value":"minimalist","label_vi":"Tối giản"}]'::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'style');
 
--- Pet: Pet Type
+-- Home: Room Type
 INSERT INTO attributes (slug, name_vi, name_en, type, is_filterable, is_searchable, display_order, options)
-SELECT 'pet-type', 'Loại thú cưng', 'Pet Type', 'select', true, true, 8,
-  '[{"value":"cho","label_vi":"Chó"},{"value":"meo","label_vi":"Mèo"},{"value":"ca","label_vi":"Cá"},{"value":"chim","label_vi":"Chim"},{"value":"hamster","label_vi":"Hamster"},{"value":"tho","label_vi":"Thỏ"}]'::jsonb
-WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'pet-type');
+SELECT 'room-type', 'Phòng sử dụng', 'Room Type', 'select', true, true, 8,
+  '[{"value":"phong-khach","label_vi":"Phòng khách"},{"value":"phong-ngu","label_vi":"Phòng ngủ"},{"value":"bep","label_vi":"Nhà bếp"},{"value":"phong-tam","label_vi":"Phòng tắm"},{"value":"phong-lam-viec","label_vi":"Phòng làm việc"}]'::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'room-type');
 
--- Pet: Age Range
+-- Electronics: Screen Size
 INSERT INTO attributes (slug, name_vi, name_en, type, is_filterable, is_searchable, display_order, options)
-SELECT 'pet-age', 'Độ tuổi', 'Age Range', 'select', true, true, 9,
-  '[{"value":"so-sinh","label_vi":"Sơ sinh (0-2 tháng)"},{"value":"tre","label_vi":"Trẻ (2-12 tháng)"},{"value":"truong-thanh","label_vi":"Trưởng thành (1-7 năm)"},{"value":"cao-tuoi","label_vi":"Cao tuổi (7+ năm)"}]'::jsonb
-WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'pet-age');
+SELECT 'screen-size', 'Kích thước màn hình', 'Screen Size', 'select', true, true, 9,
+  '[{"value":"5inch","label_vi":"Dưới 5 inch"},{"value":"6inch","label_vi":"5-6 inch"},{"value":"6.5inch","label_vi":"6-6.5 inch"},{"value":"7inch","label_vi":"Trên 7 inch"},{"value":"13inch","label_vi":"13 inch"},{"value":"15inch","label_vi":"15 inch"},{"value":"17inch","label_vi":"17 inch"}]'::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE slug = 'screen-size');
 
 -- ============================================================================
 -- Step 8: Associate attributes with categories via category_attributes
@@ -249,56 +249,59 @@ DECLARE
   attr RECORD;
 BEGIN
   -- Map: category_slug -> array of {attr_slug, is_required, display_order}
-  -- Thức ăn cho chó (thuc-an-cho-cho)
+  -- Thời trang (thoi-trang)
   FOR attr IN 
     SELECT unnest(ARRAY[
       ROW('brand', true, 1),
-      ROW('pet-weight', true, 2),
-      ROW('pet-type', false, 3),
-      ROW('pet-age', false, 4)
-    ]::record[]) AS t(slug TEXT, required BOOL, ord INT)
-  LOOP
-    INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
-    SELECT c.id, a.id, attr.required, attr.ord
-    FROM categories c, attributes a
-    WHERE c.slug = 'thuc-an-cho-cho' AND a.slug = attr.slug
-    ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
-  END LOOP;
-
-  -- Thức ăn cho mèo (thuc-an-cho-meo)
-  FOR attr IN 
-    SELECT unnest(ARRAY[
-      ROW('brand', true, 1),
-      ROW('pet-weight', true, 2),
-      ROW('pet-type', false, 3),
-      ROW('pet-age', false, 4)
-    ]::record[]) AS t(slug TEXT, required BOOL, ord INT)
-  LOOP
-    INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
-    SELECT c.id, a.id, attr.required, attr.ord
-    FROM categories c, attributes a
-    WHERE c.slug = 'thuc-an-cho-meo' AND a.slug = attr.slug
-    ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
-  END LOOP;
-
-  -- Phụ kiện thú cưng (phu-kien-thu-cung)
-  FOR attr IN 
-    SELECT unnest(ARRAY[
-      ROW('color', true, 1),
       ROW('size', true, 2),
-      ROW('material', true, 3),
-      ROW('brand', false, 4),
-      ROW('pet-type', false, 5)
+      ROW('color', true, 3),
+      ROW('material', true, 4),
+      ROW('style', false, 5)
     ]::record[]) AS t(slug TEXT, required BOOL, ord INT)
   LOOP
     INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
     SELECT c.id, a.id, attr.required, attr.ord
     FROM categories c, attributes a
-    WHERE c.slug = 'phu-kien-thu-cung' AND a.slug = attr.slug
+    WHERE c.slug = 'thoi-trang' AND a.slug = attr.slug
     ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
   END LOOP;
 
-  -- Thời trang (thoi-trang) — new generic category
+  -- Điện tử (dien-tu)
+  FOR attr IN 
+    SELECT unnest(ARRAY[
+      ROW('brand', true, 1),
+      ROW('ram', true, 2),
+      ROW('storage', true, 3),
+      ROW('cpu', true, 4),
+      ROW('screen-size', false, 5),
+      ROW('color', false, 6)
+    ]::record[]) AS t(slug TEXT, required BOOL, ord INT)
+  LOOP
+    INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
+    SELECT c.id, a.id, attr.required, attr.ord
+    FROM categories c, attributes a
+    WHERE c.slug = 'dien-tu' AND a.slug = attr.slug
+    ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
+  END LOOP;
+
+  -- Gia dụng (gia-dung)
+  FOR attr IN 
+    SELECT unnest(ARRAY[
+      ROW('material', true, 1),
+      ROW('room-type', true, 2),
+      ROW('color', false, 3),
+      ROW('brand', false, 4),
+      ROW('dimensions', false, 5)
+    ]::record[]) AS t(slug TEXT, required BOOL, ord INT)
+  LOOP
+    INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
+    SELECT c.id, a.id, attr.required, attr.ord
+    FROM categories c, attributes a
+    WHERE c.slug = 'gia-dung' AND a.slug = attr.slug
+    ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
+  END LOOP;
+
+  -- Thời trang nam (thoi-trang-nam) — new generic category
   FOR attr IN 
     SELECT unnest(ARRAY[
       ROW('brand', true, 1),
@@ -310,24 +313,24 @@ BEGIN
     INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
     SELECT c.id, a.id, attr.required, attr.ord
     FROM categories c, attributes a
-    WHERE c.slug = 'thoi-trang' AND a.slug = attr.slug
+    WHERE c.slug = 'thoi-trang-nam' AND a.slug = attr.slug
     ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
   END LOOP;
 
-  -- Điện tử (dien-tu) — new generic category
+  -- Điện thoại (dien-thoai) — new generic category
   FOR attr IN 
     SELECT unnest(ARRAY[
       ROW('brand', true, 1),
       ROW('color', false, 2),
-      ROW('ram', true, 3),
-      ROW('storage', true, 4),
-      ROW('cpu', true, 5)
+      ROW('storage', true, 3),
+      ROW('screen-size', true, 4),
+      ROW('ram', true, 5)
     ]::record[]) AS t(slug TEXT, required BOOL, ord INT)
   LOOP
     INSERT INTO category_attributes (category_id, attribute_id, is_required, display_order)
     SELECT c.id, a.id, attr.required, attr.ord
     FROM categories c, attributes a
-    WHERE c.slug = 'dien-tu' AND a.slug = attr.slug
+    WHERE c.slug = 'dien-thoai' AND a.slug = attr.slug
     ON CONFLICT (category_id, attribute_id) DO UPDATE SET is_required = EXCLUDED.is_required, display_order = EXCLUDED.display_order;
   END LOOP;
 
@@ -421,7 +424,8 @@ BEGIN
   RAISE NOTICE '✓ Added performance indexes';
   RAISE NOTICE '✓ Added generic attributes: color, size, material';
   RAISE NOTICE '✓ Added electronics attributes: RAM, storage, CPU';
-  RAISE NOTICE '✓ Added pet attributes: weight, pet-type, age';
+  RAISE NOTICE '✓ Added fashion attributes: style, brand';
+  RAISE NOTICE '✓ Added home attributes: room-type, dimensions';
   RAISE NOTICE '✓ Assigned attribute schemas to all categories';
   RAISE NOTICE '✓ Added fashion, electronics, home, beauty, toys categories';
   RAISE NOTICE '✓ Created v_category_attribute_schema view';

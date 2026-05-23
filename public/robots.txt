@@ -1,24 +1,4 @@
-# TRỌNG ĐỊNH STORE - https://trong-dinh-store.netlify.app
-# Robots.txt for production
-
 User-agent: *
 Allow: /
-Allow: /danh-muc/
-Allow: /san-pham/
-Allow: /thuong-hieu/
-Allow: /chinh-sach/
-Allow: /gioi-thieu
-Allow: /lien-he
 
-# Disallow admin and account areas
-Disallow: /admin/
-Disallow: /tai-khoan/
-Disallow: /them-san-pham
-Disallow: /quan-ly-san-pham
-Disallow: /api/
-
-# Disallow search results (prevent duplicate content)
-Disallow: /tim-kiem?*
-
-# Sitemap
 Sitemap: https://trong-dinh-store.netlify.app/sitemap.xml

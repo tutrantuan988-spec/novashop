@@ -3,7 +3,7 @@
  * 
  * Trách nhiệm:
  * - Tạo mô tả sản phẩm chuẩn SEO
- * - Viết blog posts, bài viết chăm sóc thú cưng
+ * - Viết blog posts, bài viết hướng dẫn mua sắm
  * - Tạo nội dung promotion, flash sale
  * - Viết email marketing & newsletter
  * - Tối ưu content theo từ khóa SEO
@@ -14,44 +14,44 @@ const { Agent, PERMISSION_SCOPES } = require('./agent-framework');
 
 // Template content mẫu cho các loại sản phẩm
 const PRODUCT_TEMPLATES = {
-  'thức ăn chó': {
+  'thoi-trang': {
     intro: [
-      'Dinh dưỡng hoàn hảo cho người bạn bốn chân của bạn!',
-      'Chất lượng cao cấp, phù hợp với mọi giống chó.'
+      'Phong cách hoàn hảo cho bạn!',
+      'Chất liệu cao cấp, phù hợp với mọi phong cách.'
     ],
     features: [
-      'Công thức dinh dưỡng cân bằng cho sức khỏe tối ưu',
-      'Giàu protein từ thịt tự nhiên, hỗ trợ phát triển cơ bắp',
-      'Bổ sung vitamin & khoáng chất thiết yếu',
-      'Hương vị thơm ngon, chó yêu thích ngay từ lần đầu'
+      'Chất liệu cao cấp, thoáng mát và bền đẹp',
+      'Thiết kế hiện đại, phù hợp xu hướng mới nhất',
+      'Đường may tỉ mỉ, form dáng chuẩn',
+      'Dễ phối đồ, phù hợp nhiều hoàn cảnh'
     ],
     outro: ['Đặt hàng ngay để nhận ưu đãi freeship từ 300K!']
   },
-  'thức ăn mèo': {
+  'dien-tu': {
     intro: [
-      'Món ngon mỗi ngày cho hoàng thượng của bạn!',
-      'Công thức dinh dưỡng chuyên biệt cho mèo.'
+      'Công nghệ tiên tiến cho cuộc sống thông minh!',
+      'Hiệu năng vượt trội, giá cả hợp lý.'
     ],
     features: [
-      'Hàm lượng taurine cần thiết cho sức khỏe tim mạch',
-      'Công thức kiểm soát hairball hiệu quả',
-      'Giàu omega-3 giúp da khỏe, lông bóng mượt',
-      'Dễ tiêu hóa, thích hợp cho mèo mọi lứa tuổi'
+      'Công nghệ mới nhất, hiệu năng mạnh mẽ',
+      'Thiết kế nhỏ gọn, tiện lợi mang theo',
+      'Tiết kiệm năng lượng, thân thiện môi trường',
+      'Bảo hành chính hãng 12 tháng'
     ],
-    outro: ['Giao nhanh trong 24h — Mèo của bạn sẽ cảm ơn bạn!']
+    outro: ['Giao nhanh trong 24h — Trải nghiệm công nghệ đỉnh cao!']
   },
-  'phụ kiện': {
+  'gia-dung': {
     intro: [
-      'Phụ kiện xinh xắn cho thú cưng của bạn!',
-      'Chất liệu an toàn, kiểu dáng đa dạng.'
+      'Nâng tầm không gian sống của bạn!',
+      'Chất liệu an toàn, thiết kế thông minh.'
     ],
     features: [
-      'Chất liệu cao cấp, không độc hại',
-      'Thiết kế thông minh, tiện dụng',
-      'Phù hợp với mọi kích cỡ thú cưng',
+      'Chất liệu cao cấp, an toàn cho gia đình',
+      'Thiết kế thông minh, tiết kiệm không gian',
+      'Đa năng, phù hợp mọi nhu cầu sử dụng',
       'Dễ dàng vệ sinh và bảo quản'
     ],
-    outro: ['Mua sắm thông minh — Phụ kiện chất lượng cho thú cưng!']
+    outro: ['Mua sắm thông minh — Gia dụng chất lượng cho mọi nhà!']
   }
 };
 
@@ -62,7 +62,7 @@ class ContentAgent extends Agent {
       version: '1.0.0',
       responsibilities: [
         'Tạo mô tả sản phẩm chuẩn SEO (tiếng Việt)',
-        'Viết bài blog về chăm sóc thú cưng',
+        'Viết bài blog về hướng dẫn mua sắm',
         'Tạo nội dung cho flash sale & promotion',
         'Viết email marketing & newsletter',
         'Quản lý template content',
@@ -114,7 +114,7 @@ class ContentAgent extends Agent {
     }
 
     const category = (product.category || '').toLowerCase();
-    const template = PRODUCT_TEMPLATES[category] || PRODUCT_TEMPLATES['thức ăn chó'];
+    const template = PRODUCT_TEMPLATES[category] || PRODUCT_TEMPLATES['thoi-trang'];
     const name = product.name;
     const brand = product.brand || '';
 
@@ -122,7 +122,7 @@ class ContentAgent extends Agent {
     const features = template.features.slice(0, 3).map(f => `✓ ${f}`).join('\n');
     const outro = template.outro[Math.floor(Math.random() * template.outro.length)];
 
-    const description = `${intro}\n\n${name}${brand ? ' từ thương hiệu ' + brand : ''} — ${category || 'thức ăn thú cưng'} chất lượng cao.\n\nƯu điểm nổi bật:\n${features}\n\n${outro}\n\n🏪 Mua ngay tại TRỌNG ĐỊNH STORE — Cam kết chính hãng 100%.`;
+    const description = `${intro}\n\n${name}${brand ? ' từ thương hiệu ' + brand : ''} — ${category || 'sản phẩm'} chất lượng cao.\n\nƯu điểm nổi bật:\n${features}\n\n${outro}\n\n🏪 Mua ngay tại TRỌNG ĐỊNH STORE — Cam kết chính hãng 100%.`;
 
     return {
       productId: product.id || product._id,
@@ -140,24 +140,24 @@ class ContentAgent extends Agent {
    */
   generateBlogPost(topic) {
     const blogTemplates = {
-      'cham-soc-cho-con': {
-        title: 'Hướng dẫn chăm sóc chó con mới về nhà',
-        content: `Chăm sóc chó con những ngày đầu là vô cùng quan trọng...`,
-        tags: ['chó con', 'chăm sóc thú cưng', 'nuôi chó']
+      'phoi-do-thu-dong': {
+        title: 'Hướng dẫn phối đồ mùa đông стильный',
+        content: `Phối đồ mùa đông không chỉ giữ ấm mà còn phải стильный...`,
+        tags: ['thời trang', 'phối đồ', 'mùa đông']
       },
-      'chon-thuc-an-cho-meo': {
-        title: 'Cách chọn thức ăn phù hợp cho mèo theo từng độ tuổi',
-        content: `Mỗi giai đoạn phát triển của mèo cần một chế độ dinh dưỡng khác nhau...`,
-        tags: ['thức ăn mèo', 'mèo con', 'dinh dưỡng']
+      'chon-dien-thoai': {
+        title: 'Cách chọn điện thoại phù hợp theo nhu cầu',
+        content: `Mỗi người dùng có nhu cầu khác nhau khi chọn điện thoại...`,
+        tags: ['điện thoại', 'công nghệ', 'hướng dẫn']
       },
-      'royal-canin-review': {
-        title: 'Royal Canin có tốt không? Review chi tiết các dòng sản phẩm',
-        content: `Royal Canin là thương hiệu thức ăn thú cưng cao cấp đến từ Pháp...`,
-        tags: ['royal canin', 'review', 'thức ăn chó mèo']
+      'samsung-vs-apple': {
+        title: 'Samsung hay Apple? So sánh chi tiết 2024',
+        content: `Samsung và Apple là hai thương hiệu điện thoại hàng đầu thế giới...`,
+        tags: ['samsung', 'apple', 'so sánh']
       }
     };
 
-    const blog = blogTemplates[topic] || blogTemplates['cham-soc-cho-con'];
+    const blog = blogTemplates[topic] || blogTemplates['phoi-do-thu-dong'];
     return {
       title: blog.title,
       excerpt: blog.content.slice(0, 150) + '...',
@@ -177,9 +177,9 @@ class ContentAgent extends Agent {
   generatePromotionContent(campaign) {
     const promoTemplates = {
       'flash-sale': {
-        title: '⚡ FLASH SALE — Giảm đến 30% thức ăn thú cưng!',
+        title: '⚡ FLASH SALE — Giảm đến 30% sản phẩm chính hãng!',
         subtitle: 'Chỉ trong 24h — Nhanh tay kẻo hết!',
-        body: 'Ưu đãi đặc biệt cuối tuần: Giảm giá sốc các dòng sản phẩm Royal Canin, Pedigree, Whiskas. Freeship từ 300K.',
+        body: 'Ưu đãi đặc biệt cuối tuần: Giảm giá sốc các thương hiệu Nike, Adidas, Samsung, Xiaomi. Freeship từ 300K.',
         cta: 'Mua ngay'
       },
       'free-ship': {
@@ -228,7 +228,7 @@ class ContentAgent extends Agent {
   listTemplates() {
     return {
       productTemplates: Object.keys(PRODUCT_TEMPLATES),
-      blogTemplates: ['cham-soc-cho-con', 'chon-thuc-an-cho-meo', 'royal-canin-review'],
+      blogTemplates: ['phoi-do-thu-dong', 'chon-dien-thoai', 'samsung-vs-apple'],
       promoTemplates: ['flash-sale', 'free-ship'],
       emailTemplates: ['welcome', 'abandoned-cart', 'order-confirmation'],
       total: 12

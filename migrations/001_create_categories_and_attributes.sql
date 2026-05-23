@@ -168,55 +168,36 @@ CREATE TRIGGER update_attributes_updated_at
 -- SEED DATA: Initial Categories for NovaShop
 -- ============================================================================
 
--- Root category: Pet Products (existing business)
+-- Root category: Multi-Category Marketplace
 INSERT INTO categories (slug, name_vi, name_en, description_vi, is_active, is_featured, show_in_menu, show_in_homepage)
 VALUES 
-  ('thu-cung', 'Thú cưng', 'Pets', 'Sản phẩm cho thú cưng', true, true, true, true)
+  ('san-pham', 'Sản phẩm', 'Products', 'Danh mục sản phẩm đa ngành hàng', true, true, true, true)
 ON CONFLICT (slug) DO NOTHING;
 
--- Pet subcategories
-INSERT INTO categories (parent_id, slug, name_vi, name_en, description_vi, is_active, show_in_menu)
-SELECT 
-  c.id,
-  'thuc-an-cho-cho',
-  'Thức ăn cho chó',
-  'Dog Food',
-  'Thức ăn dinh dưỡng cho chó',
-  true,
-  true
-FROM categories c WHERE c.slug = 'thu-cung'
-ON CONFLICT (slug) DO NOTHING;
-
-INSERT INTO categories (parent_id, slug, name_vi, name_en, description_vi, is_active, show_in_menu)
-SELECT 
-  c.id,
-  'thuc-an-cho-meo',
-  'Thức ăn cho mèo',
-  'Cat Food',
-  'Thức ăn dinh dưỡng cho mèo',
-  true,
-  true
-FROM categories c WHERE c.slug = 'thu-cung'
-ON CONFLICT (slug) DO NOTHING;
-
-INSERT INTO categories (parent_id, slug, name_vi, name_en, description_vi, is_active, show_in_menu)
-SELECT 
-  c.id,
-  'phu-kien-thu-cung',
-  'Phụ kiện thú cưng',
-  'Pet Accessories',
-  'Phụ kiện và đồ dùng cho thú cưng',
-  true,
-  true
-FROM categories c WHERE c.slug = 'thu-cung'
-ON CONFLICT (slug) DO NOTHING;
+-- Multi-category subcategories
+DO $$
+DECLARE
+  parent_category_id UUID;
+BEGIN
+  SELECT id INTO parent_category_id FROM categories WHERE slug = 'san-pham';
+  
+  INSERT INTO categories (parent_id, slug, name_vi, name_en, description_vi, is_active, show_in_menu)
+  VALUES 
+    (parent_category_id, 'thoi-trang-nam', 'Thời trang nam', 'Men Fashion', 'Quần áo, phụ kiện thời trang nam', true, true),
+    (parent_category_id, 'thoi-trang-nu', 'Thời trang nữ', 'Women Fashion', 'Quần áo, phụ kiện thời trang nữ', true, true),
+    (parent_category_id, 'dien-thoai', 'Điện thoại', 'Mobile Phones', 'Điện thoại thông minh và phụ kiện', true, true),
+    (parent_category_id, 'laptop', 'Laptop', 'Laptops', 'Máy tính xách tay các loại', true, true),
+    (parent_category_id, 'gia-dung-nha-bep', 'Gia dụng nhà bếp', 'Kitchen Appliances', 'Đồ dùng và thiết bị nhà bếp', true, true),
+    (parent_category_id, 'noi-that', 'Nội thất', 'Furniture', 'Đồ nội thất gia đình và văn phòng', true, true)
+  ON CONFLICT (slug) DO NOTHING;
+END $$;
 
 -- Future categories (inactive for now)
 INSERT INTO categories (slug, name_vi, name_en, description_vi, is_active, is_featured, show_in_menu)
 VALUES 
-  ('thoi-trang', 'Thời trang', 'Fashion', 'Quần áo và phụ kiện thời trang', false, false, false),
   ('lam-dep', 'Làm đẹp', 'Beauty', 'Mỹ phẩm và chăm sóc sắc đẹp', false, false, false),
-  ('dien-tu', 'Điện tử', 'Electronics', 'Thiết bị điện tử và công nghệ', false, false, false)
+  ('do-choi', 'Đồ chơi', 'Toys', 'Đồ chơi trẻ em và giải trí', false, false, false),
+  ('the-thao', 'Thể thao', 'Sports', 'Dụng cụ và trang phục thể thao', false, false, false)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================================
@@ -228,7 +209,7 @@ VALUES
   ('thong-tin-co-ban', 'Thông tin cơ bản', 'Basic Information', 1),
   ('kich-thuoc-trong-luong', 'Kích thước & Trọng lượng', 'Size & Weight', 2),
   ('thong-so-ky-thuat', 'Thông số kỹ thuật', 'Technical Specifications', 3),
-  ('thanh-phan', 'Thành phần', 'Ingredients', 4)
+  ('chat-lieu', 'Chất liệu', 'Materials', 4)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================================
@@ -240,11 +221,11 @@ DO $$
 DECLARE
   basic_group_id UUID;
   size_group_id UUID;
-  ingredient_group_id UUID;
+  material_group_id UUID;
 BEGIN
   SELECT id INTO basic_group_id FROM attribute_groups WHERE slug = 'thong-tin-co-ban';
   SELECT id INTO size_group_id FROM attribute_groups WHERE slug = 'kich-thuoc-trong-luong';
-  SELECT id INTO ingredient_group_id FROM attribute_groups WHERE slug = 'thanh-phan';
+  SELECT id INTO material_group_id FROM attribute_groups WHERE slug = 'chat-lieu';
 
   -- Basic attributes
   INSERT INTO attributes (group_id, slug, name_vi, name_en, type, is_variant, is_filterable)
@@ -264,12 +245,12 @@ BEGIN
     (size_group_id, 'chieu-cao', 'Chiều cao', 'Height', 'number', 'cm', 'cm', false)
   ON CONFLICT (slug) DO NOTHING;
 
-  -- Ingredient attributes (for pet food)
+  -- Material attributes (for general products)
   INSERT INTO attributes (group_id, slug, name_vi, name_en, type, is_searchable)
   VALUES 
-    (ingredient_group_id, 'thanh-phan-chinh', 'Thành phần chính', 'Main Ingredients', 'text', true),
-    (ingredient_group_id, 'ham-luong-protein', 'Hàm lượng protein', 'Protein Content', 'number', false),
-    (ingredient_group_id, 'han-su-dung', 'Hạn sử dụng', 'Expiry Date', 'date', false)
+    (material_group_id, 'chat-lieu-chinh', 'Chất liệu chính', 'Main Material', 'text', true),
+    (material_group_id, 'bao-hanh', 'Thời gian bảo hành', 'Warranty Period', 'text', false),
+    (material_group_id, 'han-su-dung', 'Hạn sử dụng', 'Expiry Date', 'date', false)
   ON CONFLICT (slug) DO NOTHING;
 END $$;
 
@@ -282,4 +263,3 @@ SELECT 'Categories and Attributes Schema Created' AS status;
 SELECT COUNT(*) AS category_count FROM categories;
 SELECT COUNT(*) AS attribute_group_count FROM attribute_groups;
 SELECT COUNT(*) AS attribute_count FROM attributes;
-

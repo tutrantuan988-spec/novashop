@@ -6,68 +6,68 @@ import SITE from '../config/site-config';
 const BLOG_POSTS = [
   {
     id: 1,
-    slug: 'huong-dan-chon-thuc-an-cho-cho',
-    title: 'Hướng dẫn chọn thức ăn cho chó theo độ tuổi',
-    excerpt: 'Mỗi giai đoạn phát triển của chó cần chế độ dinh dưỡng khác nhau. Bài viết này sẽ giúp bạn chọn đúng loại thức ăn phù hợp.',
-    category: 'Chăm sóc thú cưng',
+    slug: 'huong-dan-phoi-do-thoi-trang-mua-2026',
+    title: 'Hướng dẫn phối đồ thời trang theo mùa 2026',
+    excerpt: 'Cập nhật xu hướng phối đồ mới nhất cho từng mùa trong năm. Từ xuân hè đến thu đông, bạn luôn tự tin và stylish.',
+    category: 'Thời trang',
     date: '2026-05-15',
     readTime: '5 phút',
-    image: 'https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=500',
+    image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400',
     featured: true
   },
   {
     id: 2,
-    slug: 'dau-hieu-meo-thieu-chat-dinh-duong',
-    title: '5 dấu hiệu mèo thiếu chất dinh dưỡng',
-    excerpt: 'Lông xơ xác, sụt cân, mệt mỏi... là những dấu hiệu cho thấy mèo cưng của bạn đang thiếu chất. Cùng tìm hiểu cách bổ sung.',
-    category: 'Sức khỏe',
+    slug: 'top-10-san-pham-cong-nghe-2026',
+    title: 'Top 10 sản phẩm công nghệ đáng mua nhất 2026',
+    excerpt: 'Tổng hợp những gadget và thiết bị công nghệ hot nhất năm 2026 mà bạn không nên bỏ lỡ.',
+    category: 'Công nghệ',
     date: '2026-05-12',
-    readTime: '4 phút',
-    image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500',
+    readTime: '6 phút',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
     featured: true
   },
   {
     id: 3,
-    slug: 'cach-chon-size-quan-ao-thu-cung',
-    title: 'Cách chọn size quần áo cho thú cưng',
-    excerpt: 'Chọn đúng size giúp thú cưng thoải mái vận động và tránh các vấn đề về da. Hướng dẫn chi tiết đo size cho chó mèo.',
-    category: 'Phụ kiện',
+    slug: 'huong-dan-chon-nuoc-hoa-phu-hop',
+    title: 'Hướng dẫn chọn nước hoa phù hợp với từng dịp',
+    excerpt: 'Cách chọn mùi hương phù hợp cho công sở, hẹn hò hay dự tiệc. Bí quyết để luôn thơm tho và tự tin.',
+    category: 'Làm đẹp',
     date: '2026-05-10',
-    readTime: '3 phút',
-    image: 'https://images.unsplash.com/photo-1583337130417-13104dec14a3?w=500',
+    readTime: '4 phút',
+    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400',
     featured: false
   },
   {
     id: 4,
-    slug: 'top-10-do-choi-meo-duoc-yeu-thich',
-    title: 'Top 10 đồ chơi cho mèo được yêu thích nhất 2026',
-    excerpt: 'Tổng hợp những món đồ chơi giúp mèo vui vẻ, vận động và giảm stress. Cập nhật xu hướng mới nhất.',
-    category: 'Đồ chơi',
+    slug: 'huong-dan-chon-laptop-sinh-vien-2026',
+    title: 'Hướng dẫn chọn laptop cho sinh viên 2026',
+    excerpt: 'Tiêu chí chọn laptop phù hợp cho sinh viên: hiệu năng, giá cả, trọng lượng và thời lượng pin.',
+    category: 'Công nghệ',
     date: '2026-05-08',
-    readTime: '6 phút',
-    image: 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=500',
+    readTime: '7 phút',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
     featured: false
   },
   {
     id: 5,
-    slug: 'huong-dan-tam-cho-dung-cach',
-    title: 'Hướng dẫn tắm cho chó đúng cách tại nhà',
-    excerpt: 'Tắm cho chó không đúng cách có thể gây kích ứng da. Học cách tắm an toàn và hiệu quả ngay tại nhà.',
-    category: 'Chăm sóc thú cưng',
+    slug: 'meo-giu-quan-ao-ben-dep-lau-hon',
+    title: 'Mẹo giữ quần áo bền đẹp lâu hơn',
+    excerpt: 'Những mẹo giặt ủi, bảo quản quần áo giúp đồ bền màu, không bai xù và luôn như mới.',
+    category: 'Thời trang',
     date: '2026-05-05',
-    readTime: '7 phút',
-    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500',
+    readTime: '5 phút',
+    image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400',
     featured: false
   },
   {
     id: 6,
-    slug: 'thuc-an-hat- hay-wet-cho-meo',
-    title: 'Thức ăn hạt hay wet food cho mèo? So sánh chi tiết',
-    excerpt: 'Nên cho mèo ăn thức ăn hạt hay wet food? Phân tích ưu nhược điểm của từng loại để bạn chọn đúng.',
-    category: 'Dinh dưỡng',
+    slug: 'dien-thoai-tam-trung-samsung-xiaomi-oppo',
+    title: 'Điện thoại tầm trung: Samsung vs Xiaomi vs OPPO?',
+    excerpt: 'So sánh chi tiết các dòng điện thoại tầm trung từ 5-8 triệu. Hãng nào đáng mua nhất 2026?',
+    category: 'Công nghệ',
     date: '2026-05-01',
-    readTime: '5 phút',
-    image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=500',
+    readTime: '6 phút',
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400',
     featured: false
   }
 ];
@@ -90,7 +90,7 @@ function BlogPage() {
         <span className="section-kicker"><BookOpen size={16} aria-hidden /> Blog & Kiến thức</span>
         <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>Blog {SITE.name}</h1>
         <p style={{ fontSize: 16, color: 'var(--muted)', maxWidth: 600, margin: '0 auto' }}>
-          Chia sẻ kiến thức chăm sóc thú cưng, mẹo hay và cập nhật xu hướng mới nhất
+          Chia sẻ kiến thức mua sắm, mẹo hay và cập nhật xu hướng mới nhất
         </p>
       </div>
 

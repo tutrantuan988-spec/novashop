@@ -19,14 +19,14 @@ test.describe('TRỌNG ĐỊNH STORE — Smoke Tests', () => {
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
     
     // Header elements
-    await expect(page.locator('header, [class*="header"], nav')).toBeVisible();
+    await expect(page.locator('header').first()).toBeVisible();
     
     // Sản phẩm được hiển thị
     const products = page.locator('[class*="product"], [class*="card"], article');
     await expect(products.first()).toBeVisible({ timeout: 10000 });
     
     // Footer
-    await expect(page.locator('footer, [class*="footer"]')).toBeVisible();
+    await expect(page.locator('footer').first()).toBeVisible();
     
     // Title
     const title = await page.title();
@@ -62,7 +62,7 @@ test.describe('TRỌNG ĐỊNH STORE — Smoke Tests', () => {
       
       // Should see search results or be on search page
       const currentUrl = page.url();
-      expect(currentUrl.toLowerCase()).toContain('search');
+      expect(currentUrl.toLowerCase()).toMatch(/(search|tim-kiem)/);
     }
   });
 
@@ -140,7 +140,7 @@ test.describe('TRỌNG ĐỊNH STORE — Smoke Tests', () => {
     ).first();
     
     // On mobile, either a hamburger menu is visible or the layout still works
-    await expect(page.locator('body')).toBeVisible();
+    await expect(page.locator('header').first()).toBeVisible();
   });
 
   // ===== 8. API Health Check =====

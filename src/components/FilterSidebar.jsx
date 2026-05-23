@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { X, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { X, SlidersHorizontal, Star } from 'lucide-react';
 
 export default function FilterSidebar({ products, onFilterChange, isOpen, onClose }) {
   const brands = useMemo(() => {
@@ -30,10 +30,11 @@ export default function FilterSidebar({ products, onFilterChange, isOpen, onClos
   const [priceMax, setPriceMax] = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedAttrs, setSelectedAttrs] = useState({});
-  const [sortBy, setSortBy] = useState('default');
+  const [minRating, setMinRating] = useState(0);
 
-  useMemo(() => {
+  const filteredProducts = useMemo(() => {
     let filtered = [...(products || [])];
+    if (minRating > 0) filtered = filtered.filter(p => (Number(p.rating) || 0) >= minRating);
     if (priceMin) filtered = filtered.filter(p => p.price >= Number(priceMin));
     if (priceMax) filtered = filtered.filter(p => p.price <= Number(priceMax));
     if (selectedBrands.length > 0) filtered = filtered.filter(p => selectedBrands.includes(p.brand));
@@ -44,19 +45,18 @@ export default function FilterSidebar({ products, onFilterChange, isOpen, onClos
         return attrs.some(a => vals.includes(a.value_text));
       });
     });
-    if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
-    else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
-    else if (sortBy === 'newest') filtered.sort((a, b) => new Date(b._pg?.created_at || 0) - new Date(a._pg?.created_at || 0));
-    else filtered.sort((a, b) => (b._pg?.is_featured ? 1 : 0) - (a._pg?.is_featured ? 1 : 0));
+    return filtered;
+  }, [products, priceMin, priceMax, selectedBrands, selectedAttrs, minRating]);
 
-    onFilterChange(filtered);
-  }, [products, priceMin, priceMax, selectedBrands, selectedAttrs, sortBy, onFilterChange]);
+  useEffect(() => {
+    onFilterChange(filteredProducts);
+  }, [filteredProducts, onFilterChange]);
 
   const clearAll = () => {
-    setPriceMin(''); setPriceMax(''); setSelectedBrands([]); setSelectedAttrs({}); setSortBy('default');
+    setPriceMin(''); setPriceMax(''); setSelectedBrands([]); setSelectedAttrs({}); setMinRating(0);
   };
 
-  const hasFilters = priceMin || priceMax || selectedBrands.length > 0 || Object.values(selectedAttrs).some(v => v.length > 0);
+  const hasFilters = priceMin || priceMax || selectedBrands.length > 0 || Object.values(selectedAttrs).some(v => v.length > 0) || minRating > 0;
 
   return (
     <>
@@ -68,21 +68,30 @@ export default function FilterSidebar({ products, onFilterChange, isOpen, onClos
         </div>
 
         <div className="filter-section">
-          <h4>Sắp xếp</h4>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="filter-select">
-            <option value="default">Mặc định</option>
-            <option value="newest">Mới nhất</option>
-            <option value="price-asc">Giá: Thấp → Cao</option>
-            <option value="price-desc">Giá: Cao → Thấp</option>
-          </select>
-        </div>
-
-        <div className="filter-section">
           <h4>Khoảng giá</h4>
           <div className="filter-price-range">
             <input type="number" placeholder="Từ" value={priceMin} onChange={e => setPriceMin(e.target.value)} min="0" />
             <span>—</span>
             <input type="number" placeholder="Đến" value={priceMax} onChange={e => setPriceMax(e.target.value)} min="0" />
+          </div>
+        </div>
+
+        <div className="filter-section">
+          <h4>Đánh giá</h4>
+          <div className="filter-rating-options">
+            {[4, 3, 2, 1].map(star => (
+              <button
+                key={star}
+                type="button"
+                className={`filter-rating-btn${minRating === star ? ' active' : ''}`}
+                onClick={() => setMinRating(minRating === star ? 0 : star)}
+              >
+                {[1,2,3,4,5].map(n => (
+                  <Star key={n} size={14} fill={n <= star ? '#f59e0b' : 'none'} color={n <= star ? '#f59e0b' : '#d1d5db'} />
+                ))}
+                <span>từ {star} sao</span>
+              </button>
+            ))}
           </div>
         </div>
 

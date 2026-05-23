@@ -8,6 +8,7 @@ env-render.json
 firebase-admin.json
 serviceAccountKey.json
 *-service-account*.json
+trantuantu-fa889-firebase-adminsdk-fbsvc-8b060d59b9.json
 *.pem
 server-start*.log
 .DS_Store

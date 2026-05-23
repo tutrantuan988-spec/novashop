@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'robots.txt'],
       manifest: {
-        name: 'TRỌNG ĐỊNH STORE - Thức ăn thú cưng',
+        name: 'TRỌNG ĐỊNH STORE - Mua sắm đa danh mục',
         short_name: 'Trọng Định Store',
-        description: 'Trọng Định Store - Thức ăn chính hãng cho thú cưng, giao nhanh toàn quốc.',
+        description: 'Trọng Định Store - Thời trang, Điện tử, Gia dụng, Làm đẹp & nhiều hơn nữa. Giao nhanh toàn quốc.',
         theme_color: '#ff7a1a',
         background_color: '#fff7ed',
         display: 'standalone',

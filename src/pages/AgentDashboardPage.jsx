@@ -5,12 +5,25 @@
  */
 
 import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import AgentConsole from '../components/agents/AgentConsole';
+import SITE from '../config/site-config';
 
 export default function AgentDashboardPage() {
+  const { isAdmin, authLoading } = useAuth();
+
   useEffect(() => {
-    document.title = 'Agent Console | TRỌNG ĐỊNH STORE';
+    document.title = `Agent Console | ${SITE.name}`;
   }, []);
+
+  if (authLoading) {
+    return <div className="page-loading"><div className="spinner" aria-hidden /><span>Đang kiểm tra quyền...</span></div>;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <>

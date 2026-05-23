@@ -18,6 +18,36 @@ function GoogleIcon() {
   );
 }
 
+function EyeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    </svg>
+  );
+}
+
+function validateEmail(email) {
+  if (!email) return 'Vui lòng nhập email';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email không hợp lệ';
+  return '';
+}
+
+function validatePassword(password) {
+  if (!password) return 'Vui lòng nhập mật khẩu';
+  if (password.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
+  return '';
+}
+
 function SignInPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,9 +57,14 @@ function SignInPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const [touched, setTouched] = useState({ email: false, password: false });
+
+  const emailError = touched.email ? validateEmail(email) : '';
+  const passwordError = touched.password ? validatePassword(password) : '';
 
   useEffect(() => {
     document.title = `Đăng nhập • ${SITE.name}`;
@@ -48,10 +83,12 @@ function SignInPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!email || !password) {
-      setError('Vui lòng nhập email và mật khẩu');
-      return;
-    }
+    setTouched({ email: true, password: true });
+
+    const eErr = validateEmail(email);
+    const pErr = validatePassword(password);
+    if (eErr || pErr) return;
+
     setSubmitting(true);
     try {
       await login({ email, password });
@@ -94,6 +131,18 @@ function SignInPage() {
             <li>Lưu địa chỉ giao hàng và phương thức thanh toán</li>
             <li>Ưu đãi VIP, mã giảm giá riêng tài khoản</li>
           </ul>
+          <div className="auth-social-proof">
+            <div className="auth-avatars">
+              <span className="auth-avatar">🎀</span>
+              <span className="auth-avatar">�</span>
+              <span className="auth-avatar">✨</span>
+              <span className="auth-avatar">🌟</span>
+              <span className="auth-avatar">⭐</span>
+            </div>
+            <p className="auth-proof-text">
+              <strong>10,000+</strong> khách hàng tin tưởng
+            </p>
+          </div>
           <p className="auth-page-cta">
             Chưa có tài khoản? <Link to="/sign-up" state={location.state}>Tạo tài khoản mới</Link>
           </p>
@@ -109,7 +158,7 @@ function SignInPage() {
               <p>Clerk authentication is configured. Please use the sign-in modal.</p>
             </div>
           ) : (
-            <form className="auth-form" onSubmit={handleSubmit}>
+            <form className="auth-form" onSubmit={handleSubmit} noValidate>
               <h2>Đăng nhập</h2>
               <p className="auth-form-subtitle">Nhập email và mật khẩu để đăng nhập vào tài khoản của bạn.</p>
 
@@ -120,74 +169,73 @@ function SignInPage() {
                 onClick={handleGoogleLogin}
                 disabled={googleLoading || authLoading}
                 className="google-signin-btn"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  padding: '12px 16px',
-                  border: '1px solid #dadce0',
-                  borderRadius: '8px',
-                  background: '#fff',
-                  cursor: googleLoading ? 'not-allowed' : 'pointer',
-                  fontSize: '15px',
-                  fontWeight: '500',
-                  color: '#3c4043',
-                  marginBottom: '16px',
-                  opacity: googleLoading ? 0.7 : 1
-                }}
               >
                 <GoogleIcon />
                 {googleLoading ? 'Đang kết nối Google...' : 'Đăng nhập với Google'}
               </button>
 
-              <div className="auth-divider" style={{
-                display: 'flex',
-                alignItems: 'center',
-                margin: '16px 0',
-                color: '#666',
-                fontSize: '13px'
-              }}>
-                <span style={{ flex: 1, height: '1px', background: '#e0e0e0' }}></span>
-                <span style={{ padding: '0 12px' }}>hoặc</span>
-                <span style={{ flex: 1, height: '1px', background: '#e0e0e0' }}></span>
+              <div className="auth-divider">
+                <span className="auth-divider-line" />
+                <span className="auth-divider-text">hoặc</span>
+                <span className="auth-divider-line" />
               </div>
 
-              <div className="form-group">
+              <div className={`form-group ${emailError ? 'form-group-error' : email ? 'form-group-valid' : ''}`}>
                 <label htmlFor="login-email">Email</label>
                 <input
                   id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => setTouched((p) => ({ ...p, email: true }))}
                   placeholder="your@email.com"
-                  required
                   autoComplete="email"
                 />
+                {emailError && <span className="field-error">{emailError}</span>}
               </div>
 
-              <div className="form-group">
+              <div className={`form-group ${passwordError ? 'form-group-error' : ''}`}>
                 <label htmlFor="login-password">Mật khẩu</label>
-                <input
-                  id="login-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  autoComplete="current-password"
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => setTouched((p) => ({ ...p, password: true }))}
+                    placeholder="••••••••"
+                    minLength={6}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword((p) => !p)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+                {passwordError && <span className="field-error">{passwordError}</span>}
+              </div>
+
+              <div className="auth-form-footer">
+                <Link to="/forgot-password" className="forgot-password-link">
+                  Quên mật khẩu?
+                </Link>
               </div>
 
               <button
                 type="submit"
-                className="primary-button"
+                className="primary-button auth-submit-btn"
                 disabled={submitting || authLoading}
-                style={{ width: '100%', marginTop: 8 }}
               >
-                {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                {submitting ? (
+                  <span className="auth-loading">
+                    <span className="spinner" />
+                    Đang đăng nhập...
+                  </span>
+                ) : 'Đăng nhập'}
               </button>
             </form>
           )}

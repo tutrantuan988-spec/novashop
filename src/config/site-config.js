@@ -1,5 +1,5 @@
-const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'NovaShop';
-let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'novashop.vn';
+const SHOP_NAME = import.meta.env.VITE_SHOP_NAME || 'Lifestyle';
+let SHOP_DOMAIN = import.meta.env.VITE_SHOP_DOMAIN || 'lifestyle.vn';
 SHOP_DOMAIN = SHOP_DOMAIN.replace(/^https?:\/\//, '');
 const SHOP_URL = `https://${SHOP_DOMAIN}`;
 

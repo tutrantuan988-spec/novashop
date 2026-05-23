@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, X, Minimize2, Maximize2, Loader2 } from 'lucide-react';
 import { sendAIChatMessage } from '../services/aiChat';
 import { saveContext, getContext } from '../services/contextCache';
+import SITE from '../config/site-config';
 
 function AIChatWidget() {
   // Anonymous user ID for context persistence (persisted in localStorage)
@@ -22,7 +23,7 @@ function AIChatWidget() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Xin chào! Tôi là trợ lý AI của NovaShop. Tôi có thể giúp gì cho bạn?' }
+    { role: 'assistant', content: `Xin chào! Tôi là trợ lý AI của ${SITE.name}. Tôi có thể giúp gì cho bạn?` }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -119,7 +120,7 @@ function AIChatWidget() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Bot size={24} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>Trợ lý AI NovaShop</div>
+            <div style={{ fontWeight: 700, fontSize: 16 }}>Trợ lý AI {SITE.name}</div>
             <div style={{ fontSize: 12, opacity: 0.9 }}>Hỗ trợ 24/7</div>
           </div>
         </div>

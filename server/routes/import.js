@@ -4,6 +4,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const { requireAdmin } = require('../middleware/auth');
+
+// Apply admin protection to all import routes
+router.use(requireAdmin);
 
 // =============================================
 //  MarkItDown-style Product Import API
@@ -140,17 +144,17 @@ router.get('/template', (req, res) => {
   ];
   
   const sampleRow = [
-    'Thức ăn cho chó Royal Canin Medium 15kg',
-    '850000',
-    '950000',
-    'dog-food',
-    'Thức ăn cao cấp cho chó giống trung bình',
+    'Áo thun nam Premium Cotton size L',
+    '285000',
+    '350000',
+    'thoi-trang',
+    'Áo thun cotton cao cấp, form regular fit',
     'https://example.com/image.jpg',
     'https://example.com/img1.jpg|https://example.com/img2.jpg',
     '100',
-    'Royal Canin',
-    '15kg',
-    '{"protein":"25%","fat":"15%"}'
+    'Premium Fashion',
+    '250g',
+    '{"material":"Cotton 100%","size":"L"}'
   ];
 
   if (format === 'csv') {

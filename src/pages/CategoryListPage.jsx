@@ -5,24 +5,22 @@ import { fetchCategoryTree, fetchProducts } from '../services/apiV2';
 import SITE from '../config/site-config';
 
 const CATEGORY_ICONS = {
-  'thuc-an-cho-cho': ShoppingBag,
-  'thuc-an-cho-meo': ShoppingBag,
-  'phu-kien-thu-cung': Package,
   'thoi-trang': Shirt,
   'dien-tu': Monitor,
   'do-gia-dung': Home,
   'suc-khoe-lam-dep': Heart,
+  'the-thao': Zap,
+  'sach': Package,
   default: Package
 };
 
 const CATEGORY_COLORS = {
-  'thuc-an-cho-cho': { from: '#1a233e', to: '#2d3a5e', accent: '#4f6fbf' },
-  'thuc-an-cho-meo': { from: '#3e1a2d', to: '#5e2d44', accent: '#bf4f7a' },
-  'phu-kien-thu-cung': { from: '#1a3e2d', to: '#2d5e44', accent: '#4fbf7a' },
   'thoi-trang': { from: '#3e2d1a', to: '#5e442d', accent: '#bf8f4f' },
   'dien-tu': { from: '#2d1a3e', to: '#442d5e', accent: '#7a4fbf' },
   'do-gia-dung': { from: '#1a3e3e', to: '#2d5e5e', accent: '#4fbfbf' },
   'suc-khoe-lam-dep': { from: '#3e1a1a', to: '#5e2d2d', accent: '#bf4f4f' },
+  'the-thao': { from: '#203825', to: '#335a3a', accent: '#57b86f' },
+  'sach': { from: '#2e2d3f', to: '#47436a', accent: '#9f98e9' },
   default: { from: '#14213d', to: '#2a3f6d', accent: '#4f6fbf' }
 };
 
