@@ -1,8 +1,8 @@
 [build]
-cmd = "cd server && npm install"
+cmd = "npm install"
 
 [deploy]
-startCommand = "cd server && npm start"
+startCommand = "node server/index.js"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
@@ -12,4 +12,39 @@ restartPolicyMaxRetries = 10
 numReplicas = 1
 
 [environments.production.deploy]
-startCommand = "cd server && npm start"
+startCommand = "node server/index.js"
+
+# ============================================================================
+# Railway PostgreSQL + Redis Service References
+# ============================================================================
+# These are auto-injected by Railway when you link the PostgreSQL & Redis
+# plugins via the Railway Dashboard.
+#
+# Steps:
+# 1. `railway login`
+# 2. `railway link`
+# 3. Add PostgreSQL Plugin → DATABASE_URL auto-set
+# 4. Add Redis Plugin → REDIS_URL auto-set
+#
+# VITE_API_URL must be set manually in Dashboard Variables:
+#   VITE_API_URL = https://your-app.up.railway.app
+#   CLIENT_URL  = https://your-frontend.vercel.app
+#   NODE_ENV    = production
+#
+# Feature flags — enable PostgreSQL commerce core:
+#   USE_POSTGRES_PRODUCTS  = true
+#   USE_POSTGRES_CATEGORIES = true
+#   USE_POSTGRES_READS     = true
+#   FIREBASE_PROJECT_ID    = (for existing order/analytics until full migration)
+#
+# Other required env variables:
+#   ADMIN_API_TOKEN, ADMIN_EMAILS, JWT_SECRET
+#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET (if using Stripe)
+#   VNPAY_TMN_CODE, VNP_HASH_SECRET (if using VNPay)
+#   MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, MOMO_SECRET_KEY (if using MoMo)
+#   RESEND_API_KEY, ADMIN_NOTIFICATION_EMAIL (if using email)
+#   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET (if using upload)
+#   OPENAI_API_KEY, PINECONE_API_KEY (if using AI RAG)
+#   SENTRY_DSN (if using Sentry monitoring)
+#
+# ============================================================================

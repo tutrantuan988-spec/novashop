@@ -4,10 +4,10 @@ import SITE from '../config/site-config';
 
 function AboutPage() {
   const values = [
-    { icon: Heart, title: 'Tận Tâm', desc: 'Mỗi sản phẩm đều được chọn lọc kỹ càng cho thú cưng của bạn' },
+    { icon: Heart, title: 'Tận Tâm', desc: 'Mỗi sản phẩm đều được chọn lọc kỹ càng cho khách hàng' },
     { icon: Shield, title: 'An Toàn', desc: 'Chỉ bán hàng chính hãng, nguồn gốc rõ ràng, chất lượng đảm bảo' },
     { icon: Zap, title: 'Nhanh Chóng', desc: 'Giao hàng trong 24-48 giờ, đóng gói cẩn thận' },
-    { icon: Smile, title: 'Vui Vẻ', desc: 'Mang niềm vui đến cho thú cưng và chủ nhân' }
+    { icon: Smile, title: 'Vui Vẻ', desc: 'Mang trải nghiệm mua sắm tuyệt vời đến cho mọi khách hàng' }
   ];
 
   const stats = [
@@ -23,7 +23,7 @@ function AboutPage() {
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 16 }}>Về {SITE.name}</h1>
         <p style={{ fontSize: 20, color: 'var(--muted)', maxWidth: 600, margin: '0 auto' }}>
-          Người Bạn Đồng Hành Cùng Thú Cưng Của Bạn
+          Mua Sắm Thông Minh, Chất Lượng Hàng Đầu
         </p>
       </div>
 
@@ -37,15 +37,11 @@ function AboutPage() {
       }}>
         <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 20 }}>Câu Chuyện Của Chúng Tôi</h2>
         <p style={{ fontSize: 16, lineHeight: 1.8, color: 'var(--text)' }}>
-          {SITE.name} được thành lập từ tình yêu sâu sắc dành cho thú cưng. 
-          Chúng tôi hiểu rằng chó và mèo không chỉ là vật nuôi, mà là những người 
-          bạn thân thiết, là thành viên trong gia đình. Mỗi chiếc đuôi vẫy, mỗi tiếng rên rỉ 
-          đều mang ý nghĩa đặc biệt.
-        </p>
-        <p style={{ fontSize: 16, lineHeight: 1.8, color: 'var(--text)', marginTop: 16 }}>
-          Từ những ngày đầu, chúng tôi đã cam kết chỉ cung cấp những sản phẩm 
-          mà chính chúng tôi tin dùng cho thú cưng của mình - từ thức ăn dinh 
-          dưỡng đến phụ kiện an toàn, tất cả đều được chọn lọc kỹ càng.
+          {SITE.name} được thành lập với sứ mệnh mang đến trải nghiệm mua sắm trực tuyến tốt nhất. 
+
+          Chúng tôi cung cấp đa dạng sản phẩm từ nhiều ngành hàng — Thời trang, Điện tử, Gia dụng, Thể thao, Sách, Mẹ & Bé, Thực phẩm và nhiều hơn nữa. 
+
+          Mỗi sản phẩm đều được chọn lọc kỹ càng — chất lượng cao, giá cả hợp lý, giao hàng nhanh toàn quốc.
         </p>
       </div>
 
@@ -58,10 +54,10 @@ function AboutPage() {
           gap: 20 
         }}>
           {[
-            'Cung cấp thực phẩm an toàn, dinh dưỡng cân bằng',
+            'Cung cấp sản phẩm chất lượng, giá cả hợp lý',
             'Mang đến trải nghiệm mua sắm thuận tiện, nhanh chóng',
             'Tư vấn chuyên nghiệp, tận tâm cho từng khách hàng',
-            'Xây dựng cộng đồng yêu thương thú cưng'
+            'Xây dựng cộng đồng mua sắm đáng tin cậy'
           ].map((item, i) => (
             <div key={i} style={{ 
               background: 'var(--bg)', 
@@ -160,15 +156,15 @@ function AboutPage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Phone size={20} style={{ color: 'var(--accent)' }} />
-            <span>0901 234 567</span>
+            <span>{SITE.phone}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Mail size={20} style={{ color: 'var(--accent)' }} />
-            <span>support@novashop.com</span>
+            <span>{SITE.email}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <MapPin size={20} style={{ color: 'var(--accent)' }} />
-            <span>TP. Hồ Chí Minh</span>
+            <span>{SITE.address}</span>
           </div>
         </div>
         <a 

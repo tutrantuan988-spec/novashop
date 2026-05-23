@@ -1,0 +1,566 @@
+{"level":"info","message":"[EventBus] Registered handler for events:order:created","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:paid","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:cancelled","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:created","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:updated","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:deleted","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Registered handler for events:subscription:changed","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Supervisor Agent (supervisor-agent) initialized v2.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Memory Agent (memory-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Analytics Agent (analytics-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] SEO Agent (seo-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Content Agent (content-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Vietnam Geo Agent (vietnam-geo-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Recommendation Agent (recommendation-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Marketing Agent (marketing-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Data Pipeline Agent (data-pipeline-agent) initialized v1.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Agent] Monitoring Agent (monitoring-agent) initialized v2.0.0","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[AgentInit] Initializing agent system...","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"╔══════════════════════════════════════════════════╗","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"║   🧠 TRỌNG ĐỊNH STORE — AI AGENT SYSTEM         ║","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"╚══════════════════════════════════════════════════╝","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Orchestrator] Registering agents...","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Memory Agent (memory-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147895-l993npwe5","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Analytics Agent (analytics-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147896-778lzwvxj","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: SEO Agent (seo-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147896-aie9ar4f7","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Content Agent (content-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147897-rq9f4uq13","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Vietnam Geo Agent (vietnam-geo-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147897-xcmagfbzc","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Recommendation Agent (recommendation-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147898-dw3fnu3vl","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Marketing Agent (marketing-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147899-fwip2esld","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Data Pipeline Agent (data-pipeline-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147899-2b1lzpc3o","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Supervisor] Agent registered: Monitoring Agent (monitoring-agent)","timestamp":"2026-05-17 16:45:47"}
+{"eventId":"supervisor:agent-registered-1779011147900-3sn0mjiwf","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Orchestrator] Initializing Workflow Engine...","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[WorkflowEngine] Template 'product-import' registered (4 steps)","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[WorkflowEngine] Template 'daily-report' registered (3 steps)","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[WorkflowEngine] Template 'marketing-campaign' registered (5 steps)","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[WorkflowEngine] Template 'system-health' registered (2 steps)","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[WorkflowEngine] Initialized","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Orchestrator] ✅ System initialized in 9ms","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Orchestrator] Agents: 9 registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Orchestrator] Workflows: 4 templates","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[AgentInit] ✅ 9 agents registered","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[AgentInit] ✅ 4 workflow templates available","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[AgentSystem] All agents initialized successfully","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Event subscription started","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[Jobs] Abandoned cart job started","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"[EventBus] Subscribed to all event channels","timestamp":"2026-05-17 16:45:47"}
+{"level":"info","message":"TRỌNG ĐỊNH STORE API server running on http://localhost:3001","timestamp":"2026-05-17 16:45:47"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 16:50:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779011448063-ogggau4l8","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 16:50:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 16:55:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779011748055-dzo9ufwcq","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 16:55:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:00:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779012048057-uge5ucjpm","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:00:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:05:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779012348058-d063qeb84","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:05:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:10:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779012648031-m98gwsxbd","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:10:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:15:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779012948046-xttkqf22u","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:15:48"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 17:18:05","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:18:06","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 17:18:08","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/chat-rag","timestamp":"2026-05-17 17:18:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/chat-rag","timestamp":"2026-05-17 17:18:27","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:18:36","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:19:06","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:19:36","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:20:06","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:20:36","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:20:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779013248097-ytyjajxqy","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:20:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:21:06","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:22:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:23:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:24:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:25:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:25:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779013548128-8hoio72x4","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:25:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:26:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:27:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:28:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:29:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:30:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:30:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779013848067-93dk1e368","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:30:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:31:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:32:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:33:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:34:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:35:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:35:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779014148092-n0ssxsn0o","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:35:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:36:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:37:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:38:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:39:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:40:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:40:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779014448115-n1kx62tbn","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:40:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:41:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:42:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:43:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:44:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:45:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:45:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779014748135-yn9jgqu6n","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:45:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:46:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:47:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:48:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:49:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:50:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:50:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779015048196-usajxylpo","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:50:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:51:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:52:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:53:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:54:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:55:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 17:55:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779015348183-x1hcq7rq0","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 17:55:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:56:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:57:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:58:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 17:59:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:00:29","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:00:37","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:00:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779015648210-uwrplxbf1","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:00:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:01:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:02:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:05:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779015948203-3pxbacy2s","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:05:48"}
+{"ip":"::1","level":"http","message":"GET /health","timestamp":"2026-05-17 18:08:26","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /health","timestamp":"2026-05-17 18:08:47","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /health","timestamp":"2026-05-17 18:09:40","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 18:09:57","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:09:59","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 18:10:02","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:10:30","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:10:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779016248239-sij2r4x7h","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:10:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:11:00","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:11:30","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:12:00","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:12:30","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:13:00","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:13:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:14:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:14:45","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 18:14:45","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:14:45","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 18:14:48","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:15:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:15:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:15:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779016548283-pkfu8e8yc","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:15:48"}
+{"ip":"::1","level":"http","message":"GET /","timestamp":"2026-05-17 18:16:05","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:16:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:16:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:17:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:18:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/integrations/status","timestamp":"2026-05-17 18:18:50","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:19:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /health","timestamp":"2026-05-17 18:19:43","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/health","timestamp":"2026-05-17 18:20:00","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/admin/config","timestamp":"2026-05-17 18:20:03","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:20:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:created","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:paid","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:cancelled","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:created","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:updated","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:deleted","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[EventBus] Registered handler for events:subscription:changed","timestamp":"2026-05-17 18:20:35"}
+{"level":"info","message":"[Agent] Supervisor Agent (supervisor-agent) initialized v2.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Memory Agent (memory-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Analytics Agent (analytics-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] SEO Agent (seo-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Content Agent (content-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Vietnam Geo Agent (vietnam-geo-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Recommendation Agent (recommendation-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Marketing Agent (marketing-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Data Pipeline Agent (data-pipeline-agent) initialized v1.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Agent] Monitoring Agent (monitoring-agent) initialized v2.0.0","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[AgentInit] Initializing agent system...","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"╔══════════════════════════════════════════════════╗","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"║   🧠 TRỌNG ĐỊNH STORE — AI AGENT SYSTEM         ║","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"╚══════════════════════════════════════════════════╝","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Orchestrator] Registering agents...","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Memory Agent (memory-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836748-dggc0hyyc","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Analytics Agent (analytics-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836748-tjpou904q","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: SEO Agent (seo-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836748-67tuwjn51","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Content Agent (content-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836748-yqdhpqxrn","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Vietnam Geo Agent (vietnam-geo-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836748-fuk14qpf6","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Recommendation Agent (recommendation-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836749-h27sm7or7","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Marketing Agent (marketing-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836749-xp04v19qj","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Data Pipeline Agent (data-pipeline-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836749-brcayqi39","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Supervisor] Agent registered: Monitoring Agent (monitoring-agent)","timestamp":"2026-05-17 18:20:36"}
+{"eventId":"supervisor:agent-registered-1779016836749-4r1aqc2ui","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Orchestrator] Initializing Workflow Engine...","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[WorkflowEngine] Template 'product-import' registered (4 steps)","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[WorkflowEngine] Template 'daily-report' registered (3 steps)","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[WorkflowEngine] Template 'marketing-campaign' registered (5 steps)","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[WorkflowEngine] Template 'system-health' registered (2 steps)","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[WorkflowEngine] Initialized","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Orchestrator] ✅ System initialized in 4ms","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Orchestrator] Agents: 9 registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Orchestrator] Workflows: 4 templates","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[AgentInit] ✅ 9 agents registered","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[AgentInit] ✅ 4 workflow templates available","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[AgentSystem] All agents initialized successfully","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[EventBus] Event subscription started","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[Jobs] Abandoned cart job started","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"[EventBus] Subscribed to all event channels","timestamp":"2026-05-17 18:20:36"}
+{"level":"info","message":"TRỌNG ĐỊNH STORE API server running on http://localhost:3003","timestamp":"2026-05-17 18:20:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:20:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779016848327-tw1v0813t","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:20:48"}
+{"ip":"::1","level":"http","message":"GET /api/health","timestamp":"2026-05-17 18:21:10","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:21:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:22:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/create-payment-intent","timestamp":"2026-05-17 18:23:24","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:23:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/create-payment-intent","timestamp":"2026-05-17 18:24:04","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:24:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:25:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:25:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779017136895-6igd4a9zp","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:25:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:25:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779017148345-9vss6xnvb","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:25:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:26:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:27:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:28:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:29:18","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:29:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:30:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:30:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779017436897-iidv47gr1","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:30:36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:30:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:30:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779017448306-8k792q153","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:30:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:31:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:31:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:32:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:32:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:33:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:33:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:34:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:35:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:35:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779017736909-8dus2c06z","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:35:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:35:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779017748388-nl5z6k0mb","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:35:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:36:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:37:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:38:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:39:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:40:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:40:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018036948-1bjpvzov5","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:40:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:40:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018048396-bhvh8o0y5","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:40:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:41:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:42:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:43:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:44:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:45:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:45:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018336961-1z5v6u232","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:45:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:45:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018348375-f3r7r0ycc","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:45:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:46:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:47:04","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:47:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:47:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:48:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:48:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:49:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:49:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:50:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:50:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018636922-3afbe2y5a","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:50:36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:50:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:50:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018648420-ow6109mqq","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:50:48"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:51:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:51:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:52:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:52:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:53:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:53:46","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 18:54:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:55:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018936965-0khk4c579","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:55:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 18:55:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779018948395-kirveyosz","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 18:55:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:00:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779019236978-vyyzner04","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:00:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:00:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779019248418-yn73uiav7","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:00:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:05:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779019536945-3bd9fww48","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:05:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:05:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779019548454-xtmnc908f","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:05:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:10:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779019836929-v25j0tran","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:10:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:10:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779019848418-ppu5cfgin","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:10:48"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:15:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779020136990-f8cdbzt36","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:15:36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:15:48","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779020148449-vyp563a01","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:15:48"}
+{"ip":"::1","level":"http","message":"GET /api/health","timestamp":"2026-05-17 19:16:38","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.8457"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:created","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:paid","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Registered handler for events:order:cancelled","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:created","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:updated","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Registered handler for events:product:deleted","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Registered handler for events:subscription:changed","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Supervisor Agent (supervisor-agent) initialized v2.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Memory Agent (memory-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Analytics Agent (analytics-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] SEO Agent (seo-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Content Agent (content-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Vietnam Geo Agent (vietnam-geo-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Recommendation Agent (recommendation-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Marketing Agent (marketing-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Data Pipeline Agent (data-pipeline-agent) initialized v1.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Agent] Monitoring Agent (monitoring-agent) initialized v2.0.0","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[AgentInit] Initializing agent system...","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"╔══════════════════════════════════════════════════╗","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"║   🧠 TRỌNG ĐỊNH STORE — AI AGENT SYSTEM         ║","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"╚══════════════════════════════════════════════════╝","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Orchestrator] Registering agents...","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Memory Agent (memory-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226848-7w5z475ej","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Analytics Agent (analytics-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226849-3lhq6tx37","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: SEO Agent (seo-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226849-3b5ttotj3","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Content Agent (content-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226850-zb4c0vcxm","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Vietnam Geo Agent (vietnam-geo-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226851-ba5bfaths","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Recommendation Agent (recommendation-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226852-6b7u1bd48","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Marketing Agent (marketing-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226852-jra8oxhpn","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Data Pipeline Agent (data-pipeline-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226853-6p1q24i1b","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Supervisor] Agent registered: Monitoring Agent (monitoring-agent)","timestamp":"2026-05-17 19:17:06"}
+{"eventId":"supervisor:agent-registered-1779020226853-r06iqpugs","level":"info","message":"[EventBus] Emitted event: supervisor:agent-registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Orchestrator] Initializing Workflow Engine...","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[WorkflowEngine] Template 'product-import' registered (4 steps)","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[WorkflowEngine] Template 'daily-report' registered (3 steps)","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[WorkflowEngine] Template 'marketing-campaign' registered (5 steps)","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[WorkflowEngine] Template 'system-health' registered (2 steps)","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[WorkflowEngine] Initialized","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Orchestrator] ✅ System initialized in 7ms","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Orchestrator] Agents: 9 registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Orchestrator] Workflows: 4 templates","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[AgentInit] ✅ 9 agents registered","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[AgentInit] ✅ 4 workflow templates available","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[AgentSystem] All agents initialized successfully","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Event subscription started","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[Jobs] Abandoned cart job started","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"[EventBus] Subscribed to all event channels","timestamp":"2026-05-17 19:17:06"}
+{"level":"info","message":"TRỌNG ĐỊNH STORE API server running on http://localhost:3001","timestamp":"2026-05-17 19:17:06"}
+{"ip":"::1","level":"http","message":"GET /api/health","timestamp":"2026-05-17 19:17:40","userAgent":"node"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:18:06","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:18:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:18:09","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:18:37","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:18:57","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:18:59","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:19:01","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:19:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:19:30","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:19:37","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:20:00","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:20:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:20:30","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:20:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779020437002-a8ton4in0","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:20:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:20:37","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:21:00","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:21:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:21:30","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:22:00","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:22:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779020526966-ows747sft","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:22:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:22:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:22:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:23:27","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:23:31","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:23:32","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:23:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:23:34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:23:35","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:23:36","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:23:38","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:23:39","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:23:40","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:23:42","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:24:10","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:24:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:24:40","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:25:10","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:25:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:25:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779020737027-f6m902npb","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:25:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:25:41","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:26:04","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:26:04","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:26:04","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:26:04","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:26:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:26:07","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:26:22","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:26:22","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:26:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:26:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:27:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779020826976-l1rhrdscz","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:27:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:27:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:27:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:27:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:27:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:28:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:28:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:28:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:28:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:29:13","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:29:14","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:29:16","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:29:22","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:29:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:29:23","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:29:25","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:29:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:29:53","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:30:24","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:30:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:30:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021037019-84y0bu4sk","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:30:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:30:54","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:31:24","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:31:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:31:54","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:32:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021126999-ee9fa7eif","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:32:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:32:24","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:32:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:32:48","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:32:49","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:32:51","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:33:19","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:33:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:33:49","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:34:19","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:34:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:34:49","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:35:19","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:35:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:35:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021337033-ynr7b8cx1","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:35:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:35:49","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:36:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:36:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:37:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021426957-uggi3w1ur","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:37:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:37:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:37:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:38:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:38:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:39:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:39:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/products","timestamp":"2026-05-17 19:39:38","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:39:39","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"POST /api/cart/sync","timestamp":"2026-05-17 19:39:41","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/v1/users/profile","timestamp":"2026-05-17 19:39:43","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/v1/users/profile","timestamp":"2026-05-17 19:39:43","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:40:09","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"PATCH /api/v1/users/profile","timestamp":"2026-05-17 19:40:12","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:40:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021636988-blj4p7i1h","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:40:36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:40:40","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:41:10","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:41:40","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:42:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021726984-05m7fwe17","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:42:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:42:10","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:42:40","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:43:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:44:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:45:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:45:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779021937018-qxn6my2lr","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:45:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:46:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:47:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022026995-0mrmpg94n","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:47:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:47:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:48:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:49:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:50:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:50:36","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022236976-ksu7fkj5x","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:50:36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:51:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:52:07","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022327012-0k1u39drn","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:52:07"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:52:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:53:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:54:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:55:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:55:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022537003-8gbkxxk60","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:55:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:56:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 19:57:07","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022627033-k88nw1ajp","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 19:57:07"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:57:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:58:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 19:59:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:00:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 20:00:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022837113-t8dqwnqc7","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 20:00:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:01:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 20:02:06","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779022926986-r0rqnfiiw","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 20:02:06"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:02:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:03:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:04:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:05:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 20:05:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779023137021-wvwskm0xp","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 20:05:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:06:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 20:07:07","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779023227078-nd91isrg2","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 20:07:07"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:07:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:08:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:09:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:10:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 20:10:37","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779023437034-9tk8y3kyb","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 20:10:37"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:11:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"error":0,"healthy":4,"level":"warn","message":"[Monitoring] Alert triggered: system_degraded","timestamp":"2026-05-17 20:12:07","total":5,"warning":1}
+{"eventId":"monitoring:alert-1779023527078-lzh8cdw8m","level":"info","message":"[EventBus] Emitted event: monitoring:alert","timestamp":"2026-05-17 20:12:07"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:12:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:13:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"http","message":"GET /api/notifications","timestamp":"2026-05-17 20:14:33","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"}

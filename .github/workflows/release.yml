@@ -1,0 +1,89 @@
+name: 🏷️ Auto Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Release Notes
+        id: notes
+        run: |
+          echo "## 🚀 TRỌNG ĐỊNH STORE - Release" > release-notes.md
+          echo "" >> release-notes.md
+          echo "### ✨ Changes" >> release-notes.md
+          echo "" >> release-notes.md
+          git log --oneline --no-decorate ${{ github.event.before }}..${{ github.sha }} 2>/dev/null | while read line; do
+            echo "- $line" >> release-notes.md
+          done || echo "- Initial release" >> release-notes.md
+          
+          echo "" >> release-notes.md
+          echo "### 📦 Deployments" >> release-notes.md
+          echo "- 🌐 Frontend: Netlify" >> release-notes.md
+          echo "- ⚡ Backend: Render/Railway" >> release-notes.md
+          
+      - name: Create Tag
+        id: tag
+        run: |
+          VERSION_TYPE="${{ github.event.inputs.version || 'patch' }}"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Lấy version hiện tại từ package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Tạo version mới
+          IFS='.' read -r -a parts <<< "$CURRENT_VERSION"
+          MAJOR="${parts[0]}"
+          MINOR="${parts[1]}"
+          PATCH="${parts[2]}"
+          
+          case "$VERSION_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Release ${{ steps.tag.outputs.tag }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

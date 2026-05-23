@@ -1,8 +1,10 @@
 /**
  * Unified search client (P8).
  *
- * - Nếu có VITE_ALGOLIA_APP_ID + VITE_ALGOLIA_SEARCH_KEY → dùng Algolia (instant search)
- * - Else fallback /api/search endpoint của backend
+ * Priority:
+ * 1. Algolia (if env keys present)
+ * 2. /api/search backend
+ * 3. Empty fallback
  */
 
 const ALGOLIA_APP_ID = import.meta.env.VITE_ALGOLIA_APP_ID;
@@ -11,14 +13,14 @@ const ALGOLIA_INDEX_NAME = import.meta.env.VITE_ALGOLIA_INDEX_NAME || 'products'
 
 let algoliaClient = null;
 
-async function getAlgoliaIndex() {
+async function getAlgoliaClient() {
   if (!ALGOLIA_APP_ID || !ALGOLIA_SEARCH_KEY) return null;
   if (algoliaClient) return algoliaClient;
   try {
     const mod = await import('algoliasearch/lite');
-    const algoliasearch = mod.default || mod;
-    const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);
-    algoliaClient = client.initIndex(ALGOLIA_INDEX_NAME);
+    const createClient = mod.liteClient || mod.default || mod.algoliasearch;
+    if (typeof createClient !== 'function') throw new Error('Algolia lite client export not found');
+    algoliaClient = createClient(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);
     return algoliaClient;
   } catch (err) {
     console.warn('[Search] Algolia init failed:', err.message);
@@ -30,15 +32,15 @@ async function getAlgoliaIndex() {
  * Search products.
  * @param {string} query
  * @param {{ filters?: object, hitsPerPage?: number, page?: number }} options
- * @returns {Promise<{ hits: Array, total: number, source: 'algolia'|'firestore' }>}
+ * @returns {Promise<{ hits: Array, total: number, source: 'algolia'|'firestore'|'local' }>}
  */
 export async function searchProducts(query, options = {}) {
   const { hitsPerPage = 20, page = 0, filters = {} } = options;
   const trimmed = String(query || '').trim();
 
   // Try Algolia first
-  const index = await getAlgoliaIndex();
-  if (index && trimmed) {
+  const client = await getAlgoliaClient();
+  if (client && trimmed) {
     try {
       const facetFilters = [];
       if (filters.brand) facetFilters.push(`brand:${filters.brand}`);
@@ -48,12 +50,17 @@ export async function searchProducts(query, options = {}) {
       if (filters.maxPrice) numericFilters.push(`price <= ${filters.maxPrice}`);
       if (filters.minRating) numericFilters.push(`rating >= ${filters.minRating}`);
 
-      const result = await index.search(trimmed, {
-        hitsPerPage,
-        page,
-        facetFilters,
-        numericFilters
+      const { results } = await client.searchForHits({
+        requests: [{
+          indexName: ALGOLIA_INDEX_NAME,
+          query: trimmed,
+          hitsPerPage,
+          page,
+          facetFilters,
+          numericFilters
+        }]
       });
+      const result = results?.[0] || {};
       return { hits: result.hits, total: result.nbHits, source: 'algolia' };
     } catch (err) {
       console.warn('[Search] Algolia failed, fallback:', err.message);
@@ -76,9 +83,16 @@ export async function searchProducts(query, options = {}) {
     if (filters.minRating) hits = hits.filter((p) => (p.rating || 0) >= filters.minRating);
     return { hits, total: hits.length, source: 'firestore' };
   } catch (err) {
-    console.warn('[Search] Fallback failed:', err.message);
-    return { hits: [], total: 0, source: 'firestore' };
+    console.warn('[Search] Backend failed, using local data:', err.message);
   }
+
+  // Final fallback: local category products data
+  const hits = localSearch(trimmed, filters, hitsPerPage);
+  return { hits, total: hits.length, source: 'local' };
+}
+
+function localSearch() {
+  return [];
 }
 
 export const isAlgoliaEnabled = () => !!(ALGOLIA_APP_ID && ALGOLIA_SEARCH_KEY);

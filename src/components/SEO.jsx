@@ -22,7 +22,7 @@ function setJsonLd(id, data) {
   el.textContent = JSON.stringify(data);
 }
 
-export default function SEO({ title, description, image, type = 'website', jsonLd, jsonLdId = 'page-jsonld' }) {
+export default function SEO({ title, description, image, type = 'website', jsonLd, jsonLdId = 'page-jsonld', canonical }) {
   useEffect(() => {
     if (title) document.title = title;
     if (description) {
@@ -41,8 +41,18 @@ export default function SEO({ title, description, image, type = 'website', jsonL
     setMeta('og:type', type, 'property');
     setMeta('og:url', window.location.href, 'property');
 
+    if (canonical) {
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'canonical';
+        document.head.appendChild(link);
+      }
+      link.href = canonical;
+    }
+
     if (jsonLd) setJsonLd(jsonLdId, jsonLd);
-  }, [title, description, image, type, jsonLd, jsonLdId]);
+  }, [title, description, image, type, jsonLd, jsonLdId, canonical]);
 
   return null;
 }

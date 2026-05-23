@@ -1,0 +1,6 @@
+⚠️ Redis không khả dụng — dùng in-memory fallback
+[PostgreSQL] Failed to initialize pool: 
+[PostgreSQL] Init failed: 
+[Firebase Admin] Credentials probe failed, disabling Firestore: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[2026-05-21T06:05:01.194Z] [PID: 31888] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Thu May 21 2026 13:05:00 GMT+0700 (Giờ Đông Dương)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-21T07:11:42.555Z] [PID: 31888] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Thu May 21 2026 14:05:00 GMT+0700 (Giờ Đông Dương)! Possible blocking IO or high CPU user at the same process used by node-cron.

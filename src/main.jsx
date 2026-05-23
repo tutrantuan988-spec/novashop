@@ -13,7 +13,24 @@ import './styles.css';
 initMonitoring();
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (import.meta.env.PROD && clerkKey?.startsWith('pk_test_')) {
+  console.warn('⚠️ CLERK: Đang dùng development key trên production! Truy cập clerk.com → Production instance để lấy pk_live_');
+}
+
 const useClerk = !!clerkKey && clerkKey.startsWith('pk_');
+
+const DevKeyBanner = () =>
+  (import.meta.env.PROD && clerkKey?.startsWith('pk_test_')) ? (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0,
+      background: '#ff4444', color: 'white',
+      textAlign: 'center', padding: '8px',
+      fontSize: '13px', zIndex: 99999
+    }}>
+      ⚠️ Clerk chưa cấu hình production key — Đăng nhập sẽ bị giới hạn
+    </div>
+  ) : null;
 
 const AppShell = () => (
   <I18nProvider>
@@ -30,11 +47,25 @@ const AppShell = () => (
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     {useClerk ? (
-      <ClerkProvider publishableKey={clerkKey}>
-        <AppShell />
+      <ClerkProvider
+        publishableKey={clerkKey}
+        appearance={{
+          elements: {
+            rootBox: 'mx-auto',
+            card: 'shadow-xl'
+          }
+        }}
+      >
+        <>
+          <AppShell />
+          <DevKeyBanner />
+        </>
       </ClerkProvider>
     ) : (
-      <AppShell />
+      <>
+        <AppShell />
+        <DevKeyBanner />
+      </>
     )}
   </React.StrictMode>
 );

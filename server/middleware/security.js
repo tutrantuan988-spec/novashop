@@ -6,7 +6,7 @@
  * - sanitize helpers (text-only) — tránh phụ thuộc thêm package
  */
 
-const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator, rateLimit } = require('express-rate-limit');
 const crypto = require('crypto');
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -29,7 +29,7 @@ const checkoutHardLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Quá nhiều lần đặt hàng, vui lòng đợi.' },
-  keyGenerator: (req) => req.header('x-user-id') || req.ip,
+  keyGenerator: (req) => req.header('x-user-id') || ipKeyGenerator(req.ip),
   skip: skipInDev
 });
 
@@ -47,7 +47,7 @@ const reviewLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Bạn đã viết quá nhiều đánh giá. Vui lòng đợi 1 giờ.' },
-  keyGenerator: (req) => req.header('x-user-id') || req.body?.email || req.ip,
+  keyGenerator: (req) => req.header('x-user-id') || req.body?.email || ipKeyGenerator(req.ip),
   skip: skipInDev
 });
 
@@ -62,6 +62,42 @@ function sanitizeText(input) {
     .replace(/[\u0000-\u001F\u007F]/g, '') // control chars
     .trim()
     .slice(0, 2000);
+}
+
+/**
+ * Deep sanitize an object — sanitize all string values recursively.
+ * Useful for request body sanitization.
+ */
+function sanitizeObject(obj, maxDepth = 5) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (maxDepth <= 0) return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item, maxDepth - 1));
+  }
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'string') {
+      sanitized[key] = sanitizeText(value);
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeObject(value, maxDepth - 1);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
+/**
+ * Middleware: Sanitize request body strings to prevent XSS.
+ * Apply to routes that accept user input.
+ */
+function sanitizeBody(req, res, next) {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
+  }
+  next();
 }
 
 /**
@@ -118,5 +154,7 @@ module.exports = {
   publicReadLimiter,
   reviewLimiter,
   sanitizeText,
+  sanitizeObject,
+  sanitizeBody,
   idempotencyMiddleware
 };

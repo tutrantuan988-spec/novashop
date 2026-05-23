@@ -9,7 +9,12 @@ let algoliaIndex = null;
 let initialized = false;
 
 function isAlgoliaConfigured() {
-  return !!(process.env.ALGOLIA_APP_ID && process.env.ALGOLIA_ADMIN_API_KEY && process.env.ALGOLIA_INDEX_NAME);
+  const values = [
+    process.env.ALGOLIA_APP_ID,
+    process.env.ALGOLIA_ADMIN_API_KEY,
+    process.env.ALGOLIA_INDEX_NAME
+  ];
+  return values.every((value) => value && value !== 'your_key_here');
 }
 
 function getIndex() {

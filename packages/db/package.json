@@ -1,0 +1,6 @@
+{
+  "name": "@novashop/db",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./prisma-client.ts"
+}

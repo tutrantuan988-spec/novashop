@@ -2,78 +2,204 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#ff7a1a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="%VITE_SHOP_NAME%" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="%VITE_SHOP_DESCRIPTION%" />
-    <meta name="keywords" content="mua sắm online, website bán hàng, thời trang, công nghệ, phụ kiện, %VITE_SHOP_NAME%, ưu đãi" />
+    <meta name="keywords" content="%VITE_SHOP_NAME%, mua sắm, thương mại điện tử, thời trang, điện tử, gia dụng, làm đẹp" />
     <meta name="author" content="%VITE_SHOP_NAME%" />
     <meta name="robots" content="index, follow" />
 
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://%VITE_SHOP_DOMAIN%" />
+    
+    <!-- Hreflang Tags cho SEO -->
+    <link rel="alternate" hreflang="vi-vn" href="https://%VITE_SHOP_DOMAIN%" />
+    <link rel="alternate" hreflang="x-default" href="https://%VITE_SHOP_DOMAIN%" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="%VITE_SHOP_NAME% - Mua sắm thông minh, phong cách mỗi ngày" />
+    <meta property="og:title" content="%VITE_SHOP_NAME%" />
     <meta property="og:description" content="%VITE_SHOP_DESCRIPTION%" />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1200&q=80" />
+    <meta property="og:image" content="https://%VITE_SHOP_DOMAIN%/og-image.svg" />
     <meta property="og:url" content="https://%VITE_SHOP_DOMAIN%" />
     <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="%VITE_SHOP_NAME%" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="%VITE_SHOP_NAME% - Mua sắm thông minh" />
+    <meta name="twitter:title" content="%VITE_SHOP_NAME%" />
     <meta name="twitter:description" content="%VITE_SHOP_DESCRIPTION%" />
+    <meta name="twitter:image" content="https://%VITE_SHOP_DOMAIN%/og-image.png" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icon.svg" />
 
-    <title>%VITE_SHOP_NAME% - Mua sắm thông minh, phong cách mỗi ngày</title>
+    <title>%VITE_SHOP_NAME%</title>
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <!-- Google Tag Manager -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '%VITE_GA_ID%');
-    </script>
-
-    <!-- Tawk.to Live Chat -->
-    <script type="text/javascript">
-      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-      (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/%VITE_TAWKTO_ID%/default';
-        s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
-        s0.parentNode.insertBefore(s1,s0);
+      (function() {
+        var gtmId = '%VITE_GTM_ID%';
+        if (!gtmId || gtmId === 'GTM-XXXXXXX' || gtmId === 'G-XXXXXXXXXX') return;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtm.js?id=' + gtmId;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
       })();
     </script>
 
+    <!-- Google Analytics 4 -->
+    <script>
+      (function() {
+        var gaId = '%VITE_GA_ID%';
+        if (!gaId || gaId === 'G-XXXXXXXXXX') return;
+        var gtmId = '%VITE_GTM_ID%';
+        if (gtmId && gtmId !== 'GTM-XXXXXXX' && gtmId !== 'G-XXXXXXXXXX') return;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+        document.head.appendChild(s);
+      })();
+    </script>
+
+    <!-- Facebook Pixel -->
+    <script>
+      (function() {
+        var pixelId = '%VITE_FACEBOOK_PIXEL_ID%';
+        if (!pixelId || pixelId === '000000000000000') return;
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', pixelId);
+        fbq('track', 'PageView');
+      })();
+    </script>
+
+    <!-- Tawk.to Live Chat -->
+    <script>
+      (function() {
+        var tawkId = '%VITE_TAWKTO_ID%';
+        if (!tawkId || tawkId === 'xxxxxxxxxxxxxxxxxxxxxxx') return;
+        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+        var s1 = document.createElement('script'), s0 = document.getElementsByTagName('script')[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/' + tawkId + '/default';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+      })();
+    </script>
+
+    <!-- Zalo OA Chat Widget -->
+    <div id="zalo-chat-widget" style="display:none"></div>
+    <script>
+      (function() {
+        var zaloId = '%VITE_ZALO_OA_ID%';
+        if (!zaloId || zaloId === '0000000000000000000') return;
+        var iframe = document.createElement('iframe');
+        iframe.src = 'https://oa.zalo.me/' + zaloId + '/chat?type=widget&theme=green&size=large&position=bottom-right';
+        iframe.style.cssText = 'position:fixed;bottom:100px;right:20px;width:350px;height:500px;border:none;z-index:9999;display:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden';
+        iframe.id = 'zalo-oa-iframe';
+        iframe.title = 'Chat với Zalo OA';
+        iframe.allow = 'clipboard-read; clipboard-write';
+        var btn = document.createElement('div');
+        btn.style.cssText = 'position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:#0068ff;cursor:pointer;z-index:9998;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,104,255,0.35);transition:transform 0.2s';
+        btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.88.54 3.64 1.48 5.13L2 22l5.13-1.48C8.36 21.46 10.12 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>';
+        btn.id = 'zalo-oa-btn';
+        btn.title = 'Chat với chúng tôi qua Zalo';
+        btn.onmouseenter = function() { this.style.transform = 'scale(1.1)'; };
+        btn.onmouseleave = function() { this.style.transform = 'scale(1)'; };
+        var isOpen = false;
+        btn.onclick = function() {
+          isOpen = !isOpen;
+          iframe.style.display = isOpen ? 'block' : 'none';
+          btn.style.transform = isOpen ? 'rotate(45deg)' : 'scale(1)';
+        };
+        document.body.appendChild(btn);
+        document.body.appendChild(iframe);
+      })();
+    </script>
+
+    <!-- Facebook Messenger Chat Button -->
+    <script>
+      (function() {
+        var fbPageId = '%VITE_FACEBOOK_PAGE_ID%';
+        if (!fbPageId || fbPageId === '000000000000000') return;
+        var btn = document.createElement('div');
+        btn.style.cssText = 'position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:#0084ff;cursor:pointer;z-index:9998;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,132,255,0.35);transition:transform 0.2s';
+        btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.712 7.288V22l3.402-1.872c.936.258 1.928.402 2.956.415l-.07-.015c5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.191 11.977l-2.547-2.722-4.99 2.722 5.475-5.803 2.605 2.722 4.932-2.722-5.475 5.803z"/></svg>';
+        btn.id = 'messenger-btn';
+        btn.title = 'Chat với chúng tôi qua Messenger';
+        btn.onmouseenter = function() { this.style.transform = 'scale(1.1)'; };
+        btn.onmouseleave = function() { this.style.transform = 'scale(1)'; };
+        btn.onclick = function() {
+          window.open('https://m.me/' + fbPageId, '_blank', 'width=400,height=600');
+        };
+        document.body.appendChild(btn);
+      })();
+    </script>
+
+    <!-- Schema.org: Organization -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "%VITE_SHOP_NAME%",
-        "url": "https://%VITE_SHOP_DOMAIN%",
-        "logo": "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=400&q=80",
-        "sameAs": [
-          "%VITE_SHOP_FACEBOOK%",
-          "%VITE_SHOP_INSTAGRAM%"
-        ],
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "%VITE_SHOP_PHONE%",
-          "contactType": "customer service",
-          "areaServed": "VN",
-          "availableLanguage": "Vietnamese"
-        }
-      }
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "%VITE_SHOP_NAME%",
+      "url": "https://%VITE_SHOP_DOMAIN%",
+      "logo": "https://%VITE_SHOP_DOMAIN%/icon.svg",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "%VITE_SHOP_PHONE%",
+        "contactType": "customer service",
+        "areaServed": "VN",
+        "availableLanguage": "Vietnamese"
+      },
+      "sameAs": ["%VITE_SHOP_FACEBOOK%","%VITE_SHOP_TIKTOK%"]
+    }
+    </script>
+
+    <!-- Schema.org: LocalBusiness -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "%VITE_SHOP_NAME%",
+      "description": "%VITE_SHOP_DESCRIPTION%",
+      "url": "https://%VITE_SHOP_DOMAIN%",
+      "telephone": "%VITE_SHOP_PHONE%",
+      "email": "%VITE_SHOP_EMAIL%",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "%VITE_SHOP_ADDRESS%",
+        "addressCountry": "VN"
+      },
+      "priceRange": "₫₫",
+      "openingHours": "Mo-Su 08:00-21:00"
+    }
     </script>
   </head>
   <body>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=%VITE_FACEBOOK_PIXEL_ID%&ev=PageView&noscript=1" alt="" /></noscript>
+    <noscript>
+      <iframe src="https://www.googletagmanager.com/ns.html?id=%VITE_GTM_ID%" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
     <div id="root"></div>
     <noscript>Bạn cần bật JavaScript để trải nghiệm %VITE_SHOP_NAME%.</noscript>
     <script type="module" src="/src/main.jsx"></script>

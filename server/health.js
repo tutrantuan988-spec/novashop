@@ -1,4 +1,5 @@
 const stripe = require('stripe');
+const { checkHealth: checkPostgresHealth } = require('./db/postgres');
 
 async function checkStripe(secretKey) {
   if (!secretKey) return { ok: false, reason: 'missing-key' };
@@ -32,10 +33,11 @@ async function checkEmail() {
 }
 
 async function buildHealth(adminDb) {
-  const [stripeStatus, firestoreStatus, emailStatus] = await Promise.all([
+  const [stripeStatus, firestoreStatus, emailStatus, postgresStatus] = await Promise.all([
     checkStripe(process.env.STRIPE_SECRET_KEY),
     checkFirestore(adminDb),
-    checkEmail()
+    checkEmail(),
+    checkPostgresHealth()
   ]);
 
   const healthy = stripeStatus.ok && firestoreStatus.ok;
@@ -47,7 +49,8 @@ async function buildHealth(adminDb) {
     checks: {
       stripe: stripeStatus,
       firestore: firestoreStatus,
-      email: emailStatus
+      email: emailStatus,
+      postgres: postgresStatus
     }
   };
 }

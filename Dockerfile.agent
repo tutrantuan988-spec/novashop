@@ -1,0 +1,51 @@
+# ─── Build Stage ─────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Cài đặt build dependencies
+RUN apk add --no-cache python3 make g++
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Build frontend
+RUN npm run build || true
+
+# ─── Production Stage ───────────────────────────────────────────
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Cài đặt runtime dependencies
+RUN apk add --no-cache tini curl
+
+# Copy từ builder stage
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/agents ./agents
+COPY --from=builder /app/package*.json ./
+
+# Tạo thư mục logs
+RUN mkdir -p /app/logs /app/uploads
+
+# Security: không chạy với root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3001/api/agents/monitoring/health || exit 1
+
+# Sử dụng tini để quản lý signals
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start server
+CMD ["node", "server/index.js"]

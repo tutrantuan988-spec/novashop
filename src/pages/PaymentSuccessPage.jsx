@@ -5,14 +5,17 @@ import SEO from '../components/SEO';
 import SITE from '../config/site-config';
 import { getOrderSummaryApi } from '../services/api';
 import { formatVND } from '../utils/format';
+import { useCart } from '../context/CartContext';
 
 function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('orderId');
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { clearCart } = useCart();
 
   useEffect(() => {
+    if (orderId) clearCart();
     document.title = `Thanh toán thành công - ${SITE.name}`;
     if (!orderId) {
       setLoading(false);

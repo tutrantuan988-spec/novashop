@@ -1,0 +1,50 @@
+{
+  "name": "TRỌNG ĐỊNH STORE - ECC Plugin",
+  "version": "1.0.0",
+  "description": "E-commerce optimization plugin cho TRỌNG ĐỊNH STORE - inspired by everything-claude-code",
+  "agents": {
+    "ecommerce-architect": {
+      "description": "Chuyên gia thiết kế architecture cho e-commerce platform",
+      "skills": ["architecture-review", "scaling-strategy", "database-design"]
+    },
+    "payment-integrator": {
+      "description": "Chuyên gia tích hợp thanh toán Stripe, VNPay, MoMo",
+      "skills": ["stripe-integration", "webhook-handling", "payment-security"]
+    },
+    "seo-specialist": {
+      "description": "Chuyên gia SEO và structured data cho e-commerce",
+      "skills": ["seo-audit", "schema-markup", "performance-optimization"]
+    },
+    "firebase-admin": {
+      "description": "Chuyên gia Firebase/Firestore optimization và bảo mật",
+      "skills": ["firestore-design", "security-rules", "real-time-sync"]
+    },
+    "ui-ux-designer": {
+      "description": "Chuyên gia thiết kế UI/UX cho pet store",
+      "skills": ["responsive-design", "mobile-first", "accessibility"]
+    },
+    "vietnamese-localizer": {
+      "description": "Chuyên gia localization tiếng Việt và i18n",
+      "skills": ["i18n-patterns", "vietnamese-optimization", "currency-format"]
+    }
+  },
+  "hooks": {
+    "pre-commit": ["check-env", "lint-staged"],
+    "post-commit": ["update-changelog"],
+    "pre-push": ["run-tests", "check-build"],
+    "post-deploy": ["health-check", "sentry-verify"]
+  },
+  "memory": {
+    "type": "context7",
+    "namespaces": ["project-context", "architecture-decisions", "user-feedback"]
+  },
+  "mcp": {
+    "configFile": ".mcp.json",
+    "autoStart": true
+  },
+  "rules": {
+    "style": ".rules/javascript-style.md",
+    "security": ".rules/security-best-practices.md",
+    "firebase": ".rules/firebase-rules.md"
+  }
+}

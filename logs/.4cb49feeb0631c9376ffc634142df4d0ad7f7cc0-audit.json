@@ -1,0 +1,50 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\.4cb49feeb0631c9376ffc634142df4d0ad7f7cc0-audit.json",
+    "files": [
+        {
+            "date": 1778760982759,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-14.log",
+            "hash": "0d5c2656ac59792476c717d7b48e6493b08b7c8ba5f42079972cf291dd6b961b"
+        },
+        {
+            "date": 1779010868219,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-17.log",
+            "hash": "a6f0edc4f52fa6400f4f2635ce923d5e20ed42d4a012edad8ad2c8ee9e192c8e"
+        },
+        {
+            "date": 1779042406489,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-18.log",
+            "hash": "d6b773722bb80801ab1922adca0607010acc37bb153fdffac7215d64e730a354"
+        },
+        {
+            "date": 1779157580349,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-19.log",
+            "hash": "c8a504383a801ad854d51eb63b818b87d9f34491308d1fc056eb4a4eda20ad2b"
+        },
+        {
+            "date": 1779293861755,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-20.log",
+            "hash": "9fab3744a4499f742c6873ade1900a33b59d09a3267ceabe3baa7421af9d741e"
+        },
+        {
+            "date": 1779330452084,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-21.log",
+            "hash": "4f6b1c34d1e3dfa09ac8087855cb35a227cc58426528ec2dbffba811c3680b82"
+        },
+        {
+            "date": 1779425499977,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-22.log",
+            "hash": "4ae3af720d5f6065d38d0e9b309d68b31c4dd9fda30497323e7e72a3d792f471"
+        },
+        {
+            "date": 1779521498790,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\error-2026-05-23.log",
+            "hash": "8c961968509c58c9d2773c16c427e0806a94ca7717a6abcae0cd51323e3dd1b5"
+        }
+    ],
+    "hashType": "sha256"
+}

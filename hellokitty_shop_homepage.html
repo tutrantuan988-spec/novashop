@@ -1,0 +1,332 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --pink-50: #fff0f5;
+    --pink-100: #ffd6e7;
+    --pink-200: #ffadd2;
+    --pink-400: #f06292;
+    --pink-500: #e91e8c;
+    --pink-600: #c2185b;
+    --pink-700: #880e4f;
+    --red-100: #ffe4e6;
+    --red-400: #fb7185;
+    --purple-100: #f3e8ff;
+    --purple-400: #c084fc;
+    --white: #ffffff;
+    --text-dark: #2d1b3d;
+    --text-mid: #6b3a5e;
+    --text-light: #b07aaa;
+    --radius: 16px;
+    --radius-lg: 24px;
+    --shadow: 0 4px 20px rgba(233,30,140,0.12);
+  }
+  
+  body { font-family: 'Nunito', sans-serif; background: #fff0f8; color: var(--text-dark); }
+
+  /* NAV */
+  nav {
+    background: white;
+    border-bottom: 2px solid var(--pink-100);
+    padding: 0 24px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(240,98,146,0.1);
+  }
+  .nav-top { display: flex; align-items: center; gap: 16px; padding: 10px 0; }
+  .logo { font-family: 'Pacifico', cursive; font-size: 22px; color: var(--pink-500); display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-bow { font-size: 28px; }
+  .search-bar { flex: 1; display: flex; align-items: center; background: var(--pink-50); border: 1.5px solid var(--pink-200); border-radius: 50px; padding: 8px 16px; gap: 8px; }
+  .search-bar input { border: none; background: transparent; outline: none; font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text-dark); width: 100%; }
+  .search-bar i { color: var(--pink-400); font-size: 18px; }
+  .nav-actions { display: flex; gap: 8px; }
+  .btn-login { background: var(--pink-500); color: white; border: none; border-radius: 50px; padding: 8px 20px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-cart { background: var(--pink-50); border: 1.5px solid var(--pink-200); border-radius: 50px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--pink-600); position: relative; }
+  .cart-badge { background: var(--pink-500); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+
+  .nav-bottom { display: flex; align-items: center; gap: 4px; padding: 6px 0; border-top: 1px solid var(--pink-100); }
+  .nav-link { padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 14px; color: var(--text-mid); cursor: pointer; transition: all 0.2s; white-space: nowrap; border: none; background: transparent; font-family: 'Nunito', sans-serif; }
+  .nav-link:hover, .nav-link.active { background: var(--pink-100); color: var(--pink-600); }
+  .nav-link.active { background: var(--pink-500); color: white; }
+  .dropdown-wrap { position: relative; }
+  .dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: white; border: 1.5px solid var(--pink-200); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px; min-width: 320px; z-index: 200; }
+  .dropdown-wrap:hover .dropdown { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; cursor: pointer; transition: background 0.15s; }
+  .dropdown-item:hover { background: var(--pink-50); }
+  .dropdown-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .dropdown-label { font-weight: 700; font-size: 13px; color: var(--text-dark); }
+  .dropdown-sub { font-size: 11px; color: var(--text-light); }
+  .nav-vip { background: linear-gradient(135deg, #f9a8d4, #ec4899); color: white; padding: 5px 14px; border-radius: 50px; font-weight: 800; font-size: 13px; cursor: pointer; border: none; font-family: 'Nunito', sans-serif; display: flex; align-items: center; gap: 4px; margin-left: auto; }
+
+  /* PROMO BAR */
+  .promo-bar { background: linear-gradient(90deg, #f9a8d4, #ec4899, #c084fc, #ec4899, #f9a8d4); background-size: 300% 100%; animation: shimmer 4s linear infinite; padding: 8px 24px; display: flex; gap: 32px; justify-content: center; overflow: hidden; }
+  @keyframes shimmer { 0%{background-position:0%} 100%{background-position:300%} }
+  .promo-item { font-size: 12px; font-weight: 700; color: white; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #fff0f8 0%, #fce4ec 40%, #f8bbd0 100%); padding: 40px 24px; display: flex; align-items: center; gap: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(240,98,146,0.15) 0%, transparent 70%); border-radius: 50%; }
+  .hero-content { flex: 1; z-index: 1; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--pink-100); color: var(--pink-600); border-radius: 50px; padding: 6px 16px; font-size: 12px; font-weight: 800; margin-bottom: 16px; border: 1px solid var(--pink-200); }
+  .hero h1 { font-family: 'Pacifico', cursive; font-size: 42px; color: var(--pink-600); line-height: 1.2; margin-bottom: 12px; }
+  .hero h1 span { color: var(--pink-400); }
+  .hero p { font-size: 15px; color: var(--text-mid); max-width: 380px; line-height: 1.7; margin-bottom: 24px; }
+  .hero-btns { display: flex; gap: 12px; }
+  .btn-primary { background: var(--pink-500); color: white; border: none; border-radius: 50px; padding: 12px 28px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(233,30,140,0.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(233,30,140,0.4); }
+  .btn-outline { background: white; color: var(--pink-500); border: 2px solid var(--pink-300, #f9a8d4); border-radius: 50px; padding: 12px 28px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; }
+  .hero-visual { width: 280px; flex-shrink: 0; z-index: 1; }
+  .hero-kitty-card { background: white; border-radius: 24px; padding: 24px; text-align: center; box-shadow: 0 8px 32px rgba(240,98,146,0.2); border: 2px solid var(--pink-100); position: relative; }
+  .kitty-face { font-size: 80px; display: block; margin-bottom: 8px; }
+  .kitty-bow { width: 60px; height: 30px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; }
+  .hero-stats { display: flex; gap: 16px; margin-top: 16px; }
+  .hero-stat { background: var(--pink-50); border-radius: 12px; padding: 8px 14px; text-align: center; flex: 1; border: 1px solid var(--pink-100); }
+  .hero-stat .num { font-weight: 900; font-size: 18px; color: var(--pink-500); }
+  .hero-stat .lbl { font-size: 11px; color: var(--text-light); font-weight: 600; }
+  .floating { animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* SECTION */
+  section { padding: 40px 24px; }
+  .section-label { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--pink-500); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .section-title { font-family: 'Pacifico', cursive; font-size: 28px; color: var(--text-dark); margin-bottom: 4px; }
+  .section-sub { font-size: 14px; color: var(--text-light); margin-bottom: 28px; }
+  .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+  .see-all { background: var(--pink-50); border: 1.5px solid var(--pink-200); border-radius: 50px; padding: 8px 18px; font-weight: 700; font-size: 13px; color: var(--pink-600); cursor: pointer; display: flex; align-items: center; gap: 4px; font-family: 'Nunito', sans-serif; }
+
+  /* CATEGORIES */
+  .cat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .cat-card { background: white; border-radius: var(--radius); padding: 20px 12px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent; box-shadow: 0 2px 12px rgba(240,98,146,0.08); }
+  .cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--pink-200); }
+  .cat-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 24px; }
+  .cat-name { font-weight: 800; font-size: 13px; color: var(--text-dark); }
+  .cat-count { font-size: 11px; color: var(--text-light); font-weight: 600; margin-top: 2px; }
+
+  /* FLASH SALE */
+  .flash-section { background: linear-gradient(135deg, #fff0f8, #fce4ec); border-radius: var(--radius-lg); margin: 0 24px; padding: 28px; border: 2px solid var(--pink-200); }
+  .flash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .flash-title { display: flex; align-items: center; gap: 12px; }
+  .flash-badge { background: var(--pink-500); color: white; border-radius: 12px; padding: 6px 14px; font-weight: 900; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+  .countdown { display: flex; align-items: center; gap: 6px; }
+  .count-box { background: var(--text-dark); color: white; border-radius: 8px; padding: 4px 10px; font-weight: 900; font-size: 18px; font-family: monospace; min-width: 40px; text-align: center; }
+  .count-sep { font-weight: 900; font-size: 18px; color: var(--pink-500); }
+  .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .product-card { background: white; border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 12px rgba(240,98,146,0.08); border: 1.5px solid var(--pink-100); }
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(240,98,146,0.18); }
+  .product-img { width: 100%; height: 180px; object-fit: cover; display: block; background: var(--pink-50); position: relative; }
+  .product-img-wrap { position: relative; }
+  .discount-badge { position: absolute; top: 10px; left: 10px; background: var(--pink-500); color: white; border-radius: 8px; padding: 2px 8px; font-size: 11px; font-weight: 800; }
+  .wishlist-btn { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .product-info { padding: 12px; }
+  .product-name { font-weight: 700; font-size: 13px; color: var(--text-dark); margin-bottom: 4px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+  .stars { color: #fbbf24; font-size: 11px; }
+  .rating-count { font-size: 11px; color: var(--text-light); }
+  .product-price { display: flex; align-items: center; gap: 8px; }
+  .price-sale { font-weight: 900; font-size: 16px; color: var(--pink-500); }
+  .price-old { font-size: 12px; color: var(--text-light); text-decoration: line-through; }
+  .add-cart-btn { width: 100%; margin-top: 8px; background: var(--pink-50); border: 1.5px solid var(--pink-200); border-radius: 50px; padding: 7px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px; color: var(--pink-600); cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .add-cart-btn:hover { background: var(--pink-500); color: white; border-color: var(--pink-500); }
+
+  /* BENEFITS */
+  .benefits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; background: white; border-radius: var(--radius-lg); padding: 24px; margin: 0 24px; border: 1.5px solid var(--pink-100); box-shadow: var(--shadow); }
+  .benefit { display: flex; align-items: center; gap: 12px; }
+  .benefit-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .benefit-title { font-weight: 800; font-size: 13px; color: var(--text-dark); }
+  .benefit-sub { font-size: 11px; color: var(--text-light); font-weight: 600; }
+
+  /* NEWSLETTER */
+  .newsletter { background: linear-gradient(135deg, #ec4899, #f9a8d4, #c084fc); border-radius: var(--radius-lg); margin: 0 24px; padding: 36px; text-align: center; color: white; position: relative; overflow: hidden; }
+  .newsletter::before { content: '🎀'; font-size: 120px; position: absolute; right: -20px; top: -20px; opacity: 0.15; }
+  .newsletter::after { content: '🎀'; font-size: 80px; position: absolute; left: -10px; bottom: -10px; opacity: 0.15; }
+  .newsletter h2 { font-family: 'Pacifico', cursive; font-size: 24px; margin-bottom: 8px; }
+  .newsletter p { font-size: 14px; opacity: 0.9; margin-bottom: 20px; }
+  .nl-form { display: flex; gap: 10px; max-width: 400px; margin: 0 auto; }
+  .nl-form input { flex: 1; border: none; border-radius: 50px; padding: 12px 20px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; }
+  .nl-form button { background: var(--text-dark); color: white; border: none; border-radius: 50px; padding: 12px 24px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; white-space: nowrap; }
+
+  /* FOOTER */
+  footer { background: var(--text-dark); color: white; padding: 40px 24px 20px; margin-top: 40px; }
+  .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 32px; }
+  .footer-logo { font-family: 'Pacifico', cursive; font-size: 22px; color: var(--pink-400); margin-bottom: 12px; }
+  .footer-desc { font-size: 13px; color: #9ca3af; line-height: 1.7; margin-bottom: 16px; }
+  .footer-contact { font-size: 13px; color: #9ca3af; display: flex; flex-direction: column; gap: 6px; }
+  .footer-contact span { display: flex; align-items: center; gap: 6px; }
+  .footer-col h4 { font-weight: 800; font-size: 13px; color: white; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+  .footer-link { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 8px; cursor: pointer; transition: color 0.2s; }
+  .footer-link:hover { color: var(--pink-400); }
+  .social-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .social-btn { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+  .social-btn:hover { background: var(--pink-500); }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-copy { font-size: 13px; color: #6b7280; }
+  .payment-methods { display: flex; gap: 8px; }
+  .pay-badge { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: white; }
+
+  /* NEW PRODUCTS */
+  .new-products { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab { padding: 7px 16px; border-radius: 50px; font-weight: 700; font-size: 13px; cursor: pointer; border: 1.5px solid var(--pink-200); background: white; color: var(--text-mid); font-family: 'Nunito', sans-serif; transition: all 0.2s; }
+  .tab.active { background: var(--pink-500); color: white; border-color: var(--pink-500); }
+
+  /* KITTY DECORATIONS */
+  .kitty-deco { position: absolute; font-size: 40px; opacity: 0.06; pointer-events: none; }
+  .hearts { display: flex; gap: 4px; }
+  .heart { color: var(--pink-400); font-size: 16px; }
+</style>
+
+<div style="max-width:100%;overflow-x:hidden;">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-top">
+      <a class="logo" href="#">
+        <span class="logo-bow">🎀</span>
+        KittyShop
+      </a>
+      <div class="search-bar">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input placeholder="Tìm váy, phụ kiện, mỹ phẩm..."/>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-login"><i class="ti ti-user" aria-hidden="true"></i> Đăng nhập</button>
+        <button class="btn-cart"><i class="ti ti-shopping-cart" aria-hidden="true"></i> Giỏ hàng <span class="cart-badge">3</span></button>
+      </div>
+    </div>
+    <div class="nav-bottom">
+      <button class="nav-link active">Trang chủ</button>
+      <div class="dropdown-wrap">
+        <button class="nav-link">Danh mục <i class="ti ti-chevron-down" style="font-size:12px" aria-hidden="true"></i></button>
+        <div class="dropdown">
+          <div class="dropdown-item">
+            <div class="dropdown-icon" style="background:#fff0f8;">👗</div>
+            <div><div class="dropdown-label">Thời trang</div><div class="dropdown-sub">Váy, áo, quần, phụ kiện</div></div>
+          </div>
+          <div class="dropdown-item">
+            <div class="dropdown-icon" style="background:#f0f9ff;">📱</div>
+            <div><div class="dropdown-label">Điện tử</div><div class="dropdown-sub">Tai nghe, điện thoại, máy tính</div></div>
+          </div>
+          <div class="dropdown-item">
+            <div class="dropdown-icon" style="background:#f0fff4;">🏠</div>
+            <div><div class="dropdown-label">Gia dụng</div><div class="dropdown-sub">Bếp, phòng khách, phòng ngủ</div></div>
+          </div>
+          <div class="dropdown-item">
+            <div class="dropdown-icon" style="background:#fdf4ff;">💄</div>
+            <div><div class="dropdown-label">Làm đẹp</div><div class="dropdown-sub">Skincare, makeup, nước hoa</div></div>
+          </div>
+          <div class="dropdown-item">
+            <div class="dropdown-icon" style="background:#fffbeb;">⭐</div>
+            <div><div class="dropdown-label">Thể thao</div><div class="dropdown-sub">Giày, đồ thể thao, yoga</div></div>
+          </div>
+          <div class="dropdown-item">
+            <div class="dropdown-icon" style="background:#f0fdf4;">📚</div>
+            <div><div class="dropdown-label">Sách & Văn phòng</div><div class="dropdown-sub">Sách, bút, dụng cụ học tập</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="nav-link">Flash Sale 🔥</button>
+      <button class="nav-link">Blog</button>
+      <button class="nav-link">Đánh giá</button>
+      <button class="nav-link">Hỗ trợ</button>
+      <button class="nav-vip">👑 VIP</button>
+    </div>
+  </nav>
+
+  <!-- PROMO BAR -->
+  <div class="promo-bar">
+    <span class="promo-item">🎀 Freeship từ 299k</span>
+    <span class="promo-item">✨ Đổi trả 7 ngày</span>
+    <span class="promo-item">💖 Hàng chính hãng 100%</span>
+    <span class="promo-item">⚡ Giao hỏa tốc nội thành</span>
+    <span class="promo-item">🛡️ Thanh toán an toàn</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">🎀 KITTYSHOP — FASHION & LIFESTYLE</div>
+      <h1>Mua sắm <span>dễ thương</span><br/>như Hello Kitty!</h1>
+      <p>Thời trang, làm đẹp, điện tử & lifestyle — mọi thứ bạn yêu thích, được giao tận tay với dịch vụ ngọt ngào nhất! 💕</p>
+      <div class="hero-btns">
+        <button class="btn-primary"><i class="ti ti-sparkles" aria-hidden="true"></i> Khám phá ngay</button>
+        <button class="btn-outline">Xem Flash Sale 🔥</button>
+      </div>
+      <div class="hero-stats" style="margin-top:24px;">
+        <div class="hero-stat"><div class="num">12K+</div><div class="lbl">Đơn thành công</div></div>
+        <div class="hero-stat"><div class="num">5K+</div><div class="lbl">Khách hài lòng</div></div>
+        <div class="hero-stat"><div class="num">4.9⭐</div><div class="lbl">Đánh giá TB</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-kitty-card floating">
+        <span class="kitty-face">🐱</span>
+        <div style="font-family:'Pacifico',cursive;font-size:18px;color:#e91e8c;margin-bottom:8px;">Hello Kitty!</div>
+        <div class="hearts">
+          <span class="heart">💕</span><span class="heart">💕</span><span class="heart">💕</span>
+        </div>
+        <div style="margin-top:12px;background:var(--pink-50);border-radius:12px;padding:10px;">
+          <div style="font-size:11px;color:var(--text-light);font-weight:700;">HÔM NAY GIẢM</div>
+          <div style="font-size:28px;font-weight:900;color:var(--pink-500);">đến 50%</div>
+          <div style="font-size:11px;color:var(--text-light);">Flash Sale kết thúc sau</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENEFITS -->
+  <div class="benefits" style="margin-top:-1px;">
+    <div class="benefit">
+      <div class="benefit-icon" style="background:#fff0f8;"><i class="ti ti-truck-delivery" style="color:#e91e8c;font-size:22px;" aria-hidden="true"></i></div>
+      <div><div class="benefit-title">Giao hỏa tốc</div><div class="benefit-sub">Nội thành trong ngày</div></div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon" style="background:#f0fff4;"><i class="ti ti-shield-check" style="color:#22c55e;font-size:22px;" aria-hidden="true"></i></div>
+      <div><div class="benefit-title">Chính hãng 100%</div><div class="benefit-sub">Cam kết hoàn tiền</div></div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon" style="background:#fdf4ff;"><i class="ti ti-refresh" style="color:#a855f7;font-size:22px;" aria-hidden="true"></i></div>
+      <div><div class="benefit-title">Đổi trả 7 ngày</div><div class="benefit-sub">Không cần giải thích</div></div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon" style="background:#fffbeb;"><i class="ti ti-headset" style="color:#f59e0b;font-size:22px;" aria-hidden="true"></i></div>
+      <div><div class="benefit-title">Hỗ trợ 24/7</div><div class="benefit-sub">Chat, Zalo, hotline</div></div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <section>
+    <div class="section-label"><i class="ti ti-category" aria-hidden="true"></i> DANH MỤC MUA SẮM</div>
+    <div class="section-header">
+      <div>
+        <div class="section-title">Mua sắm theo nhu cầu 💕</div>
+        <div class="section-sub">Tìm thấy mọi thứ bạn yêu thích</div>
+      </div>
+      <button class="see-all">Tất cả danh mục <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-icon" style="background:#fff0f8;">👗</div>
+        <div class="cat-name">Thời trang</div>
+        <div class="cat-count">2,430 sản phẩm</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon" style="background:#f0f9ff;">📱</div>
+        <div class="cat-name">Điện tử</div>
+        <div class="cat-count">1,280 sản phẩm</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon" style="background:#f0fff4;">🏠</div>
+        <div class="cat-name">Gia dụng</div>
+        <div class="cat-count">890 sản phẩm</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon" style="background:#fdf4ff;">💄</div>
+        <div class="cat-name">Làm đẹp</div>
+        <div class="cat-count">1,650 sản phẩm</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon" style="background:#fffbeb;">⭐</div>
+        <div class="cat-name">Thể thao</div>
+        <div class="cat-count">560 sản phẩm

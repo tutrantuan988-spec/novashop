@@ -6,7 +6,7 @@ import SITE from '../config/site-config';
 import { useProducts } from '../context/ProductsContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import { listMyOrdersApi } from '../services/api';
+import { listMyOrdersApi, listMyPgOrdersApi } from '../services/api';
 import { formatVND } from '../utils/format';
 
 const STATUS_LABEL = {
@@ -27,6 +27,23 @@ const STATUS_CLASS = {
   cancelled: 'badge-cancelled'
 };
 
+function transformPgOrder(o) {
+  return {
+    id: o.id,
+    status: o.status || o.payment_status || 'pending',
+    total: o.total || 0,
+    createdAt: { seconds: Math.floor(new Date(o.created_at).getTime() / 1000) },
+    items: (o.items || []).map(item => ({
+      name: item.product_name,
+      image: item.product_image,
+      quantity: item.quantity,
+      price: item.unit_price
+    })),
+    paymentMethod: o.payment_method,
+    shippingInfo: null
+  };
+}
+
 function AccountPage() {
   const { user } = useAuth();
   const { items: products } = useProducts();
@@ -34,6 +51,7 @@ function AccountPage() {
   const { addToCart } = useCart();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState(null);
 
   const wishlistProducts = products.filter((p) =>
     wishlistIds.some((id) => String(id) === String(p.id))
@@ -42,9 +60,13 @@ function AccountPage() {
   useEffect(() => {
     document.title = `Tài khoản của tôi - ${SITE.name}`;
     if (user?.email) {
-      listMyOrdersApi(user.email)
-        .then((data) => setOrders(data))
-        .catch((err) => console.error('Load orders failed:', err))
+      listMyPgOrdersApi()
+        .then((res) => setOrders((res.data || []).map(transformPgOrder)))
+        .catch(() => {
+          listMyOrdersApi(user.email)
+            .then((data) => setOrders(data))
+            .catch(() => setOrdersError('Không tải được đơn hàng'));
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -146,7 +168,9 @@ function AccountPage() {
               <article key={o.id} className="account-order">
                 <header>
                   <div>
-                    <strong>Đơn #{String(o.id).slice(-8).toUpperCase()}</strong>
+                    <Link to={`/don-hang/${o.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <strong>Đơn #{String(o.id).slice(-8).toUpperCase()}</strong>
+                    </Link>
                     <span className={`status-badge ${STATUS_CLASS[o.status] || ''}`}>
                       {STATUS_LABEL[o.status] || o.status}
                     </span>

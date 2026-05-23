@@ -1,0 +1,406 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MULTI-TENANT CORE
+// ============================================
+
+model Organization {
+  id                String    @id @default(cuid())
+  name              String
+  slug              String    @unique
+  logo              String?
+  customDomain      String?   @unique
+  subscriptionTier  String    @default("FREE") // FREE, STARTER, PROFESSIONAL, ENTERPRISE
+  subscriptionStatus String   @default("active") // active, past_due, cancelled, trial
+  stripeCustomerId String?   @unique
+  stripeSubscriptionId String? @unique
+  subscriptionStartAt DateTime?
+  subscriptionEndAt   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  users             OrganizationMember[]
+  products          Product[]
+  orders            Order[]
+  settings          OrganizationSettings?
+  customers         Customer[]
+  payments          Payment[]
+  webhooks          Webhook[]
+  categories        Category[]
+
+  @@index([slug])
+  @@index([customDomain])
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           String   @default("MEMBER") // OWNER, ADMIN, STAFF, MEMBER, CUSTOMER
+  joinedAt       DateTime @default(now())
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([role])
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String?
+  name              String?
+  avatar            String?
+  emailVerified     Boolean   @default(false)
+  verificationToken String?   @unique
+  resetPasswordToken String?  @unique
+  resetPasswordExpires DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  organizations     OrganizationMember[]
+  orders            Order[]
+  addresses         Address[]
+  auditLogs         AuditLog[]
+  sessions          Session[]
+  reviews           Review[]
+
+  @@index([email])
+}
+
+// ============================================
+// AUTHENTICATION & SESSIONS
+// ============================================
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  refreshToken String?  @unique
+  expiresAt   DateTime
+  createdAt    DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
+
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ============================================
+// E-COMMERCE CORE
+// ============================================
+
+model Category {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  description    String?
+  imageUrl       String?
+  parentId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  products      Product[]
+  parent         Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children      Category[] @relation("CategoryToCategory")
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([parentId])
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  organizationId String
+  categoryId     String
+  name           String
+  slug           String
+  description    String?
+  price          Float
+  comparePrice   Float?
+  imageUrl       String?
+  images         String[] // JSON array of image URLs
+  sku            String?
+  barcode        String?
+  stock          Int      @default(0)
+  lowStockAlert  Int      @default(10)
+  isActive       Boolean  @default(true)
+  metadata       Json?    // Additional flexible fields
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category       Category     @relation(fields: [categoryId], references: [id])
+  orderItems     OrderItem[]
+  reviews        Review[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([sku])
+}
+
+model Order {
+  id              String    @id @default(cuid())
+  organizationId  String
+  userId          String?
+  orderNumber     String    @unique
+  status          String    @default("pending") // pending, processing, shipped, delivered, cancelled
+  paymentStatus   String    @default("pending") // pending, paid, failed, refunded
+  paymentMethod   String?
+  paymentId       String?
+  subtotal        Float
+  tax             Float     @default(0)
+  shipping        Float     @default(0)
+  total           Float
+  currency        String    @default("VND")
+  notes           String?
+  customerEmail   String
+  customerName    String
+  customerPhone   String?
+  shippingAddress Json?     // JSON object
+  billingAddress   Json?     // JSON object
+  metadata        Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User?        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  total     Float
+
+  // Relations
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  productId   String
+  userId      String?
+  rating      Int
+  title       String?
+  content     String?
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User?   @relation(fields: [userId], references: [id])
+
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String   // Home, Office, etc.
+  fullName    String
+  phone       String
+  street      String
+  ward        String?
+  district    String?
+  city        String
+  province    String
+  postalCode  String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDefault])
+}
+
+// ============================================
+// SETTINGS & CONFIG
+// ============================================
+
+model OrganizationSettings {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  themeColor     String   @default("#ff7a1a")
+  logoUrl        String?
+  faviconUrl     String?
+  customCss      String?
+  timezone       String   @default("Asia/Ho_Chi_Minh")
+  locale         String   @default("vi")
+  currency       String   @default("VND")
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  userId         String?
+  organizationId String?
+  action         String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  entityType     String   // User, Product, Order, etc.
+  entityId       String?
+  changes        Json?    // Before/after changes
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  // Relations
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+// ============================================
+// CUSTOMERS & PAYMENTS
+// ============================================
+
+model Customer {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String
+  name           String?
+  phone          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  payments       Payment[]
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  organizationId String
+  customerId     String?
+  orderId        String?
+  amount         Float
+  currency       String   @default("VND")
+  status         String   // pending, processing, succeeded, failed, refunded
+  paymentMethod  String   // stripe, paypal, bank_transfer, etc.
+  paymentId      String?  // External payment ID (e.g., Stripe PaymentIntent ID)
+  paymentType    String   // subscription, one_time, refund
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer       Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([orderId])
+  @@index([status])
+  @@index([paymentId])
+}
+
+// ============================================
+// WEBHOOKS (User-defined)
+// ============================================
+
+model Webhook {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  url            String
+  secret         String?
+  events         String[]  // order.created, payment.succeeded, etc.
+  isActive       Boolean  @default(true)
+  lastTriggered  DateTime?
+  triggerCount   Int      @default(0)
+  failureCount   Int      @default(0)
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  webhookLogs    WebhookLog[]
+
+  @@index([organizationId])
+  @@index([isActive])
+}
+
+model WebhookLog {
+  id           String   @id @default(cuid())
+  webhookId    String
+  eventType    String
+  payload      Json
+  statusCode   Int?
+  response     Json?
+  errorMessage String?
+  duration     Int?     // Response time in ms
+  createdAt    DateTime @default(now())
+
+  // Relations
+  webhook      Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([eventType])
+  @@index([createdAt])
+}

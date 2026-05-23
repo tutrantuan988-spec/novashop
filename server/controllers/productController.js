@@ -70,6 +70,55 @@ async function getCategories(req, res) {
   }
 }
 
+function buildCategoryTree(records) {
+  const map = new Map();
+  const roots = [];
+
+  records.forEach((cat) => {
+    const id = String(cat._id || cat.id);
+    map.set(id, {
+      id,
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description || '',
+      image: cat.image || '',
+      sort_order: cat.sortOrder || 0,
+      parent_id: cat.parent ? String(cat.parent) : null,
+      is_active: cat.isActive !== false,
+      show_in_menu: true,
+      show_in_homepage: true,
+      children: []
+    });
+  });
+
+  map.forEach((node) => {
+    if (node.parent_id && map.has(node.parent_id)) {
+      map.get(node.parent_id).children.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  // Ensure children follow sort_order ascending like frontend expects
+  const sortNodes = (list) => {
+    list.sort((a, b) => a.sort_order - b.sort_order);
+    list.forEach((child) => sortNodes(child.children));
+    return list;
+  };
+
+  return sortNodes(roots);
+}
+
+async function getCategoryTree(_req, res) {
+  try {
+    const categories = await Category.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
+    const tree = buildCategoryTree(categories);
+    res.json({ success: true, data: tree });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
 async function getFeaturedProducts(req, res) {
   try {
     const products = await Product.find({ isActive: true, isFeatured: true })
@@ -102,6 +151,7 @@ module.exports = {
   getProducts,
   getProductBySlug,
   getCategories,
+  getCategoryTree,
   getFeaturedProducts,
   getRelatedProducts
 };

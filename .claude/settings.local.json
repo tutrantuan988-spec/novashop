@@ -1,0 +1,10 @@
+{
+  "enabledMcpjsonServers": [
+    "github",
+    "playwright",
+    "context7",
+    "sequential-thinking",
+    "filesystem",
+    "markitdown"
+  ]
+}

@@ -1,0 +1,23 @@
+<svg width="420" height="84" viewBox="0 0 420 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tt_line" x1="0" y1="0" x2="420" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2D7BF"/>
+      <stop offset="0.45" stop-color="#D4A373"/>
+      <stop offset="1" stop-color="#B88757"/>
+    </linearGradient>
+    <linearGradient id="tt_word" x1="112" y1="10" x2="362" y2="74" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7E8D8"/>
+      <stop offset="0.45" stop-color="#D4A373"/>
+      <stop offset="1" stop-color="#BC8F61"/>
+    </linearGradient>
+  </defs>
+  <rect x="1.5" y="1.5" width="80" height="80" rx="22" stroke="url(#tt_line)" stroke-opacity="0.8"/>
+  <path d="M17 22H67V28H47V60H39V28H17V22Z" fill="url(#tt_word)"/>
+  <path d="M23 36H61V42H48V60H40V42H23V36Z" fill="#FAEDE1"/>
+  <path d="M112 58V20H120L138 49V20H146V58H138L120 29V58H112Z" fill="url(#tt_word)"/>
+  <path d="M158 58V20H194V28H166V36H192V44H166V50H194V58H158Z" fill="url(#tt_word)"/>
+  <path d="M206 58V20H214V50H240V58H206Z" fill="url(#tt_word)"/>
+  <path d="M249 58V20H257V58H249Z" fill="url(#tt_word)"/>
+  <path d="M269 58V20H279L296 48L313 20H323V58H315V32L298 58H294L277 32V58H269Z" fill="url(#tt_word)"/>
+  <path d="M336 58V20H364C374 20 381 27 381 36C381 45 374 52 364 52H344V58H336ZM344 44H363C368 44 373 41 373 36C373 31 368 28 363 28H344V44Z" fill="url(#tt_word)"/>
+</svg>

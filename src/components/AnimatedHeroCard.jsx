@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import SITE from '../config/site-config';
 
 const PHOTOS = [
   {
@@ -56,7 +57,7 @@ export default function AnimatedHeroCard() {
       <div className="luxury-orb orb-one" />
       <div className="luxury-orb orb-two" />
       <div className="luxury-meta">
-        <span>TRỌNG ĐỊNH STORE EDITORIAL</span>
+        <span>{SITE.name.toUpperCase()} EDITORIAL</span>
         <strong>{String(index + 1).padStart(2, '0')} / {String(PHOTOS.length).padStart(2, '0')}</strong>
       </div>
       <div className="luxury-stage">

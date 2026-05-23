@@ -58,8 +58,9 @@ export function CartProvider({ children }) {
    * @param {object} product - { id, slug, name, price, image }
    * @param {number} quantity
    * @param {object|null} variant - { id, sku, attributes, price, images, stock }
+   * @param {object} [options] - { skipDrawer: true } to suppress drawer open during batch transfer
    */
-  const addToCart = useCallback((product, quantity = 1, variant = null) => {
+  const addToCart = useCallback((product, quantity = 1, variant = null, options = {}) => {
     const variantId = variant?.id || null;
     const key = lineKey(product.id, variantId);
     const finalPrice = variant?.price ?? product.price;
@@ -100,7 +101,9 @@ export function CartProvider({ children }) {
         }
       ];
     });
-    setIsOpen(true);
+    if (!options.skipDrawer) {
+      setIsOpen(true);
+    }
   }, []);
 
   const updateQuantity = useCallback((id, change, variantId = null) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Trash2, ToggleLeft, ToggleRight, Tag } from 'lucide-react';
 import {
   listCouponsApi,
@@ -40,18 +40,18 @@ export default function CouponManager({ adminEmail }) {
   const [form, setForm] = useState(emptyCoupon);
   const [submitting, setSubmitting] = useState(false);
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
+    if (!adminEmail) return;
     setLoading(true);
     listCouponsApi(adminEmail)
       .then((data) => setCoupons(data))
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
-  };
+  }, [adminEmail, toast]);
 
   useEffect(() => {
-    if (adminEmail) refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adminEmail]);
+    refresh();
+  }, [refresh]);
 
   const onChange = (event) => {
     const { name, value, type, checked } = event.target;

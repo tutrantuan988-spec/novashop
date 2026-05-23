@@ -3,14 +3,15 @@ services:
     name: novashop-api
     runtime: node
     plan: free
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     startCommand: node server/index.js
+    healthCheckPath: /api/health
     envVars:
       # Core
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3001
+        value: 10000
       # Shop info
       - key: VITE_SHOP_NAME
         sync: false
@@ -48,6 +49,8 @@ services:
       # Clerk
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
       # Shop branding
       - key: VITE_SHOP_DESCRIPTION
         sync: false
@@ -74,6 +77,10 @@ services:
         sync: false
       - key: ADMIN_API_TOKEN
         generateValue: true
+      - key: GUEST_TOKEN_SECRET
+        generateValue: true
+      - key: ABANDONED_COUPON_CODE
+        value: COMEBACK5
       # Email
       - key: RESEND_API_KEY
         sync: false

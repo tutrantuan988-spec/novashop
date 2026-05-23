@@ -1,0 +1,50 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\.fd373b57748aee8342f230208ffe80defb8cd15b-audit.json",
+    "files": [
+        {
+            "date": 1778760982763,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-14.log",
+            "hash": "6219e2ed2068f58f98320b49049668290d15226ee0de3824e39cf80d58967379"
+        },
+        {
+            "date": 1779010868224,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-17.log",
+            "hash": "c1ec34467369b40c39a8c2f8dd87565c8b3fcd00dde9143fe16ff04ce2cabee5"
+        },
+        {
+            "date": 1779042406493,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-18.log",
+            "hash": "a4fe490decd59f16f85d75f7b67efb9b40774b8f013e3597e555d2b139f3fca6"
+        },
+        {
+            "date": 1779123817693,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-19.log",
+            "hash": "60192b37e660ca78c0d635bd0a8a3e10fd3c5c058431bf0981589ecbbb267f25"
+        },
+        {
+            "date": 1779210136272,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-20.log",
+            "hash": "18a762633d917d1b60a6b73cd7aafde907ba9105fdf779b3e7996eca06d82a7b"
+        },
+        {
+            "date": 1779296671678,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-21.log",
+            "hash": "5572fce3f0bfb3fb7ec489b2922738877c20bf7b2385f8af110642fbdf06b50b"
+        },
+        {
+            "date": 1779425499981,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-22.log",
+            "hash": "8ecc2a214e2312116577c5e56b6c7daded5e6d7a9e82f323a950e3b05d378f02"
+        },
+        {
+            "date": 1779521498795,
+            "name": "C:\\Users\\TUAN TU\\OneDrive\\Desktop\\Website\\logs\\combined-2026-05-23.log",
+            "hash": "75d83789e91693e952ef7573f7e10415d983d230aa6e0688af2f3b9bdd4e27f8"
+        }
+    ],
+    "hashType": "sha256"
+}

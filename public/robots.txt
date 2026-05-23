@@ -1,4 +1,4 @@
-# TRỌNG ĐỊNH STORE - https://trongdinhstore.vn
 User-agent: *
 Allow: /
-Sitemap: https://trongdinhstore.vn/sitemap.xml
+
+Sitemap: https://trong-dinh-store.netlify.app/sitemap.xml

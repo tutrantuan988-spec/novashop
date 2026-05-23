@@ -4,10 +4,11 @@ import { ChevronRight, Home } from 'lucide-react';
 
 const LABELS = {
   'san-pham': 'Sản phẩm',
+  'danh-muc': 'Danh mục',
   'thanh-toan': 'Thanh toán',
   'tai-khoan': 'Tài khoản',
-  'profile': 'Thông tin cá nhân',
-  'don-hang': 'Lịch sử đơn hàng',
+  'profile': 'Hồ sơ',
+  'don-hang': 'Đơn hàng',
   'yeu-thich': 'Yêu thích',
   'admin': 'Quản trị',
   'chinh-sach': 'Chính sách',
@@ -15,11 +16,26 @@ const LABELS = {
   'van-chuyen': 'Vận chuyển',
   'bao-mat': 'Bảo mật',
   'dieu-khoan': 'Điều khoản',
-  'faq': 'FAQ',
+  'faq': 'Câu hỏi thường gặp',
   'lien-he': 'Liên hệ',
-  'dog-food': 'Thức ăn cho chó',
-  'cat-food': 'Thức ăn cho mèo',
-  'pet-accessories': 'Phụ kiện thú cưng'
+  'gio-hang': 'Giỏ hàng',
+  'thanh-cong': 'Thành công',
+  'that-bai': 'Thất bại',
+  'track-order': 'Theo dõi đơn hàng',
+  'danh-gia': 'Đánh giá',
+  'them-san-pham': 'Thêm sản phẩm',
+  'quan-ly-san-pham': 'Quản lý sản phẩm',
+  'momo-return': 'MoMo Return',
+  'dia-chi': 'Địa chỉ',
+  'sign-in': 'Đăng nhập',
+  'sign-up': 'Đăng ký',
+  'danh-muc': 'Danh mục',
+  'thuong-hieu': 'Thương hiệu',
+  'tim-kiem': 'Tìm kiếm',
+  'about': 'Giới thiệu',
+  'contact': 'Liên hệ',
+  'khuyen-mai': 'Khuyến mãi',
+  'agents': 'Agent Dashboard'
 };
 
 function Breadcrumb() {
@@ -32,7 +48,8 @@ function Breadcrumb() {
   let path = '';
   for (const seg of segments) {
     path += `/${seg}`;
-    items.push({ label: LABELS[seg] || seg, to: path });
+    const label = LABELS[seg] || seg.replace(/-/g, ' ');
+    items.push({ label, to: path });
   }
 
   // Last item is not clickable
